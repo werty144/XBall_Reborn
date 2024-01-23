@@ -7,12 +7,14 @@ using UnityEngine;
 public class Callbacks : MonoBehaviour
 {
     public GameObject lobby;
+    public GameObject global;
     
     protected Callback<LobbyCreated_t> m_LobbyCreated;
     protected Callback<LobbyEnter_t> m_LobbyEnter;
     protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
     protected Callback<GameLobbyJoinRequested_t> m_GameLobbyJoinRequested;
     protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
+    protected Callback<SteamNetConnectionStatusChangedCallback_t> m_ConnectionChanged;
 
     private void OnEnable()
     {
@@ -23,7 +25,7 @@ public class Callbacks : MonoBehaviour
             m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
             m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
             m_GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequest);
-
+            m_ConnectionChanged = Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnConnectionChanged);
         }
     }
 
@@ -64,5 +66,23 @@ public class Callbacks : MonoBehaviour
     {
         Debug.Log("Got invite into lobby " + pCallback.m_steamIDLobby + " from " + pCallback.m_steamIDFriend);
         SteamMatchmaking.JoinLobby(pCallback.m_steamIDLobby);
+    }
+
+    private void OnConnectionChanged(SteamNetConnectionStatusChangedCallback_t pCallback)
+    {
+        switch (pCallback.m_info.m_eState)
+        {
+            case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
+                SteamNetworkingSockets.AcceptConnection(pCallback.m_hConn);
+                break;
+
+            case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
+                Debug.Log("Connection with " + pCallback.m_info.m_identityRemote.GetSteamID().m_SteamID + " established");
+                var p2pManager = global.GetComponent<P2P>();
+                p2pManager.ConnectionEstablished(pCallback.m_hConn);
+                break;
+
+            // Handle other states as needed
+        }
     }
 }

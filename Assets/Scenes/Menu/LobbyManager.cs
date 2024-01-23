@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Steamworks;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +20,7 @@ public class LobbyManager : MonoBehaviour
     public GameObject lobbyMemberPrefab;
     public Transform membersContainer;
     public Transform numberOfPlayersDropdown;
+    public GameObject global;
 
     public void Start()
     {
@@ -256,6 +258,49 @@ public class LobbyManager : MonoBehaviour
         {
             dropdown.interactable = false;
         }
+    }
+
+    private CSteamID GetPartnerID()
+    {
+        if (currentLobbyID == 0)
+        {
+            Debug.LogWarning("Get partner's ID while not in lobby");
+            return CSteamID.Nil;
+        }
+
+        var members = Steam.GetLobbyMembers(currentLobbyID);
+        if (members.Count < 2)
+        {
+            return CSteamID.Nil;
+        }
+
+        if (members[0].ID != Steam.MySteamID())
+        {
+            return members[0].ID;
+        }
+        else
+        {
+            return members[1].ID;
+        }
+    }
+
+    public void SendMessageToPartner()
+    {
+        if (currentLobbyID == 0)
+        {
+            Debug.LogWarning("Send message to partner while not in lobby");
+            return;
+        }
+
+        var partnerID = GetPartnerID();
+        if (partnerID == CSteamID.Nil)
+        {
+            Debug.LogWarning("Partner not present");
+            return;
+        }
+
+        var p2pManager = global.GetComponent<P2P>();
+        p2pManager.SendMessageToPeer(partnerID, "Privet!");
     }
 
     public void TestLobbyEnter()
