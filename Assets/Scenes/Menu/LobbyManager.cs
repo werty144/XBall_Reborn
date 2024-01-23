@@ -14,6 +14,7 @@ public class LobbyManager : MonoBehaviour
     private const string SpeedKey = "SpeedKey";
     
     private ulong currentLobbyID;
+    private ulong pendingInvitedID;
 
     public GameObject lobbyMemberPrefab;
     public Transform membersContainer;
@@ -21,14 +22,33 @@ public class LobbyManager : MonoBehaviour
 
     public void Start()
     {
+        pendingInvitedID = 0;
         currentLobbyID = 0;
+    }
+
+    public void InviteAndCreateOnNeed(CSteamID invitedID)
+    {
+        if (currentLobbyID == 0)
+        {
+            pendingInvitedID = invitedID.m_SteamID;
+            Steam.CreateLobby();
+        }
+        else
+        {
+            Steam.SendInvite(currentLobbyID, invitedID.m_SteamID);
+        }
     }
 
     public void OnLobbyEnter(ulong lobbyID)
     {
         currentLobbyID = lobbyID;
         SetReady(false);
-        UpdateData();
+
+        if (pendingInvitedID != 0)
+        {
+            Steam.SendInvite(currentLobbyID, pendingInvitedID);
+            pendingInvitedID = 0;
+        }
     }
 
     public void OnDataUpdate()
@@ -73,9 +93,9 @@ public class LobbyManager : MonoBehaviour
 
         foreach (var member in lobbyMembers)
         {
-            GameObject newItem = Instantiate(lobbyMemberPrefab, membersContainer);
+            GameObject memberPanel = Instantiate(lobbyMemberPrefab, membersContainer);
             
-            var nicknamePanel = newItem.transform.Find("Nickname").GetComponent<TextMeshProUGUI>();
+            var nicknamePanel = memberPanel.transform.Find("Nickname").GetComponent<TextMeshProUGUI>();
             if (nicknamePanel == null)
             {
                 Debug.LogWarning("Nickname panel of lobby member prefab not found");
@@ -85,7 +105,7 @@ public class LobbyManager : MonoBehaviour
                 nicknamePanel.text = member.Name;
             }
             
-            var readyPanel = newItem.transform.Find("ReadyStatus").GetComponent<TextMeshProUGUI>();
+            var readyPanel = memberPanel.transform.Find("ReadyStatus").GetComponent<TextMeshProUGUI>();
             if (readyPanel == null)
             {
                 Debug.LogWarning("Ready Status of lobby member prefab not found");
@@ -95,14 +115,21 @@ public class LobbyManager : MonoBehaviour
                 readyPanel.text = Steam.GetLobbyMemberData(currentLobbyID, member.ID, ReadyStatusKey);
             }
             
-            var readyButton = newItem.transform.Find("ReadyButton").GetComponent<Button>();
+            var readyButton = memberPanel.transform.Find("ReadyButton").GetComponent<Button>();
             if (readyButton == null)
             {
                 Debug.LogWarning("Ready button of lobby member prefab not found");
             }
             else
             {
-                readyButton.onClick.AddListener(OnReadyChange);
+                if (member.ID == Steam.MySteamID())
+                {
+                    readyButton.onClick.AddListener(OnReadyChange);
+                }
+                else
+                {
+                    memberPanel.transform.Find("ReadyButton").SetParent(null);
+                }
             }
         }
     }
@@ -142,10 +169,5 @@ public class LobbyManager : MonoBehaviour
             return;
         }
         SetReady(!boolValue);
-    }
-
-    public void OnButtonClicked()
-    {
-        OnLobbyEnter(1);
     }
 }

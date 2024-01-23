@@ -9,6 +9,7 @@ public class FriendsListController : MonoBehaviour
 {
     public GameObject listItemPrefab;
     public Transform contentPanel;
+    public GameObject lobby;
     void Start()
     {
         StartCoroutine(UpdateFriendsListCoroutine(1f));
@@ -26,11 +27,6 @@ public class FriendsListController : MonoBehaviour
     void UpdateFriendsList()
     {
         ClearFriendsList();
-        // SteamUser[] onlineFriends =
-        // {
-        //     new SteamUser(new CSteamID(1), "Anton"),
-        //     new SteamUser(new CSteamID(2), "Grisha")
-        // };
         var onlineFriends = Steam.GetOnlineFriends();
 
         foreach (var friend in onlineFriends)
@@ -49,8 +45,9 @@ public class FriendsListController : MonoBehaviour
             var inviteButton = newItem.GetComponentInChildren<Button>();
             if (inviteButton != null)
             {
-                inviteButton.onClick.AddListener(() => { 
-                    Steam.SendInvite(friend.ID);
+                inviteButton.onClick.AddListener(() => {
+                    var lobbyManager = lobby.GetComponent<LobbyManager>();
+                    lobbyManager.InviteAndCreateOnNeed(friend.ID);
                 });
             }
             else
