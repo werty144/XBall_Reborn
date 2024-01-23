@@ -63,13 +63,24 @@ public class Steam
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, 2);
     }
 
-    public static Dictionary<string, string> GetLobbyMetaData(ulong lobbyID)
+    public static string GetLobbyMetaData(ulong lobbyID, string key)
     {
-        var dict = new Dictionary<string, string>
+        var result = SteamMatchmaking.GetLobbyData(new CSteamID(lobbyID), key);
+        if (result == "")
         {
-            { "SpeedKey", "slow" }
-        };
-        return dict;
+            Debug.LogWarning("No meta data for " + key);
+        }
+
+        return result;
+    }
+
+    public static void SetLobbyMetaData(ulong lobbyID, string key, string value)
+    {
+        var success = SteamMatchmaking.SetLobbyData(new CSteamID(lobbyID), key, value);
+        if (!success)
+        {
+            Debug.LogWarning("Failed to set lobby meta data - " + key + ":" + value);
+        }
     }
 
     public static List<SteamUser> GetLobbyMembers(ulong lobbyID)
@@ -95,5 +106,15 @@ public class Steam
     public static void SetLobbyMyData(ulong lobbyID, string key, string value)
     {
         SteamMatchmaking.SetLobbyMemberData(new CSteamID(lobbyID), key, value);
+    }
+
+    public static CSteamID GetLobbyOwner(ulong lobbyID)
+    {
+        return SteamMatchmaking.GetLobbyOwner(new CSteamID(lobbyID));
+    }
+
+    public static void LeaveLobby(ulong lobbyID)
+    {
+        SteamMatchmaking.LeaveLobby(new CSteamID(lobbyID));
     }
 }

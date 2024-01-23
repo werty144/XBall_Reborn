@@ -30,6 +30,9 @@ public class Callbacks : MonoBehaviour
     private void OnLobbyCreated(LobbyCreated_t pCallback)
     {
         Debug.Log("Lobby with id " + pCallback.m_ulSteamIDLobby + " created");
+        
+        var lobbyManager = lobby.GetComponent<LobbyManager>();
+        lobbyManager.OnLobbyCreate(pCallback.m_ulSteamIDLobby);
     }
 
     private void OnLobbyEnter(LobbyEnter_t pCallback)

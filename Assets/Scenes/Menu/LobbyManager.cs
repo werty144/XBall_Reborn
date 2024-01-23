@@ -11,14 +11,14 @@ using UnityEngine.UI;
 public class LobbyManager : MonoBehaviour
 {
     private const string ReadyStatusKey = "ReadyStatusKey";
-    private const string SpeedKey = "SpeedKey";
+    private const string NumberOfPlayersKey = "NumberOfPlayersKey";
     
     private ulong currentLobbyID;
     private ulong pendingInvitedID;
 
     public GameObject lobbyMemberPrefab;
     public Transform membersContainer;
-    public Transform metaData;
+    public Transform numberOfPlayersDropdown;
 
     public void Start()
     {
@@ -39,6 +39,11 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    public void OnLobbyCreate(ulong lobbyID)
+    {
+        Steam.SetLobbyMetaData(lobbyID, NumberOfPlayersKey, 2.ToString());
+    }
+
     public void OnLobbyEnter(ulong lobbyID)
     {
         currentLobbyID = lobbyID;
@@ -54,11 +59,15 @@ public class LobbyManager : MonoBehaviour
     public void OnDataUpdate()
     {
         UpdateData();
+        OwnerOrNot();
+        CheckAllReady();
     }
 
     public void OnLeave()
     {
+        Steam.LeaveLobby(currentLobbyID);
         currentLobbyID = 0;
+        ClearMembers();
     }
 
     private void UpdateData()
@@ -74,15 +83,23 @@ public class LobbyManager : MonoBehaviour
 
     private void UpdateMetaData()
     {
-        var exampleMetaData = metaData.transform.Find("ExampleName").GetComponent<TextMeshProUGUI>();
-        if (exampleMetaData == null)
+        var dropdown = numberOfPlayersDropdown.GetComponent<TMP_Dropdown>();
+        if (dropdown == null)
         {
-            Debug.LogWarning("Example meta data is not found");
+            Debug.LogWarning("Failed to get number of players dropdown");
+            return;
         }
         else
         {
-            var lobbyMetaData = Steam.GetLobbyMetaData(currentLobbyID);
-            exampleMetaData.text = lobbyMetaData[SpeedKey];
+            var numberOfPlayersString = Steam.GetLobbyMetaData(currentLobbyID, NumberOfPlayersKey);
+            Int32 numberOfPlayers;
+            var valid = Int32.TryParse(numberOfPlayersString, out numberOfPlayers);
+            if (!valid || numberOfPlayers < 1)
+            {
+                Debug.LogWarning("Invalid number of players in meta data: " + numberOfPlayersString);
+                return;
+            }
+            dropdown.value = numberOfPlayers - 1;
         }
     }
 
@@ -169,5 +186,80 @@ public class LobbyManager : MonoBehaviour
             return;
         }
         SetReady(!boolValue);
+    }
+
+    public void OnNumberOfPlayersChange()
+    {
+        if (currentLobbyID == 0)
+        {
+            Debug.LogWarning("On number of players change while not in lobby");
+            return;
+        }
+
+        if (Steam.GetLobbyOwner(currentLobbyID) != Steam.MySteamID())
+        {
+            // This means that the owner have changed the players number.
+            // We don't need to do anything
+            return;
+        }
+        
+        var dropdown = numberOfPlayersDropdown.GetComponent<TMP_Dropdown>();
+        if (dropdown == null)
+        {
+            Debug.LogWarning("Failed to get number of players dropdown");
+            return;
+        }
+        var newNumberOfPlayers = dropdown.value + 1;
+        Steam.SetLobbyMetaData(currentLobbyID, NumberOfPlayersKey, newNumberOfPlayers.ToString());
+    }
+
+    private void CheckAllReady()
+    {
+        var members = Steam.GetLobbyMembers(currentLobbyID);
+
+        if (members.Count < 2) { return; }
+
+        bool allReady = true;
+        foreach (var member in members)
+        {
+            var readyStatusString = Steam.GetLobbyMemberData(currentLobbyID, member.ID, ReadyStatusKey);
+            bool readyStatus;
+            var success = bool.TryParse(readyStatusString, out readyStatus);
+            if (!success)
+            {
+                Debug.LogWarning("Invalid ready status");
+            }
+
+            allReady = allReady && readyStatus;
+        }
+
+        if (allReady)
+        {
+            Debug.Log("Everyone ready!");
+        }
+    }
+
+    private void OwnerOrNot()
+    {
+        var dropdown = numberOfPlayersDropdown.GetComponent<TMP_Dropdown>();
+        if (dropdown == null)
+        {
+            Debug.LogWarning("Failed to get number of players dropdown");
+            return;
+        }
+        
+        if (Steam.GetLobbyOwner(currentLobbyID) == Steam.MySteamID())
+        {
+            dropdown.interactable = true;
+        }
+        else
+        {
+            dropdown.interactable = false;
+        }
+    }
+
+    public void TestLobbyEnter()
+    {
+        Steam.CreateLobby();
     }
 }
