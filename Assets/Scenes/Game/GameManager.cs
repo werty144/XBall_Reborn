@@ -20,10 +20,12 @@ public class GameManager : MonoBehaviour
 {
     public GameObject PlayerPrefab; 
     
-    private GameObject[] Players;
+    private Dictionary<uint, GameObject> Players = new ();
     private CSteamID OpponentID;
     private bool IAmMaster;
     private FieldParams FieldParams;
+
+    private GameState snapshotState_Test;
 
     public void Setup(SetupInfo setupInfo)
     {
@@ -31,10 +33,11 @@ public class GameManager : MonoBehaviour
         IAmMaster = setupInfo.IAmMaster;
         
         SetFieldParams();
+        CreatePlayers(setupInfo.NumberOfPlayers);
 
         if (IAmMaster)
         {
-            CreatePlayers(setupInfo.NumberOfPlayers);
+            
         }
     }
     
@@ -55,21 +58,23 @@ public class GameManager : MonoBehaviour
 
     void CreatePlayers(int n)
     {
-        uint spareID = 0;
-        float myZ = -FieldParams.Length / 4;
-        float opponentZ = FieldParams.Length / 4;
+        byte spareID = 0;
+        float masterZ = -FieldParams.Length / 4;
+        float followerZ = FieldParams.Length / 4;
         for (int i = 0; i < n; i++)
         {
             var x = FieldParams.Width * (i + 1) / (n + 1) - FieldParams.Width / 2;
             
-            var myPlayer = Instantiate(PlayerPrefab, 
-                new Vector3(x, PlayerParams.Height, myZ), Quaternion.identity);
-            myPlayer.GetComponent<PlayerController>().Initialize(true, spareID);
+            var masterPlayer = Instantiate(PlayerPrefab, 
+                new Vector3(x, PlayerConfig.Height, masterZ), Quaternion.identity);
+            masterPlayer.GetComponent<PlayerController>().Initialize(IAmMaster, spareID);
+            Players[spareID] = masterPlayer;
             spareID++;
             
-            var opponentPlayer = Instantiate(PlayerPrefab, 
-                new Vector3(x, PlayerParams.Height, opponentZ), Quaternion.identity);
-            opponentPlayer.GetComponent<PlayerController>().Initialize(false, spareID);
+            var followerPlayer = Instantiate(PlayerPrefab, 
+                new Vector3(x, PlayerConfig.Height, followerZ), Quaternion.identity);
+            followerPlayer.GetComponent<PlayerController>().Initialize(!IAmMaster, spareID);
+            Players[spareID] = followerPlayer;
             spareID++;
         }
     }
@@ -93,7 +98,7 @@ public class GameManager : MonoBehaviour
         {
             player.GetComponent<PlayerController>().SetTarget(target);
             
-            // TODO: send position to follower
+            // TODO: send game state to follower
         }
         else
         {
@@ -110,12 +115,38 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void ApplyPosition(int position)
+    public void ApplyGameState(GameState state)
     {
         if (IAmMaster)
         {
-            Debug.LogError("Asked to Apply position being a master");
+            Debug.LogError("Asked to Apply game state being a master");
             return;
         }
+
+        foreach (var playerState in state.PlayerStates)
+        {
+            Players[playerState.Id].GetComponent<PlayerController>().ApplyState(playerState);
+        }
+    }
+
+    public GameState GetGameState()
+    {
+        GameState gameState = new GameState();
+        foreach (var player in Players.Values)
+        {
+            gameState.PlayerStates.Add(player.GetComponent<PlayerController>().GetState());
+        }
+
+        return gameState;
+    }
+
+    public void TestSnapshotState()
+    {
+        snapshotState_Test = GetGameState();
+    }
+
+    public void TestApplyState()
+    {
+        ApplyGameState(snapshotState_Test);
     }
 }

@@ -53,6 +53,6 @@ public class InputManager : MonoBehaviour
     void SelectPlayer(GameObject selected)
     {
         selectedPlayer = selected;
-        selectedPlayer.GetComponent<Outline>().OutlineWidth = PlayerParams.OutlineWidth;
+        selectedPlayer.GetComponent<Outline>().OutlineWidth = PlayerConfig.OutlineWidth;
     }
 }
