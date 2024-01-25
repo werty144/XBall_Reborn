@@ -1,12 +1,37 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    public GameObject GameManager;
+    private GameManager GameManager;
+    private Transform CameraTransform;
     
     private GameObject selectedPlayer;
+
+    private void Start()
+    {
+        GameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
+        CameraTransform = GameObject.FindWithTag("MainCamera").GetComponent<Transform>();
+        
+        if (!GameManager.IsMaster())
+        {
+            var curCamPos = CameraTransform.position;
+            var newCameraPosition = new Vector3(
+                curCamPos.x,
+                curCamPos.y,
+                -curCamPos.z);
+            CameraTransform.position = newCameraPosition;
+
+            var curCamRot = CameraTransform.rotation.eulerAngles;
+            var newCamRot = new Vector3(
+                curCamRot.x,
+                180,
+                curCamRot.z);
+            CameraTransform.rotation = new Quaternion {eulerAngles = newCamRot};
+        }
+    }
 
     void Update()
     {
@@ -37,7 +62,7 @@ public class InputManager : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 var vectorPlane = new Vector2(hit.point.x, hit.point.z); 
-                GameManager.GetComponent<GameManager>().InputAction_SetPlayerTarget(selectedPlayer, vectorPlane);
+                GameManager.InputAction_SetPlayerTarget(selectedPlayer, vectorPlane);
             }
         }
     }

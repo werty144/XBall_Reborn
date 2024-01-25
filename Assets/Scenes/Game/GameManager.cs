@@ -63,7 +63,7 @@ public class GameManager : MonoBehaviour
         Setup(setupInfo);
     }
 
-    public void OnConnectionEstablished()
+    public void StartGame()
     {
         GameStarted = true;
     }
@@ -82,6 +82,11 @@ public class GameManager : MonoBehaviour
             RecentActions.Add(new PlayerMovementAction[2]);
         }
         CurStateNumber++;
+    }
+
+    public bool IsMaster()
+    {
+        return IAmMaster;
     }
 
     void CreatePlayers(int n)

@@ -10,6 +10,7 @@ public class GameStarter : MonoBehaviour
     private P2P P2PManager;
     private SetupInfo Info;
     private ulong LobbyID;
+    private GameManager GameManager;
 
     private bool IAmReady;
     private bool OpponentReady;
@@ -51,6 +52,7 @@ public class GameStarter : MonoBehaviour
     public void GameManagerReady(GameManager gameManager)
     {
         Debug.Log("Game manager ready");
+        GameManager = gameManager;
         IAmReady = true;
         P2PManager.SetGameManager(gameManager);
         SendReadyMessage();
@@ -75,10 +77,24 @@ public class GameStarter : MonoBehaviour
         if (IAmReady && OpponentReady)
         {
             Debug.Log("Everyone ready!");
+            GameObject.FindWithTag("GameLoader").GetComponent<GameLoader>().SwitchToGame();
+            GameManager.StartGame();
             LeaveLobby();
         }
     }
 
+    public void TestStartLoad()
+    {
+        SceneManager.LoadScene("LoadingScreen");
+        StartCoroutine(DelayedActivation());
+    }
+    
+    IEnumerator DelayedActivation()
+    {
+        yield return new WaitForSeconds(3f);
+        GameObject.FindWithTag("GameLoader").GetComponent<GameLoader>().SwitchToGame();
+    }
+    
     private void LeaveLobby()
     {
         Debug.Log("Leaving lobby");
