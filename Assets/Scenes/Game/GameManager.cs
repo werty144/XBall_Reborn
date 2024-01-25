@@ -21,23 +21,25 @@ public struct FieldParams
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject PlayerPrefab; 
+    public GameObject PlayerPrefab;
+    private P2P P2PManager;
+    private GameStarter GameStarter;
     
     private Dictionary<uint, PlayerController> Players = new ();
     private CSteamID OpponentID;
     private bool IAmMaster;
     private FieldParams FieldParams;
 
-    // TODO: Initialize on game start
     private uint CurStateNumber;
     private BoundedBuffer<GameState> RecentGameStates;
     private BoundedBuffer<PlayerMovementAction[]> RecentActions;
     private uint BufferedStates = 200;
 
-    private GameState snapshotState_Test;
+    private bool GameStarted;
 
     public void Setup(SetupInfo setupInfo)
     {
+        Debug.Log("Setting up game manager");
         OpponentID = setupInfo.OpponentID;
         IAmMaster = setupInfo.IAmMaster;
         
@@ -47,22 +49,30 @@ public class GameManager : MonoBehaviour
         CurStateNumber = 0;
         RecentGameStates = new BoundedBuffer<GameState>(BufferedStates);
         RecentActions = new BoundedBuffer<PlayerMovementAction[]>(BufferedStates);
-
-        if (IAmMaster)
-        {
-            
-        }
+        
+        GameStarter.GameManagerReady(this);
     }
     
-    // Start is called before the first frame update
     void OnEnable()
     {
-        Setup(new SetupInfo{IAmMaster = true, NumberOfPlayers = 3, OpponentID = new CSteamID()});
+        var global = GameObject.FindWithTag("Global");
+        P2PManager = global.GetComponent<P2P>();
+        GameStarter = global.GetComponent<GameStarter>();
+        
+        var setupInfo = global.GetComponent<GameStarter>().GetSetupInfo();
+        Setup(setupInfo);
+    }
+
+    public void OnConnectionEstablished()
+    {
+        GameStarted = true;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!GameStarted) {return;}
+        
         Assert.IsFalse(RecentGameStates.Has(CurStateNumber), "Cur state is not yet added");
         RecentGameStates.Add(GetGameState());
         Assert.IsTrue(RecentGameStates.Has(CurStateNumber), "Cur state " + CurStateNumber + " is added");
@@ -229,13 +239,8 @@ public class GameManager : MonoBehaviour
         return gameState;
     }
 
-    public void TestSnapshotState()
+    public void GameEnd()
     {
-        snapshotState_Test = GetGameState();
-    }
-
-    public void TestApplyState()
-    {
-        ApplyGameState(snapshotState_Test);
+        P2PManager.CloseConnection();
     }
 }

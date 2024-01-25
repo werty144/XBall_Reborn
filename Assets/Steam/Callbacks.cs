@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.SceneManagement;
 
 public class Callbacks : MonoBehaviour
 {
-    public GameObject lobby;
+    private LobbyManager lobby;
     public GameObject global;
     
     protected Callback<LobbyCreated_t> m_LobbyCreated;
@@ -29,37 +31,45 @@ public class Callbacks : MonoBehaviour
         }
     }
 
+    public void SetLobby(LobbyManager lobbyManager)
+    {
+        lobby = lobbyManager;
+    }
+
     private void OnLobbyCreated(LobbyCreated_t pCallback)
     {
         Debug.Log("Lobby with id " + pCallback.m_ulSteamIDLobby + " created");
         
-        var lobbyManager = lobby.GetComponent<LobbyManager>();
-        lobbyManager.OnLobbyCreate(pCallback.m_ulSteamIDLobby);
+        lobby.OnLobbyCreate(pCallback.m_ulSteamIDLobby);
     }
 
     private void OnLobbyEnter(LobbyEnter_t pCallback)
     {
         Debug.Log("Enter lobby " + pCallback.m_ulSteamIDLobby);
 
-        var lobbyManager = lobby.GetComponent<LobbyManager>();
-        lobbyManager.OnLobbyEnter(pCallback.m_ulSteamIDLobby);
+        lobby.OnLobbyEnter(pCallback.m_ulSteamIDLobby);
     }
     
     private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
     {
+        // We receive member data update twice: as a member update and as a lobby update
+        // Hence, we can only handle lobby updates
+        if (pCallback.m_ulSteamIDMember != pCallback.m_ulSteamIDLobby) { return; }
         Debug.Log("Lobby " + pCallback.m_ulSteamIDLobby + " data update.\n" + 
                   "Success: " + pCallback.m_bSuccess + "\n" +
                   "Updated ID: " + pCallback.m_ulSteamIDMember);
-        var lobbyManager = lobby.GetComponent<LobbyManager>();
-        lobbyManager.OnDataUpdate();
+        
+        if (lobby == null)
+        {
+            Assert.AreEqual("Game", SceneManager.GetActiveScene().name);
+            return;
+        }
+        lobby.OnDataUpdate();
     }
     
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
     {
-        Debug.Log("Lobby " + pCallback.m_ulSteamIDLobby + "data update." + 
-                  "User " + pCallback.m_ulSteamIDUserChanged + "changed status.");
-        var lobbyManager = lobby.GetComponent<LobbyManager>();
-        lobbyManager.OnDataUpdate();
+        // This one is handled as a part of LobbyDataUpdate
     }
     
     private void OnGameLobbyJoinRequest(GameLobbyJoinRequested_t pCallback)

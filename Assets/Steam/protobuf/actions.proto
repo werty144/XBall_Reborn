@@ -1,7 +1,8 @@
 syntax = "proto3";
 
 message PlayerMovementAction {
-  uint32 id = 1;
-  float x = 2;
-  float y = 3;
+  uint32 game_state_number = 1;
+  uint32 id = 2;
+  float x = 3;
+  float y = 4;
 }

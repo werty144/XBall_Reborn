@@ -6,6 +6,8 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
@@ -21,6 +23,12 @@ public class LobbyManager : MonoBehaviour
     public Transform membersContainer;
     public Transform numberOfPlayersDropdown;
     public GameObject global;
+
+    private void OnEnable()
+    {
+        global = GameObject.FindWithTag("Global");
+        global.GetComponent<Callbacks>().SetLobby(this);
+    }
 
     public void Start()
     {
@@ -93,12 +101,9 @@ public class LobbyManager : MonoBehaviour
         }
         else
         {
-            var numberOfPlayersString = Steam.GetLobbyMetaData(currentLobbyID, NumberOfPlayersKey);
-            Int32 numberOfPlayers;
-            var valid = Int32.TryParse(numberOfPlayersString, out numberOfPlayers);
-            if (!valid || numberOfPlayers < 1)
+            var numberOfPlayers = GetNumberOfPlayers();
+            if (numberOfPlayers == -1)
             {
-                Debug.LogWarning("Invalid number of players in meta data: " + numberOfPlayersString);
                 return;
             }
             dropdown.value = numberOfPlayers - 1;
@@ -237,8 +242,27 @@ public class LobbyManager : MonoBehaviour
 
         if (allReady)
         {
-            Debug.Log("Everyone ready!");
+            SwitchScenes();
         }
+    }
+
+    private void SwitchScenes()
+    {
+        Assert.AreNotEqual(0, currentLobbyID, "Switch scenes not in lobby");
+        var iAmOwner = Steam.GetLobbyOwner(currentLobbyID) == Steam.MySteamID();
+        var numberOfPlayers = GetNumberOfPlayers();
+        Assert.AreNotEqual(-1, numberOfPlayers, "Can't get number of players");
+        var opponentID = GetPartnerID();
+        Assert.AreNotEqual(CSteamID.Nil, opponentID, "Can't get opponent ID");
+        
+        global.GetComponent<GameStarter>().Initiate(
+            new SetupInfo
+            {
+                IAmMaster =  iAmOwner,
+                NumberOfPlayers = numberOfPlayers,
+                OpponentID = opponentID
+            },
+            currentLobbyID);
     }
 
     private void OwnerOrNot()
@@ -284,26 +308,21 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public void SendMessageToPartner()
+    private int GetNumberOfPlayers()
     {
-        if (currentLobbyID == 0)
+        var numberOfPlayersString = Steam.GetLobbyMetaData(currentLobbyID, NumberOfPlayersKey);
+        Int32 numberOfPlayers;
+        var valid = Int32.TryParse(numberOfPlayersString, out numberOfPlayers);
+        if (!valid || numberOfPlayers < 1)
         {
-            Debug.LogWarning("Send message to partner while not in lobby");
-            return;
+            Debug.LogWarning("Invalid number of players in meta data: " + numberOfPlayersString);
+            return -1;
         }
 
-        var partnerID = GetPartnerID();
-        if (partnerID == CSteamID.Nil)
-        {
-            Debug.LogWarning("Partner not present");
-            return;
-        }
-
-        var p2pManager = global.GetComponent<P2P>();
-        p2pManager.SendMessageToPeer(partnerID, "Privet!");
+        return numberOfPlayers;
     }
 
-    public void TestLobbyEnter()
+    public void TestCreateLobby()
     {
         Steam.CreateLobby();
     }
