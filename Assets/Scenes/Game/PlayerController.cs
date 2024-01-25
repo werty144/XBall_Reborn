@@ -75,9 +75,9 @@ public class PlayerController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
-        MovePlayer();
+        Move();
     }
 
     public void SetTarget(Vector2 target)
@@ -87,7 +87,7 @@ public class PlayerController : MonoBehaviour
         isMoving = true;
     }
     
-    void MovePlayer()
+    public void Move()
     {
         if (!isMoving) { return; }
         

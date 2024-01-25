@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.PlayerLoop;
 
 public struct SetupInfo
 {
@@ -20,10 +23,16 @@ public class GameManager : MonoBehaviour
 {
     public GameObject PlayerPrefab; 
     
-    private Dictionary<uint, GameObject> Players = new ();
+    private Dictionary<uint, PlayerController> Players = new ();
     private CSteamID OpponentID;
     private bool IAmMaster;
     private FieldParams FieldParams;
+
+    // TODO: Initialize on game start
+    private uint CurStateNumber;
+    private BoundedBuffer<GameState> RecentGameStates;
+    private BoundedBuffer<PlayerMovementAction[]> RecentActions;
+    private uint BufferedStates = 200;
 
     private GameState snapshotState_Test;
 
@@ -35,6 +44,10 @@ public class GameManager : MonoBehaviour
         SetFieldParams();
         CreatePlayers(setupInfo.NumberOfPlayers);
 
+        CurStateNumber = 0;
+        RecentGameStates = new BoundedBuffer<GameState>(BufferedStates);
+        RecentActions = new BoundedBuffer<PlayerMovementAction[]>(BufferedStates);
+
         if (IAmMaster)
         {
             
@@ -42,18 +55,23 @@ public class GameManager : MonoBehaviour
     }
     
     // Start is called before the first frame update
-    void Start()
+    void OnEnable()
     {
-        
+        Setup(new SetupInfo{IAmMaster = true, NumberOfPlayers = 3, OpponentID = new CSteamID()});
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        Assert.IsFalse(RecentGameStates.Has(CurStateNumber), "Cur state is not yet added");
+        RecentGameStates.Add(GetGameState());
+        Assert.IsTrue(RecentGameStates.Has(CurStateNumber), "Cur state " + CurStateNumber + " is added");
+        
+        if (!RecentActions.Has(CurStateNumber))
         {
-            Setup(new SetupInfo{IAmMaster = true, NumberOfPlayers = 3, OpponentID = new CSteamID()});
+            RecentActions.Add(new PlayerMovementAction[2]);
         }
+        CurStateNumber++;
     }
 
     void CreatePlayers(int n)
@@ -67,14 +85,16 @@ public class GameManager : MonoBehaviour
             
             var masterPlayer = Instantiate(PlayerPrefab, 
                 new Vector3(x, PlayerConfig.Height, masterZ), Quaternion.identity);
-            masterPlayer.GetComponent<PlayerController>().Initialize(IAmMaster, spareID);
-            Players[spareID] = masterPlayer;
+            var controller = masterPlayer.GetComponent<PlayerController>();
+            controller.Initialize(IAmMaster, spareID);
+            Players[spareID] = controller;
             spareID++;
             
             var followerPlayer = Instantiate(PlayerPrefab, 
                 new Vector3(x, PlayerConfig.Height, followerZ), Quaternion.identity);
-            followerPlayer.GetComponent<PlayerController>().Initialize(!IAmMaster, spareID);
-            Players[spareID] = followerPlayer;
+            var followerContorller = followerPlayer.GetComponent<PlayerController>();
+            followerContorller.Initialize(!IAmMaster, spareID);
+            Players[spareID] = followerContorller;
             spareID++;
         }
     }
@@ -92,40 +112,109 @@ public class GameManager : MonoBehaviour
 
     public void InputAction_SetPlayerTarget(GameObject player, Vector2 target)
     {
-        if (!player.GetComponent<PlayerController>().IsMy) { return; }
+        var playerController = player.GetComponent<PlayerController>();
+        if (!playerController.IsMy) { return; }
         
-        if (IAmMaster)
+        playerController.SetTarget(target);
+        
+        SetPlayerMovementAction(CurStateNumber, playerController.ID, target, IAmMaster ? 0u : 1u);
+    }
+
+    public void SetPlayerMovementAction(uint gameStateNumber, uint playerID, Vector2 target, uint actionPriority)
+    {
+        Assert.IsTrue(gameStateNumber == CurStateNumber || RecentActions.Has(gameStateNumber));
+        
+        PlayerMovementAction[] curActions;
+        if (RecentActions.Has(gameStateNumber))
         {
-            player.GetComponent<PlayerController>().SetTarget(target);
-            
-            // TODO: send game state to follower
+            curActions = RecentActions.Get(gameStateNumber);
         }
         else
         {
-            // TODO: Send action to master
+            curActions = new PlayerMovementAction[2];
+            RecentActions.Add(curActions);
+        }
+
+        var myAction = new PlayerMovementAction();
+        myAction.Id = playerID;
+        myAction.X = target.x;
+        myAction.Y = target.y;
+        
+        
+        curActions[actionPriority] = myAction;
+    }
+
+    public void OpponentAction_SetPlayerTarget(uint gameStateNumber, uint playerID, Vector2 target)
+    {
+        if (gameStateNumber > CurStateNumber ||
+            gameStateNumber != CurStateNumber && !RecentGameStates.Has(gameStateNumber))
+        {
+            // TODO: Implement buffering actions
+            // TODO: Implement catch up mechanism
+            Debug.LogWarning("Opponent sent too old or future action");
+            return;
+        }
+        
+        if (Players[playerID].IsMy) { return; }
+        
+        SetPlayerMovementAction(gameStateNumber, playerID, target, !IAmMaster ? 0u : 1u);
+
+        if (gameStateNumber == CurStateNumber)
+        {
+            Players[playerID].SetTarget(target);
+            return;
+        }
+        
+        Merge(gameStateNumber);
+    }
+
+    public void Merge(uint gameStateNumber)
+    {
+        Assert.IsTrue(gameStateNumber < CurStateNumber);
+        // Do a roll back
+        var headState = RecentGameStates.Get(gameStateNumber);
+        ApplyGameState(headState);
+        
+        
+        //Sequentially apply all actions
+        var mergingState = gameStateNumber;
+        Physics.autoSimulation = false;
+        while (mergingState < CurStateNumber)
+        {
+            Physics.Simulate(Time.fixedDeltaTime);
+            ApplyActions(mergingState);
+            UpdatePlayers();
+            mergingState++;
+        }
+        Physics.autoSimulation = true;
+    }
+
+    void ApplyActions(uint gameStateNumber)
+    {
+        var actions = RecentActions.Get(gameStateNumber);
+        for (int i = 0; i < 2; i++)
+        {
+            if (actions[i] != null)
+            {
+                var target = new Vector2(actions[i].X, actions[i].Y);
+                Players[actions[i].Id].SetTarget(target);
+            }
         }
     }
 
-    public void OpponentAction_SetPlayerTarget(uint playerID, Vector2 target)
+    void UpdatePlayers()
     {
-        if (!IAmMaster)
+        foreach (var player in Players.Values)
         {
-            Debug.LogError("Asked to process opponent action SetPlayerTarget not being a master");
-            return;
+            player.Move();
         }
     }
 
     public void ApplyGameState(GameState state)
     {
-        if (IAmMaster)
-        {
-            Debug.LogError("Asked to Apply game state being a master");
-            return;
-        }
-
         foreach (var playerState in state.PlayerStates)
         {
-            Players[playerState.Id].GetComponent<PlayerController>().ApplyState(playerState);
+            Players[playerState.Id].ApplyState(playerState);
         }
     }
 
@@ -134,7 +223,7 @@ public class GameManager : MonoBehaviour
         GameState gameState = new GameState();
         foreach (var player in Players.Values)
         {
-            gameState.PlayerStates.Add(player.GetComponent<PlayerController>().GetState());
+            gameState.PlayerStates.Add(player.GetState());
         }
 
         return gameState;
