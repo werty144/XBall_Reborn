@@ -8,13 +8,15 @@ using Google.Protobuf;
 using Steamworks;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Diagnostics;
 
-enum MessageType
+public enum MessageType
 {
     PlayerMovementAction = 1,
     Ready = 2,
     SendPing = 3,
-    ReplyPing = 4
+    ReplyPing = 4,
+    GameState = 5
 }
 
 public class P2P : MonoBehaviour
@@ -77,33 +79,6 @@ public class P2P : MonoBehaviour
     {
         SteamNetworkingSockets.CloseConnection(Connection, 0, "", false);
     }
-    
-    void SendMessageToPeer(CSteamID remoteID, byte[] message)
-    {
-        SteamNetConnectionInfo_t connectionInfo;
-        var connectionValid = SteamNetworkingSockets.GetConnectionInfo(Connection, out connectionInfo);
-        if (!connectionValid || 
-            connectionInfo.m_eState != ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected ||
-            connectionInfo.m_identityRemote.IsInvalid() ||
-            connectionInfo.m_identityRemote.GetSteamID() != remoteID)
-        {
-            Debug.LogWarning("No connection with " + remoteID);
-            return;
-        }
-        IntPtr unmanagedPointer = Marshal.AllocHGlobal(message.Length);
-        Marshal.Copy(message, 0, unmanagedPointer, message.Length);
-        SteamNetworkingSockets.SendMessageToConnection(Connection, unmanagedPointer, (uint)message.Length, 8, out _);
-        Marshal.FreeHGlobal(unmanagedPointer);
-    }
-
-    void SendMessage(byte[] message)
-    {
-        SteamNetConnectionInfo_t connectionInfo;
-        var connectionValid = SteamNetworkingSockets.GetConnectionInfo(Connection, out connectionInfo);
-        Assert.IsTrue(connectionValid);
-        Assert.AreEqual(ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected, connectionInfo.m_eState);
-        SendMessageToPeer(connectionInfo.m_identityRemote.GetSteamID(), message);
-    }
 
     private void Update()
     {
@@ -136,21 +111,7 @@ public class P2P : MonoBehaviour
         switch (message[0])
         {
             case (byte)MessageType.PlayerMovementAction:
-                Debug.Log("Got player movement action message");
-                Assert.IsNotNull(GameManager);
-                PlayerMovementAction action;
-                using (MemoryStream stream = new MemoryStream(message, 1, message.Length - 1))
-                {
-                    try
-                    {
-                        action = PlayerMovementAction.Parser.ParseFrom(stream);
-                    }
-                    catch (InvalidProtocolBufferException e)
-                    {
-                        Debug.LogException(e);
-                        break;
-                    }
-                }
+                var action = ParseUtils.UnmarshalPlayerMovementAction(message);
                 var target = new Vector2(action.X, action.Y);
                 GameManager.OpponentAction_SetPlayerTarget(action.GameStateNumber, action.Id, target);
                 break;
@@ -165,12 +126,18 @@ public class P2P : MonoBehaviour
                 GameManager.LastPingTook(DateTime.Now - lastPingSent);
                 SendPing();
                 break;
+            case (byte)MessageType.GameState:
+                var gameState = ParseUtils.UnmarshalGameState(message);
+                GameManager.ApplyGameState(gameState);
+                break;
             default:
                 Debug.LogWarning("Message of unknown type!");
                 break;
         }
     }
 
+    // -------------------------------- Senders ---------------------------------
+    
     public void SendPlayerMovementAction(CSteamID peerID, PlayerMovementAction action)
     {
         using (MemoryStream stream = new MemoryStream())
@@ -191,5 +158,44 @@ public class P2P : MonoBehaviour
             byte[] bytes = stream.ToArray();
             SendMessageToPeer(peerID, bytes);
         }
+    }
+
+    public void SendGameStateMessage(CSteamID peerID, GameState gameState)
+    {
+        using (MemoryStream stream = new MemoryStream())
+        {
+            stream.WriteByte((byte)MessageType.GameState);
+            gameState.WriteTo(stream);
+            byte[] bytes = stream.ToArray();
+            SendMessageToPeer(peerID, bytes);
+        }
+    }
+    
+    void SendMessageToPeer(CSteamID remoteID, byte[] message)
+    {
+        if (!SteamManager.Initialized) { return; }
+        SteamNetConnectionInfo_t connectionInfo;
+        var connectionValid = SteamNetworkingSockets.GetConnectionInfo(Connection, out connectionInfo);
+        if (!connectionValid || 
+            connectionInfo.m_eState != ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected ||
+            connectionInfo.m_identityRemote.IsInvalid() ||
+            connectionInfo.m_identityRemote.GetSteamID() != remoteID)
+        {
+            Debug.LogWarning("No connection with " + remoteID);
+            return;
+        }
+        IntPtr unmanagedPointer = Marshal.AllocHGlobal(message.Length);
+        Marshal.Copy(message, 0, unmanagedPointer, message.Length);
+        SteamNetworkingSockets.SendMessageToConnection(Connection, unmanagedPointer, (uint)message.Length, 8, out _);
+        Marshal.FreeHGlobal(unmanagedPointer);
+    }
+
+    void SendMessage(byte[] message)
+    {
+        SteamNetConnectionInfo_t connectionInfo;
+        var connectionValid = SteamNetworkingSockets.GetConnectionInfo(Connection, out connectionInfo);
+        Assert.IsTrue(connectionValid);
+        Assert.AreEqual(ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected, connectionInfo.m_eState);
+        SendMessageToPeer(connectionInfo.m_identityRemote.GetSteamID(), message);
     }
 }

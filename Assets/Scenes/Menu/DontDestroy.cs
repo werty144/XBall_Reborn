@@ -7,12 +7,6 @@ public class DontDestroy : MonoBehaviour
 {
     private static DontDestroy instance;
 
-    // private void Start()
-    // {
-    //     QualitySettings.vSyncCount = 0;
-    //     Application.targetFrameRate = 10;
-    // }
-
     void Awake()
     {
         if (instance == null)
