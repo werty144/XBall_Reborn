@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 public class Callbacks : MonoBehaviour
 {
     private LobbyManager lobby;
+    private FriendsListController friendsList;
     public GameObject global;
     
     protected Callback<LobbyCreated_t> m_LobbyCreated;
@@ -17,6 +18,7 @@ public class Callbacks : MonoBehaviour
     protected Callback<GameLobbyJoinRequested_t> m_GameLobbyJoinRequested;
     protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
     protected Callback<SteamNetConnectionStatusChangedCallback_t> m_ConnectionChanged;
+    protected Callback<PersonaStateChange_t> m_PersonaStateChange;
 
     private void OnEnable()
     {
@@ -28,12 +30,18 @@ public class Callbacks : MonoBehaviour
             m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
             m_GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequest);
             m_ConnectionChanged = Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnConnectionChanged);
+            m_PersonaStateChange = Callback<PersonaStateChange_t>.Create(OnPersonaStateChange);
         }
     }
 
     public void SetLobby(LobbyManager lobbyManager)
     {
         lobby = lobbyManager;
+    }
+
+    public void SetFriendsList(FriendsListController friendsListController)
+    {
+        friendsList = friendsListController;
     }
 
     private void OnLobbyCreated(LobbyCreated_t pCallback)
@@ -93,6 +101,14 @@ public class Callbacks : MonoBehaviour
                 break;
 
             // Handle other states as needed
+        }
+    }
+
+    private void OnPersonaStateChange(PersonaStateChange_t pCallback)
+    {
+        if (friendsList != null)
+        {
+            friendsList.UpdateFriendsList();
         }
     }
 }

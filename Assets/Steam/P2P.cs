@@ -12,7 +12,9 @@ using UnityEngine.Assertions;
 enum MessageType
 {
     PlayerMovementAction = 1,
-    Ready = 2
+    Ready = 2,
+    SendPing = 3,
+    ReplyPing = 4
 }
 
 public class P2P : MonoBehaviour
@@ -21,6 +23,7 @@ public class P2P : MonoBehaviour
     private GameStarter GameStarter;
 
     private HSteamNetConnection Connection;
+    private DateTime lastPingSent;
     private void OnEnable()
     {
         if (!SteamManager.Initialized) { return; }
@@ -39,8 +42,29 @@ public class P2P : MonoBehaviour
         CloseConnection();        
         Connection = connection;
         GameStarter.OnConnected();
+        SendPing();
     }
 
+    void SendPing()
+    {
+        lastPingSent = DateTime.Now;
+        using (MemoryStream stream = new MemoryStream())
+        {
+            stream.WriteByte((byte)MessageType.SendPing);
+            byte[] bytes = stream.ToArray();
+            SendMessage(bytes);
+        }
+    }
+
+    void ReplyPing()
+    {
+        using (MemoryStream stream = new MemoryStream())
+        {
+            stream.WriteByte((byte)MessageType.ReplyPing);
+            byte[] bytes = stream.ToArray();
+            SendMessage(bytes);
+        }
+    }
 
     public void ConnectToPeer(CSteamID remoteID)
     {
@@ -68,8 +92,17 @@ public class P2P : MonoBehaviour
         }
         IntPtr unmanagedPointer = Marshal.AllocHGlobal(message.Length);
         Marshal.Copy(message, 0, unmanagedPointer, message.Length);
-        SteamNetworkingSockets.SendMessageToConnection(Connection, unmanagedPointer, (uint)message.Length, 0, out _);
+        SteamNetworkingSockets.SendMessageToConnection(Connection, unmanagedPointer, (uint)message.Length, 8, out _);
         Marshal.FreeHGlobal(unmanagedPointer);
+    }
+
+    void SendMessage(byte[] message)
+    {
+        SteamNetConnectionInfo_t connectionInfo;
+        var connectionValid = SteamNetworkingSockets.GetConnectionInfo(Connection, out connectionInfo);
+        Assert.IsTrue(connectionValid);
+        Assert.AreEqual(ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected, connectionInfo.m_eState);
+        SendMessageToPeer(connectionInfo.m_identityRemote.GetSteamID(), message);
     }
 
     private void Update()
@@ -124,6 +157,13 @@ public class P2P : MonoBehaviour
             case (byte)MessageType.Ready:
                 Debug.Log("Got ready message");
                 GameStarter.PeerReady();
+                break;
+            case (byte)MessageType.SendPing:
+                ReplyPing();
+                break;
+            case (byte)MessageType.ReplyPing:
+                GameManager.LastPingTook(DateTime.Now - lastPingSent);
+                SendPing();
                 break;
             default:
                 Debug.LogWarning("Message of unknown type!");

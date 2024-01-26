@@ -115,6 +115,7 @@ public class Steam
 
     public static void LeaveLobby(ulong lobbyID)
     {
+        if (!SteamManager.Initialized) { return; }
         SteamMatchmaking.LeaveLobby(new CSteamID(lobbyID));
     }
 }

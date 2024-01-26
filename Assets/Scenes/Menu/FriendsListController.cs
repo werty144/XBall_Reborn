@@ -12,19 +12,11 @@ public class FriendsListController : MonoBehaviour
     public GameObject lobby;
     void Start()
     {
-        StartCoroutine(UpdateFriendsListCoroutine(1f));
-    }
-    
-    IEnumerator UpdateFriendsListCoroutine(float updateInterval)
-    {
-        while (true)
-        {
-            UpdateFriendsList();
-            yield return new WaitForSeconds(updateInterval);
-        }
+        UpdateFriendsList();
+        GameObject.FindGameObjectWithTag("Global").GetComponent<Callbacks>().SetFriendsList(this);
     }
 
-    void UpdateFriendsList()
+    public void UpdateFriendsList()
     {
         ClearFriendsList();
         var onlineFriends = Steam.GetOnlineFriends();

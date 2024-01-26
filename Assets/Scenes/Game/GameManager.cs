@@ -22,19 +22,19 @@ public struct FieldParams
 public class GameManager : MonoBehaviour
 {
     public GameObject PlayerPrefab;
+    
     private P2P P2PManager;
     private GameStarter GameStarter;
+    private UIManager UIManager;
     
     private Dictionary<uint, PlayerController> Players = new ();
     private CSteamID OpponentID;
     private bool IAmMaster;
     private FieldParams FieldParams;
-
     private uint CurStateNumber;
     private BoundedBuffer<GameState> RecentGameStates;
     private BoundedBuffer<PlayerMovementAction[]> RecentActions;
     private uint BufferedStates = 200;
-
     private bool GameStarted;
 
     public void Setup(SetupInfo setupInfo)
@@ -58,6 +58,7 @@ public class GameManager : MonoBehaviour
         var global = GameObject.FindWithTag("Global");
         P2PManager = global.GetComponent<P2P>();
         GameStarter = global.GetComponent<GameStarter>();
+        UIManager = GameObject.FindWithTag("UIManager").GetComponent<UIManager>();
         
         var setupInfo = global.GetComponent<GameStarter>().GetSetupInfo();
         Setup(setupInfo);
@@ -68,7 +69,6 @@ public class GameManager : MonoBehaviour
         GameStarted = true;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!GameStarted) {return;}
@@ -133,6 +133,15 @@ public class GameManager : MonoBehaviour
         playerController.SetTarget(target);
         
         SetPlayerMovementAction(CurStateNumber, playerController.ID, target, IAmMaster ? 0u : 1u);
+        
+        P2PManager.SendPlayerMovementAction(OpponentID, 
+            new PlayerMovementAction
+            {
+                GameStateNumber = CurStateNumber,
+                Id = playerController.ID,
+                X = target.x,
+                Y = target.y
+            });
     }
 
     public void SetPlayerMovementAction(uint gameStateNumber, uint playerID, Vector2 target, uint actionPriority)
@@ -247,5 +256,15 @@ public class GameManager : MonoBehaviour
     public void GameEnd()
     {
         P2PManager.CloseConnection();
+    }
+
+    public void LastPingTook(TimeSpan timeSpan)
+    {
+        UIManager.UpdatePing(timeSpan);
+    }
+    
+    public uint GetCurrentStateNumber()
+    {
+        return CurStateNumber;
     }
 }

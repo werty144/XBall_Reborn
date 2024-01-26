@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -85,14 +86,20 @@ public class GameStarter : MonoBehaviour
 
     public void TestStartLoad()
     {
-        SceneManager.LoadScene("LoadingScreen");
-        StartCoroutine(DelayedActivation());
-    }
-    
-    IEnumerator DelayedActivation()
-    {
-        yield return new WaitForSeconds(3f);
-        GameObject.FindWithTag("GameLoader").GetComponent<GameLoader>().SwitchToGame();
+        // SteamNetworkPingLocation_t location;
+        // var status = SteamNetworkingUtils.GetLocalPingLocation(out location);
+        // Debug.Log(status);
+        //
+        // var ping = SteamNetworkingUtils.EstimatePingTimeBetweenTwoLocations(ref location, ref location);
+        // Debug.Log(ping);
+        Info = new SetupInfo
+        {
+            IAmMaster = true,
+            NumberOfPlayers = 3,
+            OpponentID = new CSteamID(0)
+        };
+        OpponentReady = true;
+        SceneManager.LoadScene("Game");
     }
     
     private void LeaveLobby()
