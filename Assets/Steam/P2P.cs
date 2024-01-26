@@ -26,6 +26,8 @@ public class P2P : MonoBehaviour
 
     private HSteamNetConnection Connection;
     private DateTime lastPingSent;
+    
+    // ---------------------------------- SETUP ------------------------------
     private void OnEnable()
     {
         if (!SteamManager.Initialized) { return; }
@@ -46,28 +48,8 @@ public class P2P : MonoBehaviour
         GameStarter.OnConnected();
         SendPing();
     }
-
-    void SendPing()
-    {
-        lastPingSent = DateTime.Now;
-        using (MemoryStream stream = new MemoryStream())
-        {
-            stream.WriteByte((byte)MessageType.SendPing);
-            byte[] bytes = stream.ToArray();
-            SendMessage(bytes);
-        }
-    }
-
-    void ReplyPing()
-    {
-        using (MemoryStream stream = new MemoryStream())
-        {
-            stream.WriteByte((byte)MessageType.ReplyPing);
-            byte[] bytes = stream.ToArray();
-            SendMessage(bytes);
-        }
-    }
-
+    
+    // ----------------------------------- CONNECTION ------------------------------
     public void ConnectToPeer(CSteamID remoteID)
     {
         var identity = new SteamNetworkingIdentity();
@@ -79,6 +61,8 @@ public class P2P : MonoBehaviour
     {
         SteamNetworkingSockets.CloseConnection(Connection, 0, "", false);
     }
+    
+    // ------------------------------------- LISTENING ---------------------------------
 
     private void Update()
     {
@@ -112,11 +96,9 @@ public class P2P : MonoBehaviour
         {
             case (byte)MessageType.PlayerMovementAction:
                 var action = ParseUtils.UnmarshalPlayerMovementAction(message);
-                var target = new Vector2(action.X, action.Y);
-                GameManager.OpponentAction_SetPlayerTarget(action.GameStateNumber, action.Id, target);
+                GameManager.OpponentAction(action);
                 break;
             case (byte)MessageType.Ready:
-                Debug.Log("Got ready message");
                 GameStarter.PeerReady();
                 break;
             case (byte)MessageType.SendPing:
@@ -128,21 +110,52 @@ public class P2P : MonoBehaviour
                 break;
             case (byte)MessageType.GameState:
                 var gameState = ParseUtils.UnmarshalGameState(message);
-                GameManager.ApplyGameState(gameState);
+                GameManager.ReceiveGameState(gameState);
                 break;
             default:
                 Debug.LogWarning("Message of unknown type!");
                 break;
         }
     }
-
-    // -------------------------------- Senders ---------------------------------
     
-    public void SendPlayerMovementAction(CSteamID peerID, PlayerMovementAction action)
+    // -------------------------------- PING ------------------------------------
+    void SendPing()
+    {
+        lastPingSent = DateTime.Now;
+        using (MemoryStream stream = new MemoryStream())
+        {
+            stream.WriteByte((byte)MessageType.SendPing);
+            byte[] bytes = stream.ToArray();
+            SendMessage(bytes);
+        }
+    }
+
+    void ReplyPing()
     {
         using (MemoryStream stream = new MemoryStream())
         {
-            stream.WriteByte((byte)MessageType.PlayerMovementAction);
+            stream.WriteByte((byte)MessageType.ReplyPing);
+            byte[] bytes = stream.ToArray();
+            SendMessage(bytes);
+        }
+    }
+
+    // -------------------------------- Senders ---------------------------------
+    
+    public void SendAction(CSteamID peerID, IBufferMessage action)
+    {
+        using (MemoryStream stream = new MemoryStream())
+        {
+            switch (action)
+            {
+                case PlayerMovementAction:
+                    stream.WriteByte((byte)MessageType.PlayerMovementAction);
+                    break;
+                default:
+                    Debug.LogWarning("Unknown action");
+                    break;
+            }
+            
             action.WriteTo(stream);
             byte[] bytes = stream.ToArray();
             SendMessageToPeer(peerID, bytes);

@@ -61,8 +61,13 @@ public class InputManager : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit))
             {
-                var vectorPlane = new Vector2(hit.point.x, hit.point.z); 
-                GameManager.InputAction_SetPlayerTarget(selectedPlayer, vectorPlane);
+                var action = new PlayerMovementAction
+                {
+                    Id = selectedPlayer.GetComponent<PlayerController>().ID,
+                    X = hit.point.x,
+                    Y = hit.point.z
+                };
+                GameManager.InputAction(action);
             }
         }
     }

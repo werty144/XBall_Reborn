@@ -17,6 +17,8 @@ public class GameStarter : MonoBehaviour
     private bool OpponentReady;
     private bool ConnectionReady;
 
+    public bool IsTest { get; set; }
+
     private void OnEnable()
     {
         P2PManager = GameObject.FindWithTag("Global").GetComponent<P2P>();
@@ -86,12 +88,8 @@ public class GameStarter : MonoBehaviour
 
     public void TestStartLoad()
     {
-        // SteamNetworkPingLocation_t location;
-        // var status = SteamNetworkingUtils.GetLocalPingLocation(out location);
-        // Debug.Log(status);
-        //
-        // var ping = SteamNetworkingUtils.EstimatePingTimeBetweenTwoLocations(ref location, ref location);
-        // Debug.Log(ping);
+        IsTest = true;
+        
         Info = new SetupInfo
         {
             IAmMaster = true,

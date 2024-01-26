@@ -12,8 +12,12 @@ public class UIManagerGame : MonoBehaviour
     private TextMeshProUGUI PingLabel;
     private TextMeshProUGUI CurrentStateLabel;
 
+    private DateTime LastFPSUpdate;
+    private uint FramesPerLasSecond;
+
     private void OnEnable()
     {
+        LastFPSUpdate = DateTime.Now;
         GameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
         PingLabel = GameObject.Find("Ping Label").GetComponent<TextMeshProUGUI>();
         CurrentStateLabel = GameObject.Find("Current State Label").GetComponent<TextMeshProUGUI>();
@@ -21,7 +25,13 @@ public class UIManagerGame : MonoBehaviour
 
     private void Update()
     {
-        CurrentStateLabel.text = "State №: " + GameManager.GetCurrentStateNumber();
+        FramesPerLasSecond++;
+        if (DateTime.Now - LastFPSUpdate >= TimeSpan.FromSeconds(1))
+        {
+            CurrentStateLabel.text = "FPS: " + FramesPerLasSecond;
+            FramesPerLasSecond = 0;
+            LastFPSUpdate = DateTime.Now;
+        }
     }
 
     public void OnMenuButton()

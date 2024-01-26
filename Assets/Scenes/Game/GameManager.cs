@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Google.Protobuf;
 using Steamworks;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -31,10 +32,9 @@ public class GameManager : MonoBehaviour
     private CSteamID OpponentID;
     private bool IAmMaster;
     private FieldParams FieldParams;
-    private uint CurStateNumber;
-    private BoundedBuffer<GameState> RecentGameStates;
-    private BoundedBuffer<PlayerMovementAction[]> RecentActions;
-    private uint BufferedStates = 200;
+
+    private GameStateVersioning GameStateVersioning;
+
     private bool GameStarted;
 
     // ----------------------------- SETUP --------------------------------
@@ -47,9 +47,7 @@ public class GameManager : MonoBehaviour
         SetFieldParams();
         CreatePlayers(setupInfo.NumberOfPlayers);
 
-        CurStateNumber = 0;
-        RecentGameStates = new BoundedBuffer<GameState>(BufferedStates);
-        RecentActions = new BoundedBuffer<PlayerMovementAction[]>(BufferedStates);
+        GameStateVersioning = new GameStateVersioning(this);
         
         GameStarter.GameManagerReady(this);
     }
@@ -111,145 +109,60 @@ public class GameManager : MonoBehaviour
     {
         if (!GameStarted) {return;}
         
-        Assert.IsFalse(RecentGameStates.Has(CurStateNumber), "Cur state is not yet added");
-        RecentGameStates.Add(GetGameState());
-        Assert.IsTrue(RecentGameStates.Has(CurStateNumber), "Cur state " + CurStateNumber + " is added");
-        
-        if (!RecentActions.Has(CurStateNumber))
-        {
-            RecentActions.Add(new PlayerMovementAction[2]);
-        }
-        CurStateNumber++;
+        GameStateVersioning.AddCurrentState(GetGameState());
     }
 
-    public void InputAction_SetPlayerTarget(GameObject player, Vector2 target)
+    public void InputAction(IBufferMessage action)
     {
-        var playerController = player.GetComponent<PlayerController>();
-        if (!playerController.IsMy) { return; }
+        GameStateVersioning.AddCurrentAction(action);
+        // No matter if master or follower, 
+        // Do optimistic execution
+        switch (action)
+        {
+            case PlayerMovementAction playerMovementAction:
+                var player = Players[playerMovementAction.Id];
+                //Invalid action
+                if (!player.IsMy) { return; }
 
-        // Optimistic execution in case we are a follower
-        playerController.SetTarget(target);
-        
+                var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
+                player.SetTarget(target);
+                break;
+            default:
+                Debug.LogWarning("Unknown input action");
+                break;
+        }
+
         if (IAmMaster)
         {
-            var curState = GetGameState();
-            P2PManager.SendGameStateMessage(OpponentID, curState);
+            P2PManager.SendGameStateMessage(OpponentID, GetGameState());
         }
         else
         {
-            P2PManager.SendPlayerMovementAction(OpponentID, 
-                new PlayerMovementAction
-                {
-                    GameStateNumber = CurStateNumber,
-                    Id = playerController.ID,
-                    X = target.x,
-                    Y = target.y
-                });
-        }
-        
-        // SetPlayerMovementAction(CurStateNumber, playerController.ID, target, IAmMaster ? 0u : 1u);
-    }
-
-    public void SetPlayerMovementAction(uint gameStateNumber, uint playerID, Vector2 target, uint actionPriority)
-    {
-        Assert.IsTrue(gameStateNumber == CurStateNumber || RecentActions.Has(gameStateNumber));
-        
-        PlayerMovementAction[] curActions;
-        if (RecentActions.Has(gameStateNumber))
-        {
-            curActions = RecentActions.Get(gameStateNumber);
-        }
-        else
-        {
-            curActions = new PlayerMovementAction[2];
-            RecentActions.Add(curActions);
-        }
-
-        var myAction = new PlayerMovementAction();
-        myAction.Id = playerID;
-        myAction.X = target.x;
-        myAction.Y = target.y;
-        
-        
-        curActions[actionPriority] = myAction;
-    }
-
-    public void OpponentAction_SetPlayerTarget(uint gameStateNumber, uint playerID, Vector2 target)
-    {
-        Assert.IsTrue(IAmMaster, "Only process opponent's actions as a server");
-        
-        if (Players[playerID].IsMy) { return; }
-        
-        // SetPlayerMovementAction(gameStateNumber, playerID, target, !IAmMaster ? 0u : 1u);
-        
-        Players[playerID].SetTarget(target);
-        var curState = GetGameState();
-        P2PManager.SendGameStateMessage(OpponentID, curState);
-        
-        // Merge(gameStateNumber);
-    }
-
-    public void Merge(uint gameStateNumber)
-    {
-        Assert.IsTrue(gameStateNumber < CurStateNumber);
-        // Do a roll back
-        var headState = RecentGameStates.Get(gameStateNumber);
-        ApplyGameState(headState);
-        
-        
-        //Sequentially apply all actions
-        var mergingState = gameStateNumber;
-        Physics.autoSimulation = false;
-        while (mergingState < CurStateNumber)
-        {
-            Physics.Simulate(Time.fixedDeltaTime);
-            ApplyActions(mergingState);
-            foreach (var player in Players.Values)
-            {
-                player.Move();
-            }
-            mergingState++;
-        }
-        Physics.autoSimulation = true;
-    }
-    
-    void ApplyActions(uint gameStateNumber)
-    {
-        var actions = RecentActions.Get(gameStateNumber);
-        for (int i = 0; i < 2; i++)
-        {
-            if (actions[i] != null)
-            {
-                var target = new Vector2(actions[i].X, actions[i].Y);
-                Players[actions[i].Id].SetTarget(target);
-            }
+            P2PManager.SendAction(OpponentID, action);
         }
     }
 
-    public void ApplyGameState(GameState state)
+    public void OpponentAction(IBufferMessage action)
     {
-        Assert.IsFalse(IAmMaster, "Only apply game states as a follower");
-        foreach (var playerState in state.PlayerStates)
-        {
-            Players[playerState.Id].ApplyState(playerState);
-        }
+        Assert.IsTrue(IAmMaster, "Process opponent's action only as a server");
+        
+        var newState = GameStateVersioning.ApplyActionInThePast(action, TimeSpan.FromMilliseconds(10));
+        ApplyGameState(newState);
+        P2PManager.SendGameStateMessage(OpponentID, newState);
+    }
+
+    public void ReceiveGameState(GameState gameState)
+    {
+        Assert.IsFalse(IAmMaster, "Only receive game states as a follower");
+        ApplyGameState(gameState);
     }
 
     public void GameEnd()
     {
         P2PManager.CloseConnection();
     }
-
-    public void LastPingTook(TimeSpan timeSpan)
-    {
-        _uiManagerGame.UpdatePing(timeSpan);
-    }
     
     // ------------------------ GETTERS ------------------------- //
-    public uint GetCurrentStateNumber()
-    {
-        return CurStateNumber;
-    }
     
     public GameState GetGameState()
     {
@@ -261,9 +174,28 @@ public class GameManager : MonoBehaviour
 
         return gameState;
     }
+
+    public Dictionary<uint, PlayerController> GetPlayers()
+    {
+        return Players;
+    }
     
     public bool IsMaster()
     {
         return IAmMaster;
+    }
+    
+    // ----------------------------- SETTERS ----------------------------
+    public void ApplyGameState(GameState state)
+    {
+        foreach (var playerState in state.PlayerStates)
+        {
+            Players[playerState.Id].ApplyState(playerState);
+        }
+    }
+    
+    public void LastPingTook(TimeSpan timeSpan)
+    {
+        _uiManagerGame.UpdatePing(timeSpan);
     }
 }
