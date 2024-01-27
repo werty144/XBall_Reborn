@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
     private FieldParams FieldParams;
 
     private GameStateVersioning GameStateVersioning;
+    private TimeSpan Ping;
 
     private bool GameStarted;
 
@@ -105,7 +106,7 @@ public class GameManager : MonoBehaviour
     }
     
     // -------------------------------------- SERVER-CLIENT ------------------------------
-    void Update()
+    void LateUpdate()
     {
         if (!GameStarted) {return;}
         
@@ -146,9 +147,8 @@ public class GameManager : MonoBehaviour
     {
         Assert.IsTrue(IAmMaster, "Process opponent's action only as a server");
         
-        var newState = GameStateVersioning.ApplyActionInThePast(action, TimeSpan.FromMilliseconds(10));
-        ApplyGameState(newState);
-        P2PManager.SendGameStateMessage(OpponentID, newState);
+        GameStateVersioning.ApplyActionInThePast(action, Ping);
+        P2PManager.SendGameStateMessage(OpponentID, GetGameState());
     }
 
     public void ReceiveGameState(GameState gameState)
@@ -194,8 +194,9 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    public void LastPingTook(TimeSpan timeSpan)
+    public void LastRTT(TimeSpan rtt)
     {
-        _uiManagerGame.UpdatePing(timeSpan);
+        Ping = rtt / 2;
+        _uiManagerGame.UpdatePing(Ping);
     }
 }

@@ -89,7 +89,8 @@ public class GameStarter : MonoBehaviour
     public void TestStartLoad()
     {
         IsTest = true;
-        
+        // QualitySettings.vSyncCount = 0;
+        // Application.targetFrameRate = 2;
         Info = new SetupInfo
         {
             IAmMaster = true,

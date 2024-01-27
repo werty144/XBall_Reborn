@@ -105,7 +105,7 @@ public class P2P : MonoBehaviour
                 ReplyPing();
                 break;
             case (byte)MessageType.ReplyPing:
-                GameManager.LastPingTook(DateTime.Now - lastPingSent);
+                GameManager.LastRTT(DateTime.Now - lastPingSent);
                 SendPing();
                 break;
             case (byte)MessageType.GameState:

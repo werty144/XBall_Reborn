@@ -75,9 +75,9 @@ public class PlayerController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void LateUpdate()
+    void Update()
     {
-        Move();
+        Move(Time.deltaTime);
     }
 
     public void SetTarget(Vector2 target)
@@ -87,11 +87,11 @@ public class PlayerController : MonoBehaviour
         isMoving = true;
     }
     
-    public void Move()
+    public void Move(float timeDelta)
     {
         if (!isMoving) { return; }
         
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * timeDelta);
         if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
         {
             isMoving = false;

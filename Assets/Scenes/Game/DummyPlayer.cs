@@ -7,7 +7,7 @@ using Random = System.Random;
 
 public class DummyPlayer : MonoBehaviour
 {
-    public GameObject GameManager;
+    public GameManager GameManager;
     public GameObject slider;
 
     private GameStarter gameStarter;
@@ -16,6 +16,8 @@ public class DummyPlayer : MonoBehaviour
     private TimeSpan ActionFrequency = TimeSpan.FromSeconds(1);
     private DateTime LastAction;
 
+    private TimeSpan RTT = TimeSpan.FromMilliseconds(200);
+
     private void OnEnable()
     {
         gameStarter = GameObject.FindWithTag("Global").GetComponent<GameStarter>();
@@ -23,6 +25,8 @@ public class DummyPlayer : MonoBehaviour
         {
             enabled = false;
         }
+
+        GameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
     }
 
     void Start()
@@ -44,29 +48,27 @@ public class DummyPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        GameManager.LastRTT(RTT);
         if (DateTime.Now - LastAction >= ActionFrequency)
         {
             LastAction = DateTime.Now;
-            RandomMove();
+            Static();
         }
-        
-        // if (CurGameState % ActionFrequency == 0 && CurGameState % (2 * ActionFrequency) != 0)
-        // {
-        //     var playerID = playersToControll[0].ID;  
-        //     var randX = 0;
-        //     var randY = - 15;
-        //     var target = new Vector2(randX, randY);
-        //     GameManager.GetComponent<GameManager>().OpponentAction_SetPlayerTarget(CurGameState - (uint)LagFrames, playerID, target);
-        // }
-        // if (CurGameState % (2 * ActionFrequency) == 0)
-        // {
-        //     var playerID = playersToControll[0].ID;  
-        //     var randX = 0;
-        //     var randY = 15;
-        //     var target = new Vector2(randX, randY);
-        //     GameManager.GetComponent<GameManager>().OpponentAction_SetPlayerTarget(CurGameState - (uint)LagFrames, playerID, target);
-        // }
+    }
 
+    void Static()
+    {
+        var random = new Random();
+        var playerIndex = random.Next(0, playersToControll.Count);
+        var randX = random.Next(0, 20) - 10;
+        var randY = random.Next(0, 30) - 15;
+        var action = new PlayerMovementAction
+        {
+            Id = playersToControll[playerIndex].ID,
+            X = playersToControll[playerIndex].GetState().X,
+            Y = playersToControll[playerIndex].GetState().Y
+        };
+        GameManager.GetComponent<GameManager>().OpponentAction(action);
     }
 
     void RandomMove()
@@ -87,6 +89,6 @@ public class DummyPlayer : MonoBehaviour
 
     public void OnSliderChange()
     {
-        // LagFrames = (int) (slider.GetComponent<Slider>().value * 100f);
+        RTT = TimeSpan.FromMilliseconds((int) (slider.GetComponent<Slider>().value * 2000f));
     }
 }
