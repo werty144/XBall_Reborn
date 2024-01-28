@@ -97,4 +97,15 @@ public class PlayerController : MonoBehaviour
             isMoving = false;
         }
     }
+
+    public Vector2 GetPosition()
+    {
+        var position = transform.position;
+        return new Vector2(position.x, position.z);
+    }
+
+    public void SetPosition(Vector2 position)
+    {
+        transform.position = new Vector3(position.x, PlayerConfig.Height, position.y);
+    }
 }

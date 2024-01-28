@@ -5,6 +5,7 @@ using System.Linq;
 using Google.Protobuf;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vector2 = UnityEngine.Vector2;
 
 public class GameStateVersioning
 {
@@ -115,6 +116,7 @@ public class GameStateVersioning
         ApplyMovementToCurrentState(Time.deltaTime);
         Physics.autoSimulation = true;
         
+        SmoothFromPast(initialState);
     }
 
     private void ApplyActionToCurrentState(IBufferMessage action)
@@ -156,6 +158,46 @@ public class GameStateVersioning
         }
 
         return true;
+    }
+
+    public void SmoothFromPast(GameState pastState)
+    {
+        // Modifies current state so that objects that are close to their
+        // position in the past stay as they were.
+        // Preserves targets from the current state
+
+        foreach (var currentPlayer in GameManager.GetPlayers().Values)
+        {
+            foreach (var oldPlayer in pastState.PlayerStates)
+            {
+                if (oldPlayer.Id == currentPlayer.ID)
+                {
+                    var currentPosition = currentPlayer.GetPosition();
+                    var oldPosition = new Vector2(oldPlayer.X, oldPlayer.Y);
+                    if (Vector2.Distance(currentPosition, oldPosition) <= PlayerConfig.Radius)
+                    {
+                        currentPlayer.SetPosition(oldPosition);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public void FastForward(TimeSpan lag)
+    {
+        var nIterations = 10;
+        var deltaTime = (float)(lag / nIterations).TotalSeconds;
+        Physics.autoSimulation = false;
+        for (int i = 0; i < nIterations; i++)
+        {
+            Physics.Simulate(deltaTime);
+            ApplyMovementToCurrentState(deltaTime);
+            
+            // Don't need to log since called only on the follower
+        }
+
+        Physics.autoSimulation = true;
     }
 }
 

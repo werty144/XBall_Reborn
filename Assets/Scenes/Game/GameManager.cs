@@ -151,10 +151,13 @@ public class GameManager : MonoBehaviour
         P2PManager.SendGameStateMessage(OpponentID, GetGameState());
     }
 
-    public void ReceiveGameState(GameState gameState)
+    public void ReceiveGameState(GameState newGameState)
     {
         Assert.IsFalse(IAmMaster, "Only receive game states as a follower");
-        ApplyGameState(gameState);
+        var initialState = GetGameState();
+        ApplyGameState(newGameState);
+        GameStateVersioning.FastForward(Ping);
+        GameStateVersioning.SmoothFromPast(initialState);
     }
 
     public void GameEnd()
