@@ -139,7 +139,7 @@ public class GameStateVersioning
         {
             case PlayerMovementAction playerMovementAction:
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
-                var player = StateHolder.GetPlayers()[playerMovementAction.Id];
+                var player = StateHolder.GetPlayers()[playerMovementAction.PlayerId];
                 player.SetTarget(target);
                 break;
             default:

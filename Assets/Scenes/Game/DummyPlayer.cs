@@ -54,7 +54,7 @@ public class DummyPlayer : MonoBehaviour
         if (DateTime.Now - LastAction >= ActionFrequency)
         {
             LastAction = DateTime.Now;
-            RandomMove();
+            // RandomMove();
         }
     }
 
@@ -63,7 +63,7 @@ public class DummyPlayer : MonoBehaviour
         var playerIndex = 0;
         var action = new PlayerMovementAction
         {
-            Id = playersToControll[playerIndex].ID,
+            PlayerId = playersToControll[playerIndex].ID,
             X = playersToControll[playerIndex].GetState().X,
             Y = playersToControll[playerIndex].GetState().Y
         };
@@ -79,7 +79,7 @@ public class DummyPlayer : MonoBehaviour
         var randY = random.Next(0, 30) - 15;
         var action = new PlayerMovementAction
         {
-            Id = playerID,
+            PlayerId = playerID,
             X = randX,
             Y = randY
         };

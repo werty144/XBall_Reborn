@@ -15,7 +15,8 @@ public enum MessageType
     SendPing = 3,
     ReplyPing = 4,
     GameState = 5,
-    GameStart = 6
+    GameStart = 6,
+    ActionResponse = 7
 }
 
 public class P2PBase : MonoBehaviour

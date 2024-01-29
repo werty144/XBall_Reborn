@@ -63,6 +63,22 @@ public class P2PMaster : P2PBase
             SendMessage(bytes);
         }
     }
+    
+    public virtual void SendActionResponse(CSteamID userID, ActionResponse actionResponse)
+    {
+        if (userID == Steam.MySteamID())
+        {
+            Client.ReceiveActionResponse(actionResponse);
+        }
+        else
+        {
+            using MemoryStream stream = new MemoryStream();
+            stream.WriteByte((byte)MessageType.ActionResponse);
+            actionResponse.WriteTo(stream);
+            byte[] bytes = stream.ToArray();
+            SendMessage(bytes);
+        }
+    }
 
     protected override void ProcessMessage(byte[] message)
     {

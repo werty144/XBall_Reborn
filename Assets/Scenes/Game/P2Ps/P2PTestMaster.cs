@@ -1,11 +1,14 @@
 using System;
+using System.Collections;
 using Google.Protobuf;
 using Steamworks;
+using UnityEngine;
 
 public class P2PTestMaster : P2PMaster
 {
     private CSteamID DummyID = new CSteamID(1);
     private TimeSpan DummyPing = TimeSpan.Zero;
+    private TimeSpan MyPing = TimeSpan.FromMilliseconds(1000);
     public void DummyReady()
     {
         Server.PeerReady(DummyID);
@@ -23,7 +26,7 @@ public class P2PTestMaster : P2PMaster
             return DummyPing;
         }
 
-        return base.GetPingToUser(userID);
+        return MyPing;
     }
 
     public void SetDummyPing(TimeSpan ping)
@@ -51,6 +54,18 @@ public class P2PTestMaster : P2PMaster
         {
             return;
         }
-        base.SendGameState(userID, gameState);
+        StartCoroutine(DelayedAction(() => base.SendGameState(userID, gameState)));
+    }
+
+    public override void SendAction(IBufferMessage action)
+    {
+        // base.SendAction(action);
+        StartCoroutine(DelayedAction(() => base.SendAction(action)));
+    }
+
+    IEnumerator DelayedAction(Action callback)
+    {
+        yield return new WaitForSeconds((float)MyPing.TotalSeconds);
+        callback();
     }
 }

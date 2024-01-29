@@ -29,19 +29,46 @@ public static class ParseUtils
     {
         Assert.AreEqual((byte)MessageType.GameState, message[0]);
         GameState gameState;
-        using (MemoryStream stream = new MemoryStream(message, 1, message.Length - 1))
+        using MemoryStream stream = new MemoryStream(message, 1, message.Length - 1);
+        try
         {
-            try
-            {
-                gameState = GameState.Parser.ParseFrom(stream);
-            }
-            catch (InvalidProtocolBufferException e)
-            {
-                Debug.LogException(e);
-                return null;
-            }
+            gameState = GameState.Parser.ParseFrom(stream);
+        }
+        catch (InvalidProtocolBufferException e)
+        {
+            Debug.LogException(e);
+            return null;
         }
 
         return gameState;
+    }
+
+    public static ActionResponse UnmarshalActionResponse(byte[] message)
+    {
+        ActionResponse actionResponse;
+        Assert.AreEqual((byte)MessageType.ActionResponse, message[0]);
+        using MemoryStream stream = new MemoryStream(message, 1, message.Length - 1);
+        try
+        {
+            actionResponse = ActionResponse.Parser.ParseFrom(stream);
+        }
+        catch (InvalidProtocolBufferException e)
+        {
+            Debug.LogException(e);
+            return null;
+        }
+
+        return actionResponse;
+    }
+    
+    public static uint GetActionId(IBufferMessage mbAction)
+    {
+        switch (mbAction)
+        {
+            case PlayerMovementAction playerMovementAction:
+                return playerMovementAction.ActionId;
+            default:
+                return 0;
+        }
     }
 }

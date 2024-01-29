@@ -5,7 +5,7 @@ using UnityEngine;
 public class CamerController : MonoBehaviour
 {
     private float fieldLength;
-    private float moveMentSpeed = 10f;
+    private float movementSpeed = 10f;
 
     void Start()
     {
@@ -16,6 +16,8 @@ public class CamerController : MonoBehaviour
         
         if (!GameObject.FindWithTag("Global").GetComponent<GameStarter>().Info.IAmMaster)
         {
+            movementSpeed *= -1;
+            
             var curCamPos = transform.position;
             var newCameraPosition = new Vector3(
                 curCamPos.x,
@@ -39,11 +41,11 @@ public class CamerController : MonoBehaviour
         // Check if the mouse is in the upper part of the screen
         if (Input.mousePosition.y > Screen.height * 0.9)
         {
-            translation = moveMentSpeed * Time.deltaTime;
+            translation = movementSpeed * Time.deltaTime;
         }
         else if (Input.mousePosition.y < Screen.height * 0.1)
         {
-            translation = -moveMentSpeed * Time.deltaTime;
+            translation = -movementSpeed * Time.deltaTime;
         }
 
         float newZ = Mathf.Clamp(transform.position.z + translation, -fieldLength, fieldLength);

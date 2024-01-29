@@ -22,12 +22,13 @@ public static partial class ActionsReflection {
   static ActionsReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cg1hY3Rpb25zLnByb3RvIjgKFFBsYXllck1vdmVtZW50QWN0aW9uEgoKAmlk",
-          "GAIgASgNEgkKAXgYAyABKAISCQoBeRgEIAEoAmIGcHJvdG8z"));
+          "Cg1hY3Rpb25zLnByb3RvIlIKFFBsYXllck1vdmVtZW50QWN0aW9uEhEKCWFj",
+          "dGlvbl9pZBgBIAEoDRIRCglwbGF5ZXJfaWQYAiABKA0SCQoBeBgDIAEoAhIJ",
+          "CgF5GAQgASgCYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMovementAction), global::PlayerMovementAction.Parser, new[]{ "Id", "X", "Y" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMovementAction), global::PlayerMovementAction.Parser, new[]{ "ActionId", "PlayerId", "X", "Y" }, null, null, null, null)
         }));
   }
   #endregion
@@ -69,7 +70,8 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public PlayerMovementAction(PlayerMovementAction other) : this() {
-    id_ = other.id_;
+    actionId_ = other.actionId_;
+    playerId_ = other.playerId_;
     x_ = other.x_;
     y_ = other.y_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -81,15 +83,27 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
     return new PlayerMovementAction(this);
   }
 
-  /// <summary>Field number for the "id" field.</summary>
-  public const int IdFieldNumber = 2;
-  private uint id_;
+  /// <summary>Field number for the "action_id" field.</summary>
+  public const int ActionIdFieldNumber = 1;
+  private uint actionId_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public uint Id {
-    get { return id_; }
+  public uint ActionId {
+    get { return actionId_; }
     set {
-      id_ = value;
+      actionId_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "player_id" field.</summary>
+  public const int PlayerIdFieldNumber = 2;
+  private uint playerId_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public uint PlayerId {
+    get { return playerId_; }
+    set {
+      playerId_ = value;
     }
   }
 
@@ -132,7 +146,8 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
     if (ReferenceEquals(other, this)) {
       return true;
     }
-    if (Id != other.Id) return false;
+    if (ActionId != other.ActionId) return false;
+    if (PlayerId != other.PlayerId) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(X, other.X)) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Y, other.Y)) return false;
     return Equals(_unknownFields, other._unknownFields);
@@ -142,7 +157,8 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override int GetHashCode() {
     int hash = 1;
-    if (Id != 0) hash ^= Id.GetHashCode();
+    if (ActionId != 0) hash ^= ActionId.GetHashCode();
+    if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
     if (X != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(X);
     if (Y != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Y);
     if (_unknownFields != null) {
@@ -163,9 +179,13 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     output.WriteRawMessage(this);
   #else
-    if (Id != 0) {
+    if (ActionId != 0) {
+      output.WriteRawTag(8);
+      output.WriteUInt32(ActionId);
+    }
+    if (PlayerId != 0) {
       output.WriteRawTag(16);
-      output.WriteUInt32(Id);
+      output.WriteUInt32(PlayerId);
     }
     if (X != 0F) {
       output.WriteRawTag(29);
@@ -185,9 +205,13 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-    if (Id != 0) {
+    if (ActionId != 0) {
+      output.WriteRawTag(8);
+      output.WriteUInt32(ActionId);
+    }
+    if (PlayerId != 0) {
       output.WriteRawTag(16);
-      output.WriteUInt32(Id);
+      output.WriteUInt32(PlayerId);
     }
     if (X != 0F) {
       output.WriteRawTag(29);
@@ -207,8 +231,11 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public int CalculateSize() {
     int size = 0;
-    if (Id != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Id);
+    if (ActionId != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ActionId);
+    }
+    if (PlayerId != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerId);
     }
     if (X != 0F) {
       size += 1 + 4;
@@ -228,8 +255,11 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
     if (other == null) {
       return;
     }
-    if (other.Id != 0) {
-      Id = other.Id;
+    if (other.ActionId != 0) {
+      ActionId = other.ActionId;
+    }
+    if (other.PlayerId != 0) {
+      PlayerId = other.PlayerId;
     }
     if (other.X != 0F) {
       X = other.X;
@@ -252,8 +282,12 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
         default:
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
+        case 8: {
+          ActionId = input.ReadUInt32();
+          break;
+        }
         case 16: {
-          Id = input.ReadUInt32();
+          PlayerId = input.ReadUInt32();
           break;
         }
         case 29: {
@@ -279,8 +313,12 @@ public sealed partial class PlayerMovementAction : pb::IMessage<PlayerMovementAc
         default:
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
+        case 8: {
+          ActionId = input.ReadUInt32();
+          break;
+        }
         case 16: {
-          Id = input.ReadUInt32();
+          PlayerId = input.ReadUInt32();
           break;
         }
         case 29: {

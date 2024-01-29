@@ -13,8 +13,10 @@ public class Client : MonoBehaviour, StateHolder
     private P2PBase P2PManager;
     private CSteamID ServerID;
     
-    private Dictionary<uint, PlayerController> Players = new ();
+    private Dictionary<uint, PlayerController> Players = new();
     private GameStateVersioning GameStateVersioning;
+    private Dictionary<uint, uint> PlayerToLastAction = new();
+    private uint NextActionId = 1;
 
     private void Awake()
     {
@@ -86,11 +88,16 @@ public class Client : MonoBehaviour, StateHolder
         switch (action)
         {
             case PlayerMovementAction playerMovementAction:
-                var player = Players[playerMovementAction.Id];
+                var player = Players[playerMovementAction.PlayerId];
                 //Invalid action
                 if (!player.IsMy) { return; }
+                
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
                 player.SetTarget(target);
+
+                PlayerToLastAction[playerMovementAction.PlayerId] = NextActionId;
+                playerMovementAction.ActionId = NextActionId;
+                NextActionId++;
                 break;
             default:
                 Debug.LogWarning("Unknown input action");
@@ -105,6 +112,15 @@ public class Client : MonoBehaviour, StateHolder
         var currentGameState = GetGameState();
         ApplyGameState(gameState);
         GameStateVersioning.SmoothFromPast(currentGameState);
+    }
+
+    public void ReceiveActionResponse(ActionResponse actionResponse)
+    {
+        if (!PlayerToLastAction.ContainsValue(actionResponse.ActionId))
+        {
+            return;
+        }
+        ReceiveState(actionResponse.GameState);
     }
 
     public void GameEnd()

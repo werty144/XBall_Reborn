@@ -50,9 +50,22 @@ public class Server : MonoBehaviour, StateHolder
         {
             var userPing = P2PMaster.GetPingToUser(userID);
             GameStateVersioning.FastForward(userPing);
-            var positionForUser = GetGameState();
-            // TODO: send action reply
-            P2PMaster.SendGameState(userID, positionForUser);
+            var stateForUser = GetGameState();
+            if (userID == actorID)
+            {
+                P2PMaster.SendActionResponse(
+                    actorID,
+                    new ActionResponse
+                    {
+                        ActionId = ParseUtils.GetActionId(action),
+                        GameState = stateForUser
+                    });
+            }
+            else
+            {
+                P2PMaster.SendGameState(userID, stateForUser);
+            }
+
             ApplyGameState(currentState);
         }
     }

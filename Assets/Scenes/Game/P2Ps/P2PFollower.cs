@@ -53,6 +53,10 @@ public class P2PFollower : P2PBase
                 var gameState = ParseUtils.UnmarshalGameState(message);
                 Client.ReceiveState(gameState);
                 break;
+            case (byte)MessageType.ActionResponse:
+                var actionResponse = ParseUtils.UnmarshalActionResponse(message);
+                Client.ReceiveActionResponse(actionResponse);
+                break;
         }
     }
 }

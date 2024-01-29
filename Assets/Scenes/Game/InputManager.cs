@@ -44,7 +44,7 @@ public class InputManager : MonoBehaviour
             {
                 var action = new PlayerMovementAction
                 {
-                    Id = selectedPlayer.GetComponent<PlayerController>().ID,
+                    PlayerId = selectedPlayer.GetComponent<PlayerController>().ID,
                     X = hit.point.x,
                     Y = hit.point.z
                 };
