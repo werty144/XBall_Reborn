@@ -1,24 +1,58 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using Google.Protobuf;
 using Steamworks;
 using UnityEngine;
 
 public class P2PFollower : P2PBase
 {
-    // Start is called before the first frame update
-    void Start()
+    public override void ConnectToServer(CSteamID serverID)
     {
-        
+        var identity = new SteamNetworkingIdentity();
+        identity.SetSteamID(serverID);
+        SteamNetworkingSockets.ConnectP2P(ref identity, 0, 0, null);
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void SendAction(IBufferMessage action)
     {
-        
+        using MemoryStream stream = new MemoryStream();
+        switch (action)
+        {
+            case PlayerMovementAction:
+                stream.WriteByte((byte)MessageType.PlayerMovementAction);
+                break;
+            default:
+                Debug.LogWarning("Unknown action");
+                break;
+        }
+             
+        action.WriteTo(stream);
+        byte[] bytes = stream.ToArray();
+        SendMessage(bytes);
     }
 
-    public override void OnConnected(HSteamNetConnection connection)
+    public override void SendReady()
     {
-        Client.OnConnected();
+        using MemoryStream stream = new MemoryStream();
+        stream.WriteByte((byte)MessageType.Ready);
+        byte[] bytes = stream.ToArray();
+        SendMessage(bytes);
+    }
+
+    protected override void ProcessMessage(byte[] message)
+    {
+        base.ProcessMessage(message);
+        switch (message[0])
+        {
+            case (byte)MessageType.GameStart:
+                Client.OnGameStart();
+                break;
+            case (byte)MessageType.GameState:
+                var gameState = ParseUtils.UnmarshalGameState(message);
+                Client.ReceiveState(gameState);
+                break;
+        }
     }
 }

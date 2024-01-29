@@ -144,22 +144,22 @@
 //     
 //     public void SendAction(CSteamID peerID, IBufferMessage action)
 //     {
-//         using (MemoryStream stream = new MemoryStream())
-//         {
-//             switch (action)
-//             {
-//                 case PlayerMovementAction:
-//                     stream.WriteByte((byte)MessageType.PlayerMovementAction);
-//                     break;
-//                 default:
-//                     Debug.LogWarning("Unknown action");
-//                     break;
-//             }
-//             
-//             action.WriteTo(stream);
-//             byte[] bytes = stream.ToArray();
-//             SendMessageToPeer(peerID, bytes);
-//         }
+         // using (MemoryStream stream = new MemoryStream())
+         // {
+         //     switch (action)
+         //     {
+         //         case PlayerMovementAction:
+         //             stream.WriteByte((byte)MessageType.PlayerMovementAction);
+         //             break;
+         //         default:
+         //             Debug.LogWarning("Unknown action");
+         //             break;
+         //     }
+         //     
+         //     action.WriteTo(stream);
+         //     byte[] bytes = stream.ToArray();
+         //     SendMessageToPeer(peerID, bytes);
+         // }
 //     }
 //
 //     public void SendReadyMessage(CSteamID peerID)

@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using Google.Protobuf;
 using Steamworks;
 using UnityEngine;
 
@@ -14,6 +16,7 @@ public class P2PMaster : P2PBase
         Server = GameObject.FindWithTag("Server").GetComponent<Server>();
     }
 
+    // --------------------------- CLIENT METHODS -----------------------------
     public override void ConnectToServer(CSteamID serverID)
     {
         Client.OnConnected();
@@ -24,8 +27,13 @@ public class P2PMaster : P2PBase
         Server.PeerReady(Steam.MySteamID());
     }
 
-    // Server method
-    public void SendGameStart(CSteamID userID)
+    public override void SendAction(IBufferMessage action)
+    {
+        Server.ProcessAction(Steam.MySteamID(), action);
+    }
+
+    // ----------------------------- SERVER METHODS --------------------------------
+    public virtual void SendGameStart(CSteamID userID)
     {
         if (userID == Steam.MySteamID())
         {
@@ -33,12 +41,32 @@ public class P2PMaster : P2PBase
         }
         else
         {
-            // TODO: send message to follower
+            using MemoryStream stream = new MemoryStream();
+            stream.WriteByte((byte)MessageType.GameStart);
+            byte[] bytes = stream.ToArray();
+            SendMessage(bytes);
+        }
+    }
+
+    public virtual void SendGameState(CSteamID userID, GameState gameState)
+    {
+        if (userID == Steam.MySteamID())
+        {
+            Client.ReceiveState(gameState);
+        }
+        else
+        {
+            using MemoryStream stream = new MemoryStream();
+            stream.WriteByte((byte)MessageType.GameState);
+            gameState.WriteTo(stream);
+            byte[] bytes = stream.ToArray();
+            SendMessage(bytes);
         }
     }
 
     protected override void ProcessMessage(byte[] message)
     {
+        base.ProcessMessage(message);
         switch (message[0])
         {
             case (byte)MessageType.PlayerMovementAction:
@@ -48,16 +76,16 @@ public class P2PMaster : P2PBase
             case (byte)MessageType.Ready:
                 Server.PeerReady(GetPeerID());
                 break;
-            case (byte)MessageType.SendPing:
-                // ReplyPing();
-                break;
-            case (byte)MessageType.ReplyPing:
-                // GameManager.LastRTT(DateTime.Now - lastPingSent);
-                // SendPing();
-                break;
-            default:
-                Debug.LogWarning("Message of unknown type for P2PMaster: " + message[0]);
-                break;
         }
-    }    
+    }
+
+    public virtual TimeSpan GetPingToUser(CSteamID userID)
+    {
+        if (userID == Steam.MySteamID())
+        {
+            return TimeSpan.Zero;
+        }
+
+        return Ping;
+    }
 }

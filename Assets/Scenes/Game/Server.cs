@@ -5,20 +5,26 @@ using Google.Protobuf;
 using Steamworks;
 using UnityEngine;
 
-public class Server : MonoBehaviour
+public class Server : MonoBehaviour, StateHolder
 {
     private P2PMaster P2PMaster;
     private CSteamID[] userIDs = new CSteamID[2];
     private HashSet<CSteamID> PeersReady = new HashSet<CSteamID>();
     
     private Dictionary<uint, PlayerController> Players = new ();
+    private GameStateVersioning GameStateVersioning;
+
+    private void Awake()
+    {
+        GameStateVersioning = new GameStateVersioning(this);
+    }
+
     private void Start()
     {
         P2PMaster = GameObject.FindWithTag("P2P").GetComponent<P2PMaster>();
         
         var global = GameObject.FindWithTag("Global");
         var gameStarter = global.GetComponent<GameStarter>();
-
         userIDs[0] = Steam.MySteamID();
         userIDs[1] = gameStarter.Info.OpponentID;
 
@@ -29,9 +35,26 @@ public class Server : MonoBehaviour
         }
     }
 
-    public void ProcessAction(CSteamID userID, IBufferMessage action)
+    private void Update()
     {
-        
+        GameStateVersioning.AddCurrentState();
+    }
+
+    public void ProcessAction(CSteamID actorID, IBufferMessage action)
+    {
+        var actorPing = P2PMaster.GetPingToUser(actorID);
+        GameStateVersioning.ApplyActionInThePast(action, actorID, actorPing);
+
+        var currentState = GetGameState();
+        foreach (var userID in userIDs)
+        {
+            var userPing = P2PMaster.GetPingToUser(userID);
+            GameStateVersioning.FastForward(userPing);
+            var positionForUser = GetGameState();
+            // TODO: send action reply
+            P2PMaster.SendGameState(userID, positionForUser);
+            ApplyGameState(currentState);
+        }
     }
 
     public void PeerReady(CSteamID userID)

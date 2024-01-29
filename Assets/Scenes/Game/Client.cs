@@ -5,7 +5,7 @@ using Google.Protobuf;
 using Steamworks;
 using UnityEngine;
 
-public class Client : MonoBehaviour
+public class Client : MonoBehaviour, StateHolder
 {
     public GameObject PlayerPrefab;
     public GameObject LoadingScreen;
@@ -14,6 +14,7 @@ public class Client : MonoBehaviour
     private CSteamID ServerID;
     
     private Dictionary<uint, PlayerController> Players = new ();
+    private GameStateVersioning GameStateVersioning;
 
     private void Awake()
     {
@@ -25,6 +26,8 @@ public class Client : MonoBehaviour
         ServerID = setupInfo.IAmMaster ? Steam.MySteamID() : setupInfo.OpponentID;
         
         P2PManager = GameObject.FindWithTag("P2P").GetComponent<P2PBase>();
+
+        GameStateVersioning = new GameStateVersioning(this);
         
         LoadingScreen.SetActive(true);
     }
@@ -79,11 +82,57 @@ public class Client : MonoBehaviour
 
     public void InputAction(IBufferMessage action)
     {
+        // Optimistic execution
+        switch (action)
+        {
+            case PlayerMovementAction playerMovementAction:
+                var player = Players[playerMovementAction.Id];
+                //Invalid action
+                if (!player.IsMy) { return; }
+                var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
+                player.SetTarget(target);
+                break;
+            default:
+                Debug.LogWarning("Unknown input action");
+                break;
+        }
         
+        P2PManager.SendAction(action);
+    }
+
+    public void ReceiveState(GameState gameState)
+    {
+        var currentGameState = GetGameState();
+        ApplyGameState(gameState);
+        GameStateVersioning.SmoothFromPast(currentGameState);
     }
 
     public void GameEnd()
     {
         
+    }
+    
+    public GameState GetGameState()
+    {
+        GameState gameState = new GameState();
+        foreach (var player in Players.Values)
+        { 
+            gameState.PlayerStates.Add(player.GetState());
+        }
+
+        return gameState;
+    }
+    
+    public Dictionary<uint, PlayerController> GetPlayers()
+    {
+        return Players;
+    }
+    
+    public void ApplyGameState(GameState state)
+    {
+        foreach (var playerState in state.PlayerStates)
+        {
+            Players[playerState.Id].ApplyState(playerState);
+        }
     }
 }

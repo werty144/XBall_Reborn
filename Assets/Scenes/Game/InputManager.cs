@@ -6,31 +6,12 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     private Client Client;
-    private Transform CameraTransform;
     
     private GameObject selectedPlayer;
 
     private void Start()
     {
         Client = GameObject.FindWithTag("Client").GetComponent<Client>();
-        CameraTransform = GameObject.FindWithTag("MainCamera").GetComponent<Transform>();
-        
-        // if (!GameManager.IsMaster())
-        // {
-        //     var curCamPos = CameraTransform.position;
-        //     var newCameraPosition = new Vector3(
-        //         curCamPos.x,
-        //         curCamPos.y,
-        //         -curCamPos.z);
-        //     CameraTransform.position = newCameraPosition;
-        //
-        //     var curCamRot = CameraTransform.rotation.eulerAngles;
-        //     var newCamRot = new Vector3(
-        //         curCamRot.x,
-        //         180,
-        //         curCamRot.z);
-        //     CameraTransform.rotation = new Quaternion {eulerAngles = newCamRot};
-        // }
     }
 
     void Update()

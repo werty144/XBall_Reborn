@@ -3,13 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Google.Protobuf;
+using Steamworks;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vector2 = UnityEngine.Vector2;
 
 public class GameStateVersioning
 {
-    private Server Server;
+    private StateHolder StateHolder;
     
     private static uint BufferSize = 200;
     private StateBuffer GameStates;
@@ -17,22 +19,31 @@ public class GameStateVersioning
     // (assuming we have reliable messaging)
     private ActionBuffer Actions;
 
-    private DateTime LastAppliedActionTime;
+    private Dictionary<CSteamID, DateTime> LastAppliedActionTimes = new ();
     private uint CurrentStateNumber;
 
-    public GameStateVersioning(Server server)
+    public GameStateVersioning(StateHolder stateHolder)
     {
-        Server = server;
-        LastAppliedActionTime = DateTime.Now - TimeSpan.FromHours(1);
+        StateHolder = stateHolder;
         CurrentStateNumber = 0;
         Actions = new(BufferSize);
         GameStates = new(BufferSize);
     }
     
-    public void AddCurrentState(GameState gameState)
+    public void AddCurrentState()
     {
-        GameStates.Insert(gameState, CurrentStateNumber, DateTime.Now, Time.deltaTime);
+        GameStates.Insert(StateHolder.GetGameState(), CurrentStateNumber, DateTime.Now, Time.deltaTime);
         CurrentStateNumber++;
+    }
+
+    private DateTime GetLastAppliedActionTime(CSteamID actorID)
+    {
+        if (!LastAppliedActionTimes.ContainsKey(actorID))
+        {
+            return DateTime.Now - TimeSpan.FromHours(1);
+        }
+
+        return LastAppliedActionTimes[actorID];
     }
 
     public void AddCurrentAction(IBufferMessage action)
@@ -40,7 +51,7 @@ public class GameStateVersioning
         Actions.Insert(action, CurrentStateNumber);
     }
 
-    public void ApplyActionInThePast(IBufferMessage action, TimeSpan lag)
+    public void ApplyActionInThePast(IBufferMessage action, CSteamID actorID, TimeSpan lag)
     {
         // Calculate point in the past (account for the previous action, should be after)
         // Find closest state
@@ -51,31 +62,34 @@ public class GameStateVersioning
         //  Move players
         //  Log state
 
-        var initialState = Server.GetGameState();
+        var initialState = StateHolder.GetGameState();
 
         var currentTime = DateTime.Now;
         var actionTime = currentTime - lag;
 
-        if (actionTime <= LastAppliedActionTime)
+        var lastAppliedActionTime = GetLastAppliedActionTime(actorID);
+        if (actionTime <= lastAppliedActionTime)
         {
             Debug.LogWarning("Inverse order of follower actions. Wrong ping estimation");
-            actionTime = LastAppliedActionTime + TimeSpan.FromMilliseconds(1);
+            actionTime = lastAppliedActionTime + TimeSpan.FromMilliseconds(1);
         }
 
-        LastAppliedActionTime = actionTime;
+        LastAppliedActionTimes[actorID] = actionTime;
 
         var (actionState, actionStateIndex) = GameStates.FindFirstAfterTime(actionTime);
         if (actionState == null)
         {
             ApplyActionToCurrentState(action);
+            Actions.Insert(action, CurrentStateNumber + 1);
             return;
         }
         
-        Server.ApplyGameState(actionState.Value.GameState);
+        StateHolder.ApplyGameState(actionState.Value.GameState);
         ApplyActionToCurrentState(action);
+        Actions.Insert(action, actionState.Value.StateNumber);
         var updatedState = new TimedGameState
         {
-            GameState = Server.GetGameState(),
+            GameState = StateHolder.GetGameState(),
             StateNumber = actionState.Value.StateNumber,
             TimeStamp = actionState.Value.TimeStamp,
             DeltaTime = actionState.Value.DeltaTime
@@ -94,8 +108,8 @@ public class GameStateVersioning
             // Order matters
             Physics.Simulate(nextRecordedState.DeltaTime);
             ApplyMovementToCurrentState(nextRecordedState.DeltaTime);
-            var currentAction = Actions.GetAction(nextRecordedState.StateNumber);
-            if (currentAction != null)
+            var currentActions = Actions.GetAction(nextRecordedState.StateNumber);
+            foreach (var currentAction in currentActions)
             {
                 ApplyActionToCurrentState(currentAction);
             }
@@ -103,7 +117,7 @@ public class GameStateVersioning
             currentStateIndex++;
             currentState = new TimedGameState
             {
-                GameState = Server.GetGameState(),
+                GameState = StateHolder.GetGameState(),
                 StateNumber = nextRecordedState.StateNumber,
                 TimeStamp = nextRecordedState.TimeStamp,
                 DeltaTime = nextRecordedState.DeltaTime
@@ -125,7 +139,7 @@ public class GameStateVersioning
         {
             case PlayerMovementAction playerMovementAction:
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
-                var player = Server.GetPlayers()[playerMovementAction.Id];
+                var player = StateHolder.GetPlayers()[playerMovementAction.Id];
                 player.SetTarget(target);
                 break;
             default:
@@ -136,7 +150,7 @@ public class GameStateVersioning
 
     private void ApplyMovementToCurrentState(float deltaTime)
     {
-        foreach (var player in Server.GetPlayers().Values)
+        foreach (var player in StateHolder.GetPlayers().Values)
         {
             player.Move(deltaTime);
         }
@@ -166,7 +180,7 @@ public class GameStateVersioning
         // position in the past stay as they were.
         // Preserves targets from the current state
 
-        foreach (var currentPlayer in Server.GetPlayers().Values)
+        foreach (var currentPlayer in StateHolder.GetPlayers().Values)
         {
             foreach (var oldPlayer in pastState.PlayerStates)
             {
@@ -186,6 +200,10 @@ public class GameStateVersioning
 
     public void FastForward(TimeSpan lag)
     {
+        if (lag == TimeSpan.Zero)
+        {
+            return;
+        }
         var nIterations = 10;
         var deltaTime = (float)(lag / nIterations).TotalSeconds;
         Physics.autoSimulation = false;
@@ -207,28 +225,32 @@ public class ActionBuffer
     
     private uint BufferSize;
 
-    private Dictionary<uint, IBufferMessage> StatesToActions;
+    private Dictionary<uint, List<IBufferMessage>> StatesToActions;
 
     public ActionBuffer(uint bufferSize)
     {
         BufferSize = bufferSize;
-        StatesToActions = new Dictionary<uint, IBufferMessage>();
+        StatesToActions = new Dictionary<uint, List<IBufferMessage>>();
     }
 
     public void Insert(IBufferMessage action, uint stateNumber)
     {
-        StatesToActions[stateNumber] = action;
+        if (!StatesToActions.ContainsKey(stateNumber))
+        {
+            StatesToActions[stateNumber] = new List<IBufferMessage>();
+        }
+        StatesToActions[stateNumber].Add(action);
         if (StatesToActions.Count > BufferSize)
         {
             StatesToActions.Remove(StatesToActions.Keys.Min());
         }
     }
 
-    public IBufferMessage GetAction(uint stateNumber)
+    public List<IBufferMessage> GetAction(uint stateNumber)
     {
         if (!StatesToActions.ContainsKey(stateNumber))
         {
-            return null;
+            return new List<IBufferMessage>();
         }
 
         return StatesToActions[stateNumber];

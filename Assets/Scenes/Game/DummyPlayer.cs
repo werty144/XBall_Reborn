@@ -16,7 +16,7 @@ public class DummyPlayer : MonoBehaviour
     private TimeSpan ActionFrequency = TimeSpan.FromSeconds(1);
     private DateTime LastAction;
 
-    private TimeSpan RTT = TimeSpan.FromMilliseconds(200);
+    private TimeSpan Ping = TimeSpan.Zero;
 
     private void Awake()
     {
@@ -50,7 +50,7 @@ public class DummyPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // GameManager.LastRTT(RTT);
+        P2PManager.SetDummyPing(Ping);
         if (DateTime.Now - LastAction >= ActionFrequency)
         {
             LastAction = DateTime.Now;
@@ -67,7 +67,7 @@ public class DummyPlayer : MonoBehaviour
             X = playersToControll[playerIndex].GetState().X,
             Y = playersToControll[playerIndex].GetState().Y
         };
-        // GameManager.GetComponent<GameManager>().OpponentAction(action);
+        P2PManager.DummySendAction(action);
     }
 
     void RandomMove()
@@ -83,11 +83,11 @@ public class DummyPlayer : MonoBehaviour
             X = randX,
             Y = randY
         };
-        // GameManager.GetComponent<GameManager>().OpponentAction(action);
+        P2PManager.DummySendAction(action);
     }
 
     public void OnSliderChange()
     {
-        RTT = TimeSpan.FromMilliseconds((int) (slider.GetComponent<Slider>().value * 2000f));
+        Ping = TimeSpan.FromMilliseconds((int) (slider.GetComponent<Slider>().value * 1000f));
     }
 }

@@ -7,20 +7,42 @@ using UnityEngine.SceneManagement;
 
 public class UIManagerGame : MonoBehaviour
 {
+    private P2PBase P2PManager;
     private TextMeshProUGUI PingLabel;
     private TextMeshProUGUI CurrentStateLabel;
 
     private DateTime LastFPSUpdate;
     private uint FramesPerLasSecond;
 
-    private void OnEnable()
+    private void Awake()
     {
         LastFPSUpdate = DateTime.Now;
         PingLabel = GameObject.Find("Ping Label").GetComponent<TextMeshProUGUI>();
         CurrentStateLabel = GameObject.Find("Current State Label").GetComponent<TextMeshProUGUI>();
     }
 
+    private void Start()
+    {
+        P2PManager = GameObject.FindWithTag("P2P").GetComponent<P2PBase>();
+    }
+
     private void Update()
+    {
+        UpdateFPS();
+        UpdatePing();
+    }
+
+    public void OnMenuButton()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+
+    public void UpdatePing()
+    {
+        PingLabel.text = "Ping: " + P2PManager.GetPing().Milliseconds + "ms";
+    }
+
+    private void UpdateFPS()
     {
         FramesPerLasSecond++;
         if (DateTime.Now - LastFPSUpdate >= TimeSpan.FromSeconds(1))
@@ -29,15 +51,5 @@ public class UIManagerGame : MonoBehaviour
             FramesPerLasSecond = 0;
             LastFPSUpdate = DateTime.Now;
         }
-    }
-
-    public void OnMenuButton()
-    {
-        SceneManager.LoadScene("Menu");
-    }
-
-    public void UpdatePing(TimeSpan timeSpan)
-    {
-        PingLabel.text = "Ping: " + timeSpan.Milliseconds + "ms";
     }
 }
