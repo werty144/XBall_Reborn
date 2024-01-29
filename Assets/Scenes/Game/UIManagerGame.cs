@@ -7,8 +7,6 @@ using UnityEngine.SceneManagement;
 
 public class UIManagerGame : MonoBehaviour
 {
-    private GameManager GameManager;
-
     private TextMeshProUGUI PingLabel;
     private TextMeshProUGUI CurrentStateLabel;
 
@@ -18,7 +16,6 @@ public class UIManagerGame : MonoBehaviour
     private void OnEnable()
     {
         LastFPSUpdate = DateTime.Now;
-        GameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
         PingLabel = GameObject.Find("Ping Label").GetComponent<TextMeshProUGUI>();
         CurrentStateLabel = GameObject.Find("Current State Label").GetComponent<TextMeshProUGUI>();
     }
@@ -36,7 +33,6 @@ public class UIManagerGame : MonoBehaviour
 
     public void OnMenuButton()
     {
-        GameManager.GameEnd();
         SceneManager.LoadScene("Menu");
     }
 

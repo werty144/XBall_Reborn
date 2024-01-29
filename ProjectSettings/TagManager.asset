@@ -10,6 +10,9 @@ TagManager:
   - Lobby
   - GameLoader
   - UIManager
+  - P2P
+  - Client
+  - Server
   layers:
   - Default
   - TransparentFX

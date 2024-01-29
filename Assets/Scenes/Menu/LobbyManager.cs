@@ -261,8 +261,8 @@ public class LobbyManager : MonoBehaviour
                 IAmMaster =  iAmOwner,
                 NumberOfPlayers = numberOfPlayers,
                 OpponentID = opponentID
-            },
-            currentLobbyID);
+            });
+        Steam.LeaveLobby(currentLobbyID);
     }
 
     private void OwnerOrNot()

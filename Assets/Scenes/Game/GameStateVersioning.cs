@@ -9,7 +9,7 @@ using Vector2 = UnityEngine.Vector2;
 
 public class GameStateVersioning
 {
-    private GameManager GameManager;
+    private Server Server;
     
     private static uint BufferSize = 200;
     private StateBuffer GameStates;
@@ -20,9 +20,9 @@ public class GameStateVersioning
     private DateTime LastAppliedActionTime;
     private uint CurrentStateNumber;
 
-    public GameStateVersioning(GameManager gameManager)
+    public GameStateVersioning(Server server)
     {
-        GameManager = gameManager;
+        Server = server;
         LastAppliedActionTime = DateTime.Now - TimeSpan.FromHours(1);
         CurrentStateNumber = 0;
         Actions = new(BufferSize);
@@ -51,7 +51,7 @@ public class GameStateVersioning
         //  Move players
         //  Log state
 
-        var initialState = GameManager.GetGameState();
+        var initialState = Server.GetGameState();
 
         var currentTime = DateTime.Now;
         var actionTime = currentTime - lag;
@@ -71,11 +71,11 @@ public class GameStateVersioning
             return;
         }
         
-        GameManager.ApplyGameState(actionState.Value.GameState);
+        Server.ApplyGameState(actionState.Value.GameState);
         ApplyActionToCurrentState(action);
         var updatedState = new TimedGameState
         {
-            GameState = GameManager.GetGameState(),
+            GameState = Server.GetGameState(),
             StateNumber = actionState.Value.StateNumber,
             TimeStamp = actionState.Value.TimeStamp,
             DeltaTime = actionState.Value.DeltaTime
@@ -103,7 +103,7 @@ public class GameStateVersioning
             currentStateIndex++;
             currentState = new TimedGameState
             {
-                GameState = GameManager.GetGameState(),
+                GameState = Server.GetGameState(),
                 StateNumber = nextRecordedState.StateNumber,
                 TimeStamp = nextRecordedState.TimeStamp,
                 DeltaTime = nextRecordedState.DeltaTime
@@ -125,7 +125,7 @@ public class GameStateVersioning
         {
             case PlayerMovementAction playerMovementAction:
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
-                var player = GameManager.GetPlayers()[playerMovementAction.Id];
+                var player = Server.GetPlayers()[playerMovementAction.Id];
                 player.SetTarget(target);
                 break;
             default:
@@ -136,7 +136,7 @@ public class GameStateVersioning
 
     private void ApplyMovementToCurrentState(float deltaTime)
     {
-        foreach (var player in GameManager.GetPlayers().Values)
+        foreach (var player in Server.GetPlayers().Values)
         {
             player.Move(deltaTime);
         }
@@ -166,7 +166,7 @@ public class GameStateVersioning
         // position in the past stay as they were.
         // Preserves targets from the current state
 
-        foreach (var currentPlayer in GameManager.GetPlayers().Values)
+        foreach (var currentPlayer in Server.GetPlayers().Values)
         {
             foreach (var oldPlayer in pastState.PlayerStates)
             {

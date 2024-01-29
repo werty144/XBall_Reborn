@@ -7,10 +7,10 @@ using Random = System.Random;
 
 public class DummyPlayer : MonoBehaviour
 {
-    public GameManager GameManager;
     public GameObject slider;
 
     private GameStarter gameStarter;
+    private P2PTestMaster P2PManager;
     
     private List<PlayerController> playersToControll;
     private TimeSpan ActionFrequency = TimeSpan.FromSeconds(1);
@@ -18,15 +18,15 @@ public class DummyPlayer : MonoBehaviour
 
     private TimeSpan RTT = TimeSpan.FromMilliseconds(200);
 
-    private void OnEnable()
+    private void Awake()
     {
         gameStarter = GameObject.FindWithTag("Global").GetComponent<GameStarter>();
         if (!gameStarter.IsTest)
         {
             enabled = false;
         }
-
-        GameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
+        
+        P2PManager = GameObject.FindWithTag("P2P").GetComponent<P2PTestMaster>();
     }
 
     void Start()
@@ -43,12 +43,14 @@ public class DummyPlayer : MonoBehaviour
                 playersToControll.Add(controller);
             }
         }
+        
+        P2PManager.DummyReady();
     }
 
     // Update is called once per frame
     void Update()
     {
-        GameManager.LastRTT(RTT);
+        // GameManager.LastRTT(RTT);
         if (DateTime.Now - LastAction >= ActionFrequency)
         {
             LastAction = DateTime.Now;
@@ -65,7 +67,7 @@ public class DummyPlayer : MonoBehaviour
             X = playersToControll[playerIndex].GetState().X,
             Y = playersToControll[playerIndex].GetState().Y
         };
-        GameManager.GetComponent<GameManager>().OpponentAction(action);
+        // GameManager.GetComponent<GameManager>().OpponentAction(action);
     }
 
     void RandomMove()
@@ -81,7 +83,7 @@ public class DummyPlayer : MonoBehaviour
             X = randX,
             Y = randY
         };
-        GameManager.GetComponent<GameManager>().OpponentAction(action);
+        // GameManager.GetComponent<GameManager>().OpponentAction(action);
     }
 
     public void OnSliderChange()

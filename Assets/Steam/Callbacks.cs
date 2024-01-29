@@ -96,11 +96,29 @@ public class Callbacks : MonoBehaviour
 
             case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
                 Debug.Log("Connection with " + pCallback.m_info.m_identityRemote.GetSteamID().m_SteamID + " established");
-                var p2pManager = global.GetComponent<P2P>();
-                p2pManager.ConnectionEstablished(pCallback.m_hConn);
+                StartCoroutine(RelayOnConnectedToP2PManager(pCallback.m_hConn));
                 break;
 
             // Handle other states as needed
+        }
+    }
+
+    IEnumerator RelayOnConnectedToP2PManager(HSteamNetConnection connection)
+    {
+        while (true)
+        {
+            var P2PObject = GameObject.FindWithTag("P2P");
+            if (P2PObject != null)
+            {
+                var P2PManager = P2PObject.GetComponent<P2PBase>();
+                if (P2PManager != null)
+                {
+                    P2PManager.OnConnected(connection);
+                    break;
+                }
+            }
+
+            yield return new WaitForSeconds(0.1f);
         }
     }
 

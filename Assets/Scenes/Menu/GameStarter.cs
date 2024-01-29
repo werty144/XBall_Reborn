@@ -6,112 +6,35 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+public struct SetupInfo
+{
+    public int NumberOfPlayers;
+    public CSteamID OpponentID;
+    public bool IAmMaster;
+}
+
 public class GameStarter : MonoBehaviour
 {
-    private P2P P2PManager;
-    private SetupInfo Info;
-    private ulong LobbyID;
-    private GameManager GameManager;
+    public SetupInfo Info { get; private set; }
+    public bool IsTest { get; private set; }
 
-    private bool IAmReady;
-    private bool OpponentReady;
-    private bool ConnectionReady;
-
-    public bool IsTest { get; set; }
-
-    private void OnEnable()
-    {
-        P2PManager = GameObject.FindWithTag("Global").GetComponent<P2P>();
-    }
-
-    public void Initiate(SetupInfo info, ulong lobbyID)
+    public void Initiate(SetupInfo info)
     {
         Debug.Log("Initiate switching scenes" );
         Info = info;
-        LobbyID = lobbyID;
         SceneManager.LoadScene("Game");
-        
-        if (info.IAmMaster)
-        {
-            P2PManager.ConnectToPeer(info.OpponentID);
-        }
     }
-
-    public SetupInfo GetSetupInfo()
-    {
-        return Info;
-    }
-
-    public void OnConnected()
-    {
-        Debug.Log("Connected to peer");
-        ConnectionReady = true;
-        if (IAmReady)
-        {
-            SendReadyMessage();
-        }
-    }
-
-    public void GameManagerReady(GameManager gameManager)
-    {
-        Debug.Log("Game manager ready");
-        GameManager = gameManager;
-        IAmReady = true;
-        P2PManager.SetGameManager(gameManager);
-        SendReadyMessage();
-        CheckAllReady();
-    }
-
-    private void SendReadyMessage()
-    {
-        if (!ConnectionReady) { return; }
-        P2PManager.SendReadyMessage(Info.OpponentID);
-    }
-
-    public void PeerReady()
-    {
-        Debug.Log("Peer ready");
-        OpponentReady = true;
-        CheckAllReady();
-    }
-
-    private void CheckAllReady()
-    {
-        if (IAmReady && OpponentReady)
-        {
-            Debug.Log("Everyone ready!");
-            GameObject.FindWithTag("GameLoader").GetComponent<GameLoader>().SwitchToGame();
-            GameManager.StartGame();
-            LeaveLobby();
-        }
-    }
-
+    
     public void TestStartLoad()
     {
         IsTest = true;
-        // QualitySettings.vSyncCount = 0;
-        // Application.targetFrameRate = 2;
+
         Info = new SetupInfo
         {
             IAmMaster = true,
             NumberOfPlayers = 3,
-            OpponentID = new CSteamID(0)
+            OpponentID = new CSteamID(1)
         };
-        OpponentReady = true;
         SceneManager.LoadScene("Game");
-    }
-    
-    private void LeaveLobby()
-    {
-        Debug.Log("Leaving lobby");
-        Clear();
-        Steam.LeaveLobby(LobbyID);
-    }
-
-    private void Clear()
-    {
-        IAmReady = false;
-        OpponentReady = false;
-        ConnectionReady = false;
     }
 }
