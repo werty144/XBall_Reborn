@@ -3,15 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using Google.Protobuf;
 using Steamworks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Client : MonoBehaviour, StateHolder
 {
     public GameObject PlayerPrefab;
-    public GameObject LoadingScreen;
 
-    private P2PBase P2PManager;
-    private CSteamID ServerID;
+    private MessageManager MessageManager;
     
     private Dictionary<uint, PlayerController> Players = new();
     private GameStateVersioning GameStateVersioning;
@@ -24,21 +23,15 @@ public class Client : MonoBehaviour, StateHolder
         var setupInfo = global.GetComponent<GameStarter>().Info;
         
         CreatePlayers(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
-
-        ServerID = setupInfo.IAmMaster ? Steam.MySteamID() : setupInfo.OpponentID;
         
-        P2PManager = GameObject.FindWithTag("P2P").GetComponent<P2PBase>();
-
         GameStateVersioning = new GameStateVersioning(this);
-        
-        LoadingScreen.SetActive(true);
     }
 
     private void Start()
     {
-        P2PManager.ConnectToServer(ServerID);
+        MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
     }
-    
+
     void CreatePlayers(int n, bool IAmMaster)
     {
         var defaultPlaneWidth = 10;
@@ -71,16 +64,6 @@ public class Client : MonoBehaviour, StateHolder
             spareID++;
         }
     }
-    
-    public void OnConnected()
-    {
-        P2PManager.SendReady();
-    }
-
-    public void OnGameStart()
-    {
-        LoadingScreen.SetActive(false);
-    }
 
     public void InputAction(IBufferMessage action)
     {
@@ -104,7 +87,7 @@ public class Client : MonoBehaviour, StateHolder
                 break;
         }
         
-        P2PManager.SendAction(action);
+        MessageManager.SendAction(action);
     }
 
     public void ReceiveState(GameState gameState)
@@ -121,11 +104,6 @@ public class Client : MonoBehaviour, StateHolder
             return;
         }
         ReceiveState(actionResponse.GameState);
-    }
-
-    public void GameEnd()
-    {
-        
     }
     
     public GameState GetGameState()

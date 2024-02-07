@@ -1,9 +1,8 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class P2PCreator : MonoBehaviour
+public class MessageManagerCreator : MonoBehaviour
 {
     private void Awake()
     {
@@ -12,17 +11,17 @@ public class P2PCreator : MonoBehaviour
 
         if (global.GetComponent<GameStarter>().IsTest)
         {
-            gameObject.AddComponent<P2PTestMaster>();
+            gameObject.AddComponent<MessageManagerTest>();
             return;
         }
 
         if (setupInfo.IAmMaster)
         {
-           gameObject.AddComponent<P2PMaster>();
+            gameObject.AddComponent<MessageManagerMaster>();
         }
         else
         {
-            gameObject.AddComponent<P2PFollower>();
+            gameObject.AddComponent<MessageManagerFollower>();
         }
         
     }

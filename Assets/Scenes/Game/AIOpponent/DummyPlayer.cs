@@ -10,7 +10,7 @@ public class DummyPlayer : MonoBehaviour
     public GameObject slider;
 
     private GameStarter gameStarter;
-    private P2PTestMaster P2PManager;
+    private MessageManagerTest messageManager;
     
     private List<PlayerController> playersToControll;
     private TimeSpan ActionFrequency = TimeSpan.FromSeconds(1);
@@ -26,7 +26,7 @@ public class DummyPlayer : MonoBehaviour
             enabled = false;
         }
         
-        P2PManager = GameObject.FindWithTag("P2P").GetComponent<P2PTestMaster>();
+        messageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManagerTest>();
     }
 
     void Start()
@@ -44,17 +44,16 @@ public class DummyPlayer : MonoBehaviour
             }
         }
         
-        P2PManager.DummyReady();
+        messageManager.DummyReady();
     }
 
     // Update is called once per frame
     void Update()
     {
-        P2PManager.SetDummyPing(Ping);
         if (DateTime.Now - LastAction >= ActionFrequency)
         {
             LastAction = DateTime.Now;
-            // RandomMove();
+            RandomMove();
         }
     }
 
@@ -67,7 +66,7 @@ public class DummyPlayer : MonoBehaviour
             X = playersToControll[playerIndex].GetState().X,
             Y = playersToControll[playerIndex].GetState().Y
         };
-        P2PManager.DummySendAction(action);
+        messageManager.DummySendAction(action);
     }
 
     void RandomMove()
@@ -83,7 +82,7 @@ public class DummyPlayer : MonoBehaviour
             X = randX,
             Y = randY
         };
-        P2PManager.DummySendAction(action);
+        messageManager.DummySendAction(action);
     }
 
     public void OnSliderChange()

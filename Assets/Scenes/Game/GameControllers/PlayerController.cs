@@ -108,4 +108,9 @@ public class PlayerController : MonoBehaviour
     {
         transform.position = new Vector3(position.x, PlayerConfig.Height, position.y);
     }
+
+    public void Stop()
+    {
+        isMoving = false;
+    }
 }

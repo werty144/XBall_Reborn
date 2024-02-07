@@ -88,34 +88,72 @@ public class Callbacks : MonoBehaviour
 
     private void OnConnectionChanged(SteamNetConnectionStatusChangedCallback_t pCallback)
     {
+        ConnectionManager connectionManager;
         switch (pCallback.m_info.m_eState)
         {
             case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
-                SteamNetworkingSockets.AcceptConnection(pCallback.m_hConn);
+                if (!GameObject.FindWithTag("Global").GetComponent<GameStarter>().Info.IAmMaster) {break;}
+                Debug.Log("On connecting");
+                StartCoroutine(RelayOnConnectingToConnectionManager(pCallback.m_hConn));
                 break;
-
             case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
                 Debug.Log("Connection with " + pCallback.m_info.m_identityRemote.GetSteamID().m_SteamID + " established");
-                StartCoroutine(RelayOnConnectedToP2PManager(pCallback.m_hConn));
+                connectionManager = GameObject.FindWithTag("P2P").GetComponent<ConnectionManager>();
+                connectionManager.OnConnected(pCallback.m_hConn);
                 break;
-
-            // Handle other states as needed
+            case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
+                Debug.LogWarning("Problem detected locally: " + pCallback.m_info.m_eEndReason + ". " + pCallback.m_info.m_szEndDebug);
+                connectionManager = GameObject.FindWithTag("P2P").GetComponent<ConnectionManager>();
+                switch (pCallback.m_info.m_eEndReason)
+                {
+                    case (int)ESteamNetConnectionEnd.k_ESteamNetConnectionEnd_Remote_Timeout:
+                        connectionManager.OnRemoteProblem();
+                        break;
+                    case (int)ESteamNetConnectionEnd.k_ESteamNetConnectionEnd_Misc_Timeout:
+                        if (pCallback.m_eOldState ==
+                            ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting)
+                        {
+                            ((ConnectionManagerFollower)connectionManager).ReconnectTimeOut();
+                        }
+                        else
+                        {
+                            connectionManager.OnLocalProblem();
+                        }
+                        break;
+                    default:
+                        Debug.LogWarning("Unknown reason");
+                        break;
+                }
+                break;
+            case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer:
+                Debug.Log("Closed by peer");
+                connectionManager = GameObject.FindWithTag("P2P").GetComponent<ConnectionManager>();
+                connectionManager.OnClosedByPeer();
+                break;
         }
     }
 
-    IEnumerator RelayOnConnectedToP2PManager(HSteamNetConnection connection)
+    IEnumerator RelayOnConnectingToConnectionManager(HSteamNetConnection connection)
     {
+        var startTime = DateTime.Now;
         while (true)
         {
             var P2PObject = GameObject.FindWithTag("P2P");
             if (P2PObject != null)
             {
-                var P2PManager = P2PObject.GetComponent<P2PBase>();
-                if (P2PManager != null)
+                var ConnectionManager = P2PObject.GetComponent<ConnectionManagerMaster>();
+                if (ConnectionManager != null)
                 {
-                    P2PManager.OnConnected(connection);
+                    ConnectionManager.OnConnecting(connection);
                     break;
                 }
+            }
+
+            if (DateTime.Now - startTime > TimeSpan.FromSeconds(3))
+            {
+                Debug.LogWarning("Reject connection not in game");
+                SteamNetworkingSockets.CloseConnection(connection, 1, "No game is going", false);
+                break;
             }
 
             yield return new WaitForSeconds(0.1f);

@@ -7,9 +7,11 @@ using UnityEngine.SceneManagement;
 
 public class UIManagerGame : MonoBehaviour
 {
-    private P2PBase P2PManager;
+    private PingManager PingManager;
     private TextMeshProUGUI PingLabel;
     private TextMeshProUGUI CurrentStateLabel;
+    private GameObject LoadingScreen;
+    private TextMeshProUGUI LoadingScreenText;
 
     private DateTime LastFPSUpdate;
     private uint FramesPerLasSecond;
@@ -19,11 +21,36 @@ public class UIManagerGame : MonoBehaviour
         LastFPSUpdate = DateTime.Now;
         PingLabel = GameObject.Find("Ping Label").GetComponent<TextMeshProUGUI>();
         CurrentStateLabel = GameObject.Find("Current State Label").GetComponent<TextMeshProUGUI>();
+        LoadingScreen = GameObject.Find("Loading Screen");
+        LoadingScreenText = LoadingScreen.GetComponentInChildren<TextMeshProUGUI>();
+    }
+
+    public void DisplayLoading()
+    {
+        LoadingScreen.SetActive(true);
+        LoadingScreenText.text = "Loading...";
+    }
+
+    public void DisplayLocalProblem()
+    {
+        LoadingScreen.SetActive(true);
+        LoadingScreenText.text = "Internet issue";
+    }
+
+    public void DisplayPeerDropped()
+    {
+        LoadingScreen.SetActive(true);
+        LoadingScreenText.text = "Opponent disconnected";
+    }
+
+    public void RemoveScreen()
+    {
+        LoadingScreen.SetActive(false);
     }
 
     private void Start()
     {
-        P2PManager = GameObject.FindWithTag("P2P").GetComponent<P2PBase>();
+        PingManager = GameObject.FindWithTag("P2P").GetComponent<PingManager>();
     }
 
     private void Update()
@@ -39,7 +66,7 @@ public class UIManagerGame : MonoBehaviour
 
     public void UpdatePing()
     {
-        PingLabel.text = "Ping: " + P2PManager.GetPing().Milliseconds + "ms";
+        PingLabel.text = "Ping: " + PingManager.GetPing().Milliseconds + "ms";
     }
 
     private void UpdateFPS()

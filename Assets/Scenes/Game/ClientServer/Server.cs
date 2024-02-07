@@ -7,12 +7,16 @@ using UnityEngine;
 
 public class Server : MonoBehaviour, StateHolder
 {
-    private P2PMaster P2PMaster;
+    private MessageManagerMaster MessageManager;
+    private PingManager PingManager;
     private CSteamID[] userIDs = new CSteamID[2];
     private HashSet<CSteamID> PeersReady = new HashSet<CSteamID>();
     
     private Dictionary<uint, PlayerController> Players = new ();
     private GameStateVersioning GameStateVersioning;
+    
+    private GameState PausedState;
+    private bool OnPause;
 
     private void Awake()
     {
@@ -21,7 +25,8 @@ public class Server : MonoBehaviour, StateHolder
 
     private void Start()
     {
-        P2PMaster = GameObject.FindWithTag("P2P").GetComponent<P2PMaster>();
+        MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManagerMaster>();
+        PingManager = GameObject.FindWithTag("P2P").GetComponent<PingManager>();
         
         var global = GameObject.FindWithTag("Global");
         var gameStarter = global.GetComponent<GameStarter>();
@@ -37,23 +42,25 @@ public class Server : MonoBehaviour, StateHolder
 
     private void Update()
     {
+        if (OnPause) {return;}
         GameStateVersioning.AddCurrentState();
     }
 
     public void ProcessAction(CSteamID actorID, IBufferMessage action)
     {
-        var actorPing = P2PMaster.GetPingToUser(actorID);
+        if (OnPause) {return;}
+        var actorPing = PingManager.GetPingToUser(actorID);
         GameStateVersioning.ApplyActionInThePast(action, actorID, actorPing);
 
         var currentState = GetGameState();
         foreach (var userID in userIDs)
         {
-            var userPing = P2PMaster.GetPingToUser(userID);
+            var userPing = PingManager.GetPingToUser(userID);
             GameStateVersioning.FastForward(userPing);
             var stateForUser = GetGameState();
             if (userID == actorID)
             {
-                P2PMaster.SendActionResponse(
+                MessageManager.SendActionResponse(
                     actorID,
                     new ActionResponse
                     {
@@ -63,7 +70,7 @@ public class Server : MonoBehaviour, StateHolder
             }
             else
             {
-                P2PMaster.SendGameState(userID, stateForUser);
+                MessageManager.SendGameState(userID, stateForUser);
             }
 
             ApplyGameState(currentState);
@@ -78,7 +85,7 @@ public class Server : MonoBehaviour, StateHolder
         {
             foreach (var user in userIDs)
             {
-                P2PMaster.SendGameStart(user);
+                MessageManager.SendGameStart(user);
             }
         }
     }
@@ -105,5 +112,42 @@ public class Server : MonoBehaviour, StateHolder
         {
             Players[playerState.Id].ApplyState(playerState);
         }
+    }
+
+    public void PeerDropped()
+    {
+        Pause();
+    }
+
+    private void Pause()
+    {
+        OnPause = true;
+        Physics.autoSimulation = false;
+        PausedState = GetGameState();
+        StopPlayers();
+    }
+
+    private void StopPlayers()
+    {
+        foreach (var player in GetPlayers().Values)
+        {
+            player.Stop();
+        }
+    }
+
+    public void PeerConnected()
+    {
+        if (OnPause)
+        {
+            Resume();
+        }
+    }
+
+    private void Resume()
+    {
+        OnPause = false;
+        Physics.autoSimulation = true;
+
+        ApplyGameState(PausedState);
     }
 }
