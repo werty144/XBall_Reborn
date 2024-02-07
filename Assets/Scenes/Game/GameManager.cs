@@ -72,4 +72,9 @@ public class GameManager : MonoBehaviour
             UIManager.RemoveScreen();
         }
     }
+
+    public void OnConnectionUnknownProblem()
+    {
+        
+    }
 }

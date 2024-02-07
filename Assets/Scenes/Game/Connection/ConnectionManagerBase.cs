@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 using Steamworks;
 using UnityEngine;
 
-public class ConnectionManagerBase : MonoBehaviour, ConnectionManager
+public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
 {
     protected GameManager GameManager;
     
-    private HSteamNetConnection Connection;
+    protected HSteamNetConnection Connection;
     private MessageManager MessageManager;
     private PingManager PingManager;
     
@@ -27,20 +27,13 @@ public class ConnectionManagerBase : MonoBehaviour, ConnectionManager
         PingManager.OnConnected();
     }
 
-    public virtual void OnRemoteProblem()
-    {
-        throw new NotImplementedException();
-    }
+    public abstract void OnUnknownProblem();
 
-    public virtual void OnLocalProblem()
-    {
-        throw new NotImplementedException();
-    }
+    public abstract void OnRemoteProblem();
 
-    public virtual void OnClosedByPeer()
-    {
-        throw new NotImplementedException();
-    }
+    public abstract void OnLocalProblem();
+
+    public abstract void OnClosedByPeer();
 
     public void SendMessage(byte[] message)
     {
@@ -99,6 +92,11 @@ public class ConnectionManagerBase : MonoBehaviour, ConnectionManager
 
     public void CloseConnection()
     {
-        SteamNetworkingSockets.CloseConnection(Connection, 0, "test", false);
+        SteamNetworkingSockets.CloseConnection(Connection, 0, "", false);
+    }
+
+    public void OnDestroy()
+    {
+        CloseConnection();
     }
 }

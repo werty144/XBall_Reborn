@@ -41,20 +41,29 @@ public class ConnectionManagerMaster : ConnectionManagerBase
         GameManager.OnPeerConnected();
     }
 
+    public override void OnUnknownProblem()
+    {
+        CloseConnection();
+        GameManager.OnConnectionUnknownProblem();
+    }
+
     public override void OnRemoteProblem()
     {
+        CloseConnection();
         Server.PeerDropped();
         GameManager.OnConnectionRemoteProblem();
     }
 
     public override void OnLocalProblem()
     {
+        CloseConnection();
         Server.PeerDropped();
         GameManager.OnConnectionLocalProblem();
     }
 
     public override void OnClosedByPeer()
     {
+        CloseConnection();
         GameManager.OnConnectionPeerDisconnected();
     }
 }

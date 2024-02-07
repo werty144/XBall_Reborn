@@ -20,15 +20,21 @@ public class ConnectionManagerFollower : ConnectionManagerBase
 
     private void ConnectToServer()
     {
+        CloseConnection();
         Debug.Log("Connecting to server");
         var identity = new SteamNetworkingIdentity();
         identity.SetSteamID(ServerID);
         
-        var connectionParams = new SteamNetworkingConfigValue_t[1];
+        var connectionParams = new SteamNetworkingConfigValue_t[2];
         connectionParams[0].m_eValue = ESteamNetworkingConfigValue.k_ESteamNetworkingConfig_TimeoutInitial;
+        connectionParams[0].m_eDataType = ESteamNetworkingConfigDataType.k_ESteamNetworkingConfig_Int32;
         connectionParams[0].m_val = new SteamNetworkingConfigValue_t.OptionValue{ m_int32 = 5000 };
+        connectionParams[1].m_eValue = ESteamNetworkingConfigValue.k_ESteamNetworkingConfig_TimeoutConnected;
+        connectionParams[1].m_eDataType = ESteamNetworkingConfigDataType.k_ESteamNetworkingConfig_Int32;
+        connectionParams[1].m_val = new SteamNetworkingConfigValue_t.OptionValue{ m_int32 = 1000 };
         
-        SteamNetworkingSockets.ConnectP2P(ref identity, 0, 0, null);
+        Connection = SteamNetworkingSockets.ConnectP2P(ref identity, 0, connectionParams.Length, connectionParams);
+        
     }
 
     public override void OnConnected(HSteamNetConnection connection)
@@ -37,26 +43,37 @@ public class ConnectionManagerFollower : ConnectionManagerBase
         GameManager.OnConnectedToServer();
     }
 
+    public override void OnUnknownProblem()
+    {
+        CloseConnection();
+        GameManager.OnConnectionUnknownProblem();
+        ConnectToServer();
+    }
+
     public override void OnRemoteProblem()
     {
+        CloseConnection();
         ConnectToServer();
         GameManager.OnConnectionRemoteProblem();
     }
 
     public override void OnLocalProblem()
     {
+        CloseConnection();
         ConnectToServer();
         GameManager.OnConnectionLocalProblem();
     }
 
     public override void OnClosedByPeer()
     {
+        CloseConnection();
         ConnectToServer();
         GameManager.OnConnectionPeerDisconnected();
     }
 
     public void ReconnectTimeOut()
     {
+        CloseConnection();
         ConnectToServer();
     }
 }

@@ -121,7 +121,8 @@ public class Callbacks : MonoBehaviour
                         }
                         break;
                     default:
-                        Debug.LogWarning("Unknown reason");
+                        connectionManager.OnUnknownProblem();
+                        Debug.LogWarning("Unknown problem detected locally");
                         break;
                 }
                 break;

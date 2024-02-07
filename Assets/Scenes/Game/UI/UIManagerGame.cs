@@ -43,6 +43,12 @@ public class UIManagerGame : MonoBehaviour
         LoadingScreenText.text = "Opponent disconnected";
     }
 
+    public void DisplayUnknownProblem()
+    {
+        LoadingScreen.SetActive(true);
+        LoadingScreenText.text = "Unknown problem";
+    }
+
     public void RemoveScreen()
     {
         LoadingScreen.SetActive(false);
