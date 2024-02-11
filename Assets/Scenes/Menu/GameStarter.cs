@@ -15,26 +15,13 @@ public struct SetupInfo
 
 public class GameStarter : MonoBehaviour
 {
-    public SetupInfo Info { get; private set; }
-    public bool IsTest { get; private set; }
+    public SetupInfo Info { get; protected set; }
+    public bool IsTest { get; protected set; }
 
     public void Initiate(SetupInfo info)
     {
         Debug.Log("Initiate switching scenes" );
         Info = info;
-        SceneManager.LoadScene("Game");
-    }
-    
-    public void TestStartLoad()
-    {
-        IsTest = true;
-
-        Info = new SetupInfo
-        {
-            IAmMaster = true,
-            NumberOfPlayers = 3,
-            OpponentID = new CSteamID(1)
-        };
         SceneManager.LoadScene("Game");
     }
 }

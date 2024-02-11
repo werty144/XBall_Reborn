@@ -31,7 +31,7 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
         Server.PeerReady(Steam.MySteamID());
     }
 
-    public void SendAction(IBufferMessage action)
+    public virtual void SendAction(IBufferMessage action)
     {
         Server.ProcessAction(Steam.MySteamID(), action);
     }

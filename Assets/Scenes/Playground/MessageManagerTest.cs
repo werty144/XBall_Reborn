@@ -7,6 +7,7 @@ using UnityEngine;
 public class MessageManagerTest : MessageManagerMaster
 {
     private CSteamID DummyID = new CSteamID(1);
+    private CSteamID MyID = new CSteamID(0);
 
     
     // Disable Ping
@@ -14,11 +15,16 @@ public class MessageManagerTest : MessageManagerMaster
     {
         
     }
+    
+    public override void SendAction(IBufferMessage action)
+    {
+        Server.ProcessAction(MyID, action);
+    }
 
     // ---------------- IGNORE MESSAGES TO DUMMY ---------------------
     public override void SendGameStart(CSteamID userID)
     {
-        if (userID == Steam.MySteamID())
+        if (userID == MyID)
         {
             GameManager.OnGameStart();
         }
@@ -26,7 +32,7 @@ public class MessageManagerTest : MessageManagerMaster
 
     public override void SendGameState(CSteamID userID, GameState gameState)
     {
-        if (userID == Steam.MySteamID())
+        if (userID == MyID)
         {
             Client.ReceiveState(gameState);
         }
@@ -34,7 +40,7 @@ public class MessageManagerTest : MessageManagerMaster
 
     public override void SendActionResponse(CSteamID userID, ActionResponse actionResponse)
     {
-        if (userID == Steam.MySteamID())
+        if (userID == MyID)
         {
             Client.ReceiveActionResponse(actionResponse);
         }

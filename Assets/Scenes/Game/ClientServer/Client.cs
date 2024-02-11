@@ -10,10 +10,10 @@ public class Client : MonoBehaviour, StateHolder
 {
     public GameObject PlayerPrefab;
 
-    private MessageManager MessageManager;
+    protected MessageManager MessageManager;
     
     private Dictionary<uint, PlayerController> Players = new();
-    private GameStateVersioning GameStateVersioning;
+    protected GameStateVersioning GameStateVersioning;
     private Dictionary<uint, uint> PlayerToLastAction = new();
     private uint NextActionId = 1;
 
@@ -32,7 +32,7 @@ public class Client : MonoBehaviour, StateHolder
         MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
     }
 
-    void CreatePlayers(int n, bool IAmMaster)
+    protected void CreatePlayers(int n, bool IAmMaster)
     {
         var defaultPlaneWidth = 10;
         var defaultPlaneLength = 10;

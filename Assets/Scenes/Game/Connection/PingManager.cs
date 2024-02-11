@@ -38,7 +38,7 @@ public class PingManager : MonoBehaviour
         SendPing();
     }
 
-    public TimeSpan GetPingToUser(CSteamID userID)
+    public virtual TimeSpan GetPingToUser(CSteamID userID)
     {
         return userID == Steam.MySteamID() ? TimeSpan.Zero : Ping;
     }

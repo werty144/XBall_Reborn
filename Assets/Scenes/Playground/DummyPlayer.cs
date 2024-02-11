@@ -20,12 +20,6 @@ public class DummyPlayer : MonoBehaviour
 
     private void Awake()
     {
-        gameStarter = GameObject.FindWithTag("Global").GetComponent<GameStarter>();
-        if (!gameStarter.IsTest)
-        {
-            enabled = false;
-        }
-        
         messageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManagerTest>();
     }
 

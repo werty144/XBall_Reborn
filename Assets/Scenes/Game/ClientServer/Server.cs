@@ -7,12 +7,12 @@ using UnityEngine;
 
 public class Server : MonoBehaviour, StateHolder
 {
-    private MessageManagerMaster MessageManager;
-    private PingManager PingManager;
-    private CSteamID[] userIDs = new CSteamID[2];
+    protected MessageManagerMaster MessageManager;
+    protected PingManager PingManager;
+    protected CSteamID[] userIDs = new CSteamID[2];
     private HashSet<CSteamID> PeersReady = new HashSet<CSteamID>();
     
-    private Dictionary<uint, PlayerController> Players = new ();
+    protected Dictionary<uint, PlayerController> Players = new ();
     private GameStateVersioning GameStateVersioning;
     
     private GameState PausedState;
