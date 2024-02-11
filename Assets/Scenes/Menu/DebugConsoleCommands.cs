@@ -13,6 +13,13 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("RemoteProblem", "Triggers connection manager's RemoteProblem", RemoteProblem);
         DebugLogConsole.AddCommand("LocalProblem", "Triggers connection manager's LocalProblem", LocalProblem);
         DebugLogConsole.AddCommand("CloseConnection", "Closes connection", CloseConnection);
+        
+        DebugLogConsole.AddCommand("RemovePlayers", "Removes players", RemovePlayers);
+        DebugLogConsole.AddCommand<int>("CreatePlayers", "Creates players", CreatePlayers);
+        
+        DebugLogConsole.AddCommand("EnableDummy", "Enables dummy player", EnableDummy);
+        DebugLogConsole.AddCommand("DisableDummy", "Disables dummy player", DisableDummy);
+
     }
 
     void PeerConnected()
@@ -33,5 +40,27 @@ public class DebugConsoleCommands : MonoBehaviour
     void CloseConnection()
     {
         GameObject.FindWithTag("P2P").GetComponent<ConnectionManagerBase>().CloseConnection();
+    }
+
+    void RemovePlayers()
+    {
+        GameObject.FindWithTag("Server").GetComponent<ServerTest>().RemovePlayers();
+        GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>().Disable();
+    }
+
+    void CreatePlayers(int n)
+    {
+        GameObject.FindWithTag("Client").GetComponent<ClientTest>().CreatePlayers(n);
+        GameObject.FindWithTag("Server").GetComponent<ServerTest>().GrabPlayers();
+    }
+    
+    void DisableDummy()
+    {
+        GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>().Disable();
+    }
+
+    void EnableDummy()
+    {
+        GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>().Enable();
     }
 }

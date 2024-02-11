@@ -67,11 +67,12 @@ public class Client : MonoBehaviour, StateHolder
 
     public void InputAction(IBufferMessage action)
     {
+        PlayerController player;
         // Optimistic execution
         switch (action)
         {
             case PlayerMovementAction playerMovementAction:
-                var player = Players[playerMovementAction.PlayerId];
+                player = Players[playerMovementAction.PlayerId];
                 //Invalid action
                 if (!player.IsMy) { return; }
                 
@@ -80,6 +81,16 @@ public class Client : MonoBehaviour, StateHolder
 
                 PlayerToLastAction[playerMovementAction.PlayerId] = NextActionId;
                 playerMovementAction.ActionId = NextActionId;
+                NextActionId++;
+                break;
+            case PlayerStopAction playerStopAction:
+                player = Players[playerStopAction.PlayerId];
+                //Invalid action
+                if (!player.IsMy) { return; }
+
+                player.Stop();
+                PlayerToLastAction[playerStopAction.PlayerId] = NextActionId;
+                playerStopAction.ActionId = NextActionId;
                 NextActionId++;
                 break;
             default:
@@ -92,9 +103,30 @@ public class Client : MonoBehaviour, StateHolder
 
     public void ReceiveState(GameState gameState)
     {
-        var currentGameState = GetGameState();
-        ApplyGameState(gameState);
-        GameStateVersioning.SmoothFromPast(currentGameState);
+        CorrectOpponentPlayers(gameState);
+    }
+
+    private void CorrectOpponentPlayers(GameState referenceState)
+    {
+        foreach (var playerState in referenceState.PlayerStates)
+        {
+            var player = GetPlayers()[playerState.Id];
+            if (player.IsMy) {continue;}
+
+            if (playerState.IsMoving)
+            {
+                player.SetTarget(new Vector2(playerState.TargetX, playerState.TargetY));
+            }
+            else
+            {
+                var currentPosition = player.GetPosition();
+                var referencePosition = new Vector2(playerState.X, playerState.Y);
+                if (Vector2.Distance(currentPosition, referencePosition) >= PlayerConfig.Radius)
+                {
+                    player.SetTarget(referencePosition);
+                }
+            }
+        }
     }
 
     public void ReceiveActionResponse(ActionResponse actionResponse)

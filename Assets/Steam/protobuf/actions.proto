@@ -6,3 +6,8 @@ message PlayerMovementAction {
   float x = 3;
   float y = 4;
 }
+
+message PlayerStopAction {
+  uint32 action_id = 1;
+  uint32 player_id = 2;
+}

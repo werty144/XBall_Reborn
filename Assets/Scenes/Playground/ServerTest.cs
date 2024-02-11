@@ -24,9 +24,21 @@ public class ServerTest : Server
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void RemovePlayers()
     {
-        
+        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            Destroy(player);
+        }
+        Players.Clear();
+    }
+
+    public void GrabPlayers()
+    {
+        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            var playerController = player.GetComponent<PlayerController>();
+            Players[playerController.ID] = playerController;
+        }
     }
 }

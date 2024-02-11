@@ -104,6 +104,7 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
     // ----------------------------- PROCESS MESSAGES --------------------------------
     public void ProcessMessage(byte[] message)
     {
+        IBufferMessage action;
         switch (message[0])
         {
             case (byte)MessageType.Ping:
@@ -113,7 +114,11 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
                 PingManager.ReceiveReplyPing();
                 break;
             case (byte)MessageType.PlayerMovementAction:
-                var action = ParseUtils.UnmarshalPlayerMovementAction(message);
+                action = ParseUtils.UnmarshalPlayerMovementAction(message);
+                Server.ProcessAction(ConnectionManager.GetPeerID(), action);
+                break;
+            case (byte)MessageType.PlayerStopAction:
+                action = ParseUtils.UnmarshalPlayerStopAction(message);
                 Server.ProcessAction(ConnectionManager.GetPeerID(), action);
                 break;
             case (byte)MessageType.Ready:

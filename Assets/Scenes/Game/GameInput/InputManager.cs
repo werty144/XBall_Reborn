@@ -51,6 +51,20 @@ public class InputManager : MonoBehaviour
                 Client.InputAction(action);
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.S) && selectedPlayer != null)
+        {
+            var action = new PlayerStopAction
+            {
+                PlayerId = selectedPlayer.GetComponent<PlayerController>().ID
+            };
+            Client.InputAction(action);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab) && selectedPlayer != null)
+        {
+            SelectNextPlayer();
+        }
     }
 
     void DeselectPlayer()
@@ -65,5 +79,30 @@ public class InputManager : MonoBehaviour
     {
         selectedPlayer = selected;
         selectedPlayer.GetComponent<Outline>().OutlineWidth = PlayerConfig.OutlineWidth;
+    }
+
+    void SelectNextPlayer()
+    {
+        if (!selectedPlayer.GetComponent<PlayerController>().IsMy) { return; }
+
+        List<uint> myIDs = new List<uint>();
+        List<GameObject> myPlayers = new List<GameObject>();
+        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            var controller = player.GetComponent<PlayerController>();
+            if (controller.IsMy)
+            {
+                myIDs.Add(controller.ID);
+                myPlayers.Add(player);
+            }
+        }
+
+        
+        var curID = selectedPlayer.GetComponent<PlayerController>().ID;
+        var curInd = myIDs.FindIndex((uint x) => x == curID);
+        var nextInd = (curInd + 1) % myIDs.Count;
+        
+        DeselectPlayer();
+        SelectPlayer(myPlayers[nextInd]);
     }
 }

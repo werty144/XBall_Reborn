@@ -21,4 +21,9 @@ public class ClientTest : Client
         
         GameStateVersioning = new GameStateVersioning(this);
     }
+
+    public void CreatePlayers(int n)
+    {
+        CreatePlayers(n, true);
+    }
 }

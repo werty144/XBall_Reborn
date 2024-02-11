@@ -24,6 +24,26 @@ public static class ParseUtils
 
         return action;
     }
+    
+    public static PlayerStopAction UnmarshalPlayerStopAction(byte[] message)
+    {
+        Assert.AreEqual((byte)MessageType.PlayerStopAction, message[0]);
+        PlayerStopAction action;
+        using (MemoryStream stream = new MemoryStream(message, 1, message.Length - 1))
+        {
+            try
+            {
+                action = PlayerStopAction.Parser.ParseFrom(stream);
+            }
+            catch (InvalidProtocolBufferException e)
+            {
+                Debug.LogException(e);
+                return null;
+            }
+        }
+
+        return action;
+    }
 
     public static GameState UnmarshalGameState(byte[] message)
     {

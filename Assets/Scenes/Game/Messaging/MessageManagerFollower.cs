@@ -36,6 +36,9 @@ public class MessageManagerFollower : MonoBehaviour, MessageManager
             case PlayerMovementAction:
                 stream.WriteByte((byte)MessageType.PlayerMovementAction);
                 break;
+            case PlayerStopAction:
+                stream.WriteByte((byte)MessageType.PlayerStopAction);
+                break;
             default:
                 Debug.LogWarning("Unknown action");
                 break;

@@ -133,14 +133,19 @@ public class GameStateVersioning
         SmoothFromPast(initialState);
     }
 
-    private void ApplyActionToCurrentState(IBufferMessage action)
+    public void ApplyActionToCurrentState(IBufferMessage action)
     {
+        PlayerController player;
         switch (action)
         {
             case PlayerMovementAction playerMovementAction:
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
-                var player = StateHolder.GetPlayers()[playerMovementAction.PlayerId];
+                player = StateHolder.GetPlayers()[playerMovementAction.PlayerId];
                 player.SetTarget(target);
+                break;
+            case PlayerStopAction playerStopAction:
+                player = StateHolder.GetPlayers()[playerStopAction.PlayerId];
+                player.Stop();
                 break;
             default:
                 Debug.LogWarning("Unknown action");

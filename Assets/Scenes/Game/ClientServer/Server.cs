@@ -18,6 +18,8 @@ public class Server : MonoBehaviour, StateHolder
     private GameState PausedState;
     private bool OnPause;
 
+    private Coroutine SendStateCoroutine;
+
     private void Awake()
     {
         GameStateVersioning = new GameStateVersioning(this);
@@ -49,32 +51,62 @@ public class Server : MonoBehaviour, StateHolder
     public void ProcessAction(CSteamID actorID, IBufferMessage action)
     {
         if (OnPause) {return;}
-        var actorPing = PingManager.GetPingToUser(actorID);
-        GameStateVersioning.ApplyActionInThePast(action, actorID, actorPing);
 
-        var currentState = GetGameState();
-        foreach (var userID in userIDs)
+        if (IsConflictingAction(action))
         {
-            var userPing = PingManager.GetPingToUser(userID);
-            GameStateVersioning.FastForward(userPing);
-            var stateForUser = GetGameState();
-            if (userID == actorID)
-            {
-                MessageManager.SendActionResponse(
-                    actorID,
-                    new ActionResponse
-                    {
-                        ActionId = ParseUtils.GetActionId(action),
-                        GameState = stateForUser
-                    });
-            }
-            else
-            {
-                MessageManager.SendGameState(userID, stateForUser);
-            }
-
-            ApplyGameState(currentState);
+            
         }
+        else
+        {
+            GameStateVersioning.ApplyActionToCurrentState(action);
+            MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
+        }
+        
+        // var actorPing = PingManager.GetPingToUser(actorID);
+        // GameStateVersioning.ApplyActionInThePast(action, actorID, actorPing);
+        //
+        // var currentState = GetGameState();
+        // foreach (var userID in userIDs)
+        // {
+        //     var userPing = PingManager.GetPingToUser(userID);
+        //     GameStateVersioning.FastForward(userPing);
+        //     var stateForUser = GetGameState();
+        //     if (userID == actorID)
+        //     {
+        //         MessageManager.SendActionResponse(
+        //             actorID,
+        //             new ActionResponse
+        //             {
+        //                 ActionId = ParseUtils.GetActionId(action),
+        //                 GameState = stateForUser
+        //             });
+        //     }
+        //     else
+        //     {
+        //         MessageManager.SendGameState(userID, stateForUser);
+        //     }
+        //
+        //     ApplyGameState(currentState);
+        // }
+    }
+
+    private bool IsConflictingAction(IBufferMessage action)
+    {
+        switch (action)
+        {
+            case PlayerMovementAction:
+                return false;
+            case PlayerStopAction:
+                return false;
+            default:
+                Debug.LogWarning("Unknown action");
+                return true;
+        }
+    }
+
+    private CSteamID GetAnotherID(CSteamID userID)
+    {
+        return userIDs[0] == userID ? userIDs[1] : userIDs[0];
     }
 
     public void PeerReady(CSteamID userID)
@@ -83,10 +115,33 @@ public class Server : MonoBehaviour, StateHolder
 
         if (PeersReady.Count == 2)
         {
-            foreach (var user in userIDs)
+            StartGame();
+        }
+    }
+
+    private void StartGame()
+    {
+        SendStateCoroutine = StartCoroutine(SendGameStatesPeriodically());
+        foreach (var user in userIDs)
+        {
+            MessageManager.SendGameStart(user);
+        }
+    }
+
+    private IEnumerator SendGameStatesPeriodically()
+    {
+        while (true)
+        {
+            if (!OnPause)
             {
-                MessageManager.SendGameStart(user);
+                var curState = GetGameState();
+                foreach (var userID in userIDs)
+                {
+                    MessageManager.SendGameState(userID, curState);
+                }
             }
+
+            yield return new WaitForSeconds(0.1f);
         }
     }
     
@@ -149,5 +204,18 @@ public class Server : MonoBehaviour, StateHolder
         Physics.autoSimulation = true;
 
         ApplyGameState(PausedState);
+    }
+
+    private void EndGame()
+    {
+        if (SendStateCoroutine != null)
+        {
+            StopCoroutine(SendStateCoroutine);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        EndGame();
     }
 }

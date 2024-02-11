@@ -20,10 +20,27 @@ public class DummyPlayer : MonoBehaviour
 
     private void Awake()
     {
+        enabled = false;
         messageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManagerTest>();
     }
 
-    void Start()
+    void OnEnable()
+    {
+        GrabPlayers();
+        messageManager.DummyReady();
+    }
+
+    public void Disable()
+    {
+        enabled = false;
+    }
+
+    public void Enable()
+    {
+        enabled = true;
+    }
+
+    void GrabPlayers()
     {
         playersToControll = new List<PlayerController>();
         LastAction = DateTime.Now;
@@ -37,11 +54,8 @@ public class DummyPlayer : MonoBehaviour
                 playersToControll.Add(controller);
             }
         }
-        
-        messageManager.DummyReady();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (DateTime.Now - LastAction >= ActionFrequency)
@@ -77,10 +91,5 @@ public class DummyPlayer : MonoBehaviour
             Y = randY
         };
         messageManager.DummySendAction(action);
-    }
-
-    public void OnSliderChange()
-    {
-        Ping = TimeSpan.FromMilliseconds((int) (slider.GetComponent<Slider>().value * 1000f));
     }
 }

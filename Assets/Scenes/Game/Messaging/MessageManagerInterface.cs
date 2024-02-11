@@ -11,7 +11,8 @@ public enum MessageType
     ReplyPing = 4,
     GameState = 5,
     GameStart = 6,
-    ActionResponse = 7
+    ActionResponse = 7,
+    PlayerStopAction = 8
 }
 
 public interface MessageManager
