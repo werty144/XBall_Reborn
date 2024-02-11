@@ -57,7 +57,7 @@ public class Client : MonoBehaviour, StateHolder
             spareID++;
             
             var followerPlayer = Instantiate(PlayerPrefab, 
-                new Vector3(x, PlayerConfig.Height, followerZ), Quaternion.identity);
+                new Vector3(x, PlayerConfig.Height, followerZ), Quaternion.Euler(0, 180, 0));
             var followerContorller = followerPlayer.GetComponent<PlayerController>();
             followerContorller.Initialize(!IAmMaster, spareID);
             Players[spareID] = followerContorller;
@@ -77,7 +77,7 @@ public class Client : MonoBehaviour, StateHolder
                 if (!player.IsMy) { return; }
                 
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
-                player.SetTarget(target);
+                player.SetMovementTarget(target);
 
                 PlayerToLastAction[playerMovementAction.PlayerId] = NextActionId;
                 playerMovementAction.ActionId = NextActionId;
@@ -120,7 +120,7 @@ public class Client : MonoBehaviour, StateHolder
 
             if (playerState.IsMoving)
             {
-                player.SetTarget(new Vector2(playerState.TargetX, playerState.TargetY));
+                player.SetMovementTarget(new Vector2(playerState.TargetX, playerState.TargetY));
             }
             else
             {
@@ -128,7 +128,12 @@ public class Client : MonoBehaviour, StateHolder
                 var referencePosition = new Vector2(playerState.X, playerState.Y);
                 if (Vector2.Distance(currentPosition, referencePosition) >= PlayerConfig.Radius)
                 {
-                    player.SetTarget(referencePosition);
+                    player.SetMovementTarget(referencePosition);
+                }
+
+                if (Mathf.Abs(player.GetAngle() - playerState.RotationAngle) >= 0.1)
+                {
+                    player.SetRotationTargetAngle(playerState.RotationAngle);
                 }
             }
         }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class DebugConsoleCommands : MonoBehaviour
 {
-    // Start is called before the first frame update
+    private GameState SnapshotState;
     void Start()
     {
         DebugLogConsole.AddCommand("PeerConnected", "Triggers connection manager's PeerConnected", PeerConnected);
@@ -22,6 +22,11 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand("EnableCameraMovement", "EnablesCameraMovement", EnableCameraMovement);
         DebugLogConsole.AddCommand("DisableCameraMovement", "Disables camera movement", DisableCameraMovement);
+        
+        DebugLogConsole.AddCommand<uint, float>("SetPlayerRotationTargetAngle", "Sets a given rotation angle for a player by ID", SetTargetRotationAngle);
+        
+        DebugLogConsole.AddCommand("TakeStateSnapshot", "Remembers current game state", TakeStateSnapshot);
+        DebugLogConsole.AddCommand("SendSnapshotToClient", "Sends a snapshot state to the client as if it was ReceiveState call", SendSnapshotToClient);
     }
 
     void PeerConnected()
@@ -74,5 +79,20 @@ public class DebugConsoleCommands : MonoBehaviour
     void EnableCameraMovement()
     {
         GameObject.FindWithTag("MainCamera").GetComponent<CameraController>().enabled = true;
+    }
+
+    void SetTargetRotationAngle(uint playerID, float angle)
+    {
+        GameObject.FindWithTag("Server").GetComponent<Server>().GetPlayers()[playerID].SetRotationTargetAngle(angle);
+    }
+
+    void TakeStateSnapshot()
+    {
+        SnapshotState = GameObject.FindWithTag("Client").GetComponent<Client>().GetGameState();
+    }
+
+    void SendSnapshotToClient()
+    {
+        GameObject.FindWithTag("Client").GetComponent<Client>().ReceiveState(SnapshotState);
     }
 }

@@ -23,8 +23,11 @@ public class PlayerController : MonoBehaviour
     public uint ID;
     
     private float moveSpeed = 5f;
+    private float rotationSpeed = 5f;
     private Vector3 targetPosition;
-    private bool isMoving = false;
+    private bool isMoving;
+    private float targetRotationAngle;
+    private bool needsRotation;
 
     public void Initialize(bool isMy, byte id)
     {
@@ -57,7 +60,8 @@ public class PlayerController : MonoBehaviour
             Y = position.z,
             IsMoving = isMoving,
             TargetX = targetPosition.x,
-            TargetY = targetPosition.z
+            TargetY = targetPosition.z,
+            RotationAngle = GetAngle()
         };
     }
 
@@ -72,26 +76,50 @@ public class PlayerController : MonoBehaviour
         transform.position = new Vector3(state.X, PlayerConfig.Height, state.Y);
         isMoving = state.IsMoving;
         targetPosition = new Vector3(state.TargetX, PlayerConfig.Height, state.TargetY);
+        transform.rotation = Quaternion.Euler(0, state.RotationAngle * Mathf.Rad2Deg, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
         Move(Time.deltaTime);
+        Rotate(Time.deltaTime);
     }
 
-    public void SetTarget(Vector2 target)
+    public void SetMovementTarget(Vector2 target)
     {
         var target3D = new Vector3(target.x, PlayerConfig.Height, target.y);
         targetPosition = target3D;
         isMoving = true;
+    }
+
+    public void SetRotationTargetAngle(float angle)
+    {
+        targetRotationAngle = angle;
+        needsRotation = true;
+    }
+
+    private void Rotate(float timeDelta)
+    {
+        if (isMoving)
+        {
+            TurnTowardsMovementTarget(timeDelta);
+        }
+        
+        if (!needsRotation) {return;}
+        
+        TurnTowardsTargetRotationAngle(timeDelta);
     }
     
     public void Move(float timeDelta)
     {
         if (!isMoving) { return; }
         
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * timeDelta);
+        transform.position = Vector3.MoveTowards(
+            transform.position, 
+            targetPosition, 
+            AngleMovementSlowingCoefficient() * moveSpeed * timeDelta
+            );
         if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
         {
             isMoving = false;
@@ -109,8 +137,56 @@ public class PlayerController : MonoBehaviour
         transform.position = new Vector3(position.x, PlayerConfig.Height, position.y);
     }
 
+    public float GetAngle()
+    {
+        return transform.eulerAngles.y * Mathf.Deg2Rad;
+    }
+
     public void Stop()
     {
         isMoving = false;
+    }
+    
+    void TurnTowardsMovementTarget(float deltaTime)
+    {
+        Vector3 targetDirection = targetPosition - transform.position;
+        targetDirection.y = 0;
+        
+        Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, deltaTime * rotationSpeed);
+    }
+
+    private void TurnTowardsTargetRotationAngle(float deltaTime)
+    {
+        var targetQuaternion = Quaternion.Euler(0, Mathf.Rad2Deg * targetRotationAngle, 0);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation, 
+            targetQuaternion,
+            deltaTime * rotationSpeed);
+
+        if (Quaternion.Angle(transform.rotation, targetQuaternion) < 1f)
+        {
+            needsRotation = false;
+        }
+    }
+    
+    float CalculateViewAngle(Vector3 point)
+    {
+        if ((point - transform.position).sqrMagnitude < 0.001f)
+        {
+            return 0f;
+        }
+        Vector3 directionToPoint = (point - transform.position).normalized;
+        directionToPoint.y = 0;
+        
+        float dotProduct = Vector3.Dot(transform.forward.normalized, directionToPoint);
+        float angleInRadians = Mathf.Acos(Mathf.Clamp(dotProduct, -1f, 1f));
+        return angleInRadians;
+    }
+
+    float AngleMovementSlowingCoefficient()
+    {
+        var angle = CalculateViewAngle(targetPosition);
+        return 0.25f + 0.75f * (1f - angle / Mathf.PI);
     }
 }

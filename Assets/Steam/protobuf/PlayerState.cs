@@ -22,16 +22,16 @@ public static partial class PlayerStateReflection {
   static PlayerStateReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "ChJwbGF5ZXJfc3RhdGUucHJvdG8iYwoLUGxheWVyU3RhdGUSCgoCaWQYASAB",
+          "ChJwbGF5ZXJfc3RhdGUucHJvdG8iegoLUGxheWVyU3RhdGUSCgoCaWQYASAB",
           "KA0SCQoBeBgCIAEoAhIJCgF5GAMgASgCEhAKCGlzTW92aW5nGAQgASgIEg8K",
-          "B3RhcmdldFgYBSABKAISDwoHdGFyZ2V0WRgGIAEoAiIvCglHYW1lU3RhdGUS",
-          "IgoMcGxheWVyU3RhdGVzGAEgAygLMgwuUGxheWVyU3RhdGUiQwoOQWN0aW9u",
-          "UmVzcG9uc2USEQoJYWN0aW9uX2lkGAEgASgNEh4KCmdhbWVfc3RhdGUYAiAB",
-          "KAsyCi5HYW1lU3RhdGViBnByb3RvMw=="));
+          "B3RhcmdldFgYBSABKAISDwoHdGFyZ2V0WRgGIAEoAhIVCg1yb3RhdGlvbkFu",
+          "Z2xlGAcgASgCIi8KCUdhbWVTdGF0ZRIiCgxwbGF5ZXJTdGF0ZXMYASADKAsy",
+          "DC5QbGF5ZXJTdGF0ZSJDCg5BY3Rpb25SZXNwb25zZRIRCglhY3Rpb25faWQY",
+          "ASABKA0SHgoKZ2FtZV9zdGF0ZRgCIAEoCzIKLkdhbWVTdGF0ZWIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::PlayerState), global::PlayerState.Parser, new[]{ "Id", "X", "Y", "IsMoving", "TargetX", "TargetY" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::PlayerState), global::PlayerState.Parser, new[]{ "Id", "X", "Y", "IsMoving", "TargetX", "TargetY", "RotationAngle" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::GameState), global::GameState.Parser, new[]{ "PlayerStates" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ActionResponse), global::ActionResponse.Parser, new[]{ "ActionId", "GameState" }, null, null, null, null)
         }));
@@ -81,6 +81,7 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
     isMoving_ = other.isMoving_;
     targetX_ = other.targetX_;
     targetY_ = other.targetY_;
+    rotationAngle_ = other.rotationAngle_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -162,6 +163,18 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
     }
   }
 
+  /// <summary>Field number for the "rotationAngle" field.</summary>
+  public const int RotationAngleFieldNumber = 7;
+  private float rotationAngle_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public float RotationAngle {
+    get { return rotationAngle_; }
+    set {
+      rotationAngle_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -183,6 +196,7 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
     if (IsMoving != other.IsMoving) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(TargetX, other.TargetX)) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(TargetY, other.TargetY)) return false;
+    if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(RotationAngle, other.RotationAngle)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -196,6 +210,7 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
     if (IsMoving != false) hash ^= IsMoving.GetHashCode();
     if (TargetX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(TargetX);
     if (TargetY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(TargetY);
+    if (RotationAngle != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(RotationAngle);
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -238,6 +253,10 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
       output.WriteRawTag(53);
       output.WriteFloat(TargetY);
     }
+    if (RotationAngle != 0F) {
+      output.WriteRawTag(61);
+      output.WriteFloat(RotationAngle);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -272,6 +291,10 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
       output.WriteRawTag(53);
       output.WriteFloat(TargetY);
     }
+    if (RotationAngle != 0F) {
+      output.WriteRawTag(61);
+      output.WriteFloat(RotationAngle);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -298,6 +321,9 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
       size += 1 + 4;
     }
     if (TargetY != 0F) {
+      size += 1 + 4;
+    }
+    if (RotationAngle != 0F) {
       size += 1 + 4;
     }
     if (_unknownFields != null) {
@@ -329,6 +355,9 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
     }
     if (other.TargetY != 0F) {
       TargetY = other.TargetY;
+    }
+    if (other.RotationAngle != 0F) {
+      RotationAngle = other.RotationAngle;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -369,6 +398,10 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
           TargetY = input.ReadFloat();
           break;
         }
+        case 61: {
+          RotationAngle = input.ReadFloat();
+          break;
+        }
       }
     }
   #endif
@@ -406,6 +439,10 @@ public sealed partial class PlayerState : pb::IMessage<PlayerState>
         }
         case 53: {
           TargetY = input.ReadFloat();
+          break;
+        }
+        case 61: {
+          RotationAngle = input.ReadFloat();
           break;
         }
       }
