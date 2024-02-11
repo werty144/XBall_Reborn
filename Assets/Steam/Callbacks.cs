@@ -129,7 +129,18 @@ public class Callbacks : MonoBehaviour
             case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer:
                 Debug.Log("Closed by peer");
                 connectionManager = GameObject.FindWithTag("P2P").GetComponent<ConnectionManager>();
-                connectionManager.OnClosedByPeer();
+                switch (pCallback.m_eOldState)
+                {
+                    case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
+                        connectionManager.OnClosedByPeerWhileConnecting();
+                        break;
+                    case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
+                        connectionManager.OnClosedByPeerWhenActive();
+                        break;
+                    default:
+                        Debug.LogWarning("Unsupported connection close");
+                        break;
+                }
                 break;
         }
     }

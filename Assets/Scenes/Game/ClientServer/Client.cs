@@ -101,6 +101,11 @@ public class Client : MonoBehaviour, StateHolder
         MessageManager.SendAction(action);
     }
 
+    public void ReceiveResumeGame(GameState gameState)
+    {
+        ApplyGameState(gameState);
+    }
+
     public void ReceiveState(GameState gameState)
     {
         CorrectOpponentPlayers(gameState);

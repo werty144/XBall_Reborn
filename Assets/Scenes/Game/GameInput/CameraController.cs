@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CamerController : MonoBehaviour
+public class CameraController : MonoBehaviour
 {
     private float fieldLength;
     private float movementSpeed = 10f;

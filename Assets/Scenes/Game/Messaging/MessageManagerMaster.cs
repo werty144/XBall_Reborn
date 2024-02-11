@@ -84,6 +84,23 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
             ConnectionManager.SendMessage(bytes);
         }
     }
+
+    public void SendResumeGame(CSteamID userID, GameState gameState)
+    {
+        if (userID == Steam.MySteamID())
+        {
+            Client.ReceiveResumeGame(gameState);
+            GameManager.ResumeGame();
+        }
+        else
+        {
+            using MemoryStream stream = new MemoryStream();
+            stream.WriteByte((byte)MessageType.ResumeGame);
+            gameState.WriteTo(stream);
+            byte[] bytes = stream.ToArray();
+            ConnectionManager.SendMessage(bytes);
+        }
+    }
     
     public virtual void SendActionResponse(CSteamID userID, ActionResponse actionResponse)
     {

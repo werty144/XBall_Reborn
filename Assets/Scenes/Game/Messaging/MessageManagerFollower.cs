@@ -78,6 +78,11 @@ public class MessageManagerFollower : MonoBehaviour, MessageManager
             case (byte)MessageType.GameStart:
                 GameManager.OnGameStart();
                 break;
+            case (byte)MessageType.ResumeGame:
+                var pausedGameState = ParseUtils.UnmarshalResumeGame(message);
+                Client.ReceiveResumeGame(pausedGameState);
+                GameManager.ResumeGame();
+                break;
             case (byte)MessageType.GameState:
                 var gameState = ParseUtils.UnmarshalGameState(message);
                 Client.ReceiveState(gameState);

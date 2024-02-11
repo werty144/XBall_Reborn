@@ -28,12 +28,14 @@ public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
     }
 
     public abstract void OnUnknownProblem();
+    public abstract void OnClosedByPeerWhenActive();
+
+    public abstract void OnClosedByPeerWhileConnecting();
 
     public abstract void OnRemoteProblem();
 
     public abstract void OnLocalProblem();
-
-    public abstract void OnClosedByPeer();
+    
 
     public void SendMessage(byte[] message)
     {

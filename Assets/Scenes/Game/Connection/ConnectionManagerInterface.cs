@@ -10,7 +10,8 @@ public interface ConnectionManager
     public void OnLocalProblem();
 
     public void OnUnknownProblem();
-    public void OnClosedByPeer();
+    public void OnClosedByPeerWhenActive();
+    public void OnClosedByPeerWhileConnecting();
     public void SendMessage(byte[] message);
 
     public CSteamID GetPeerID();

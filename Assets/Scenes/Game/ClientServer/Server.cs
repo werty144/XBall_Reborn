@@ -17,9 +17,7 @@ public class Server : MonoBehaviour, StateHolder
     
     private GameState PausedState;
     private bool OnPause;
-
-    private Coroutine SendStateCoroutine;
-
+    
     private void Awake()
     {
         GameStateVersioning = new GameStateVersioning(this);
@@ -121,27 +119,9 @@ public class Server : MonoBehaviour, StateHolder
 
     private void StartGame()
     {
-        SendStateCoroutine = StartCoroutine(SendGameStatesPeriodically());
         foreach (var user in userIDs)
         {
             MessageManager.SendGameStart(user);
-        }
-    }
-
-    private IEnumerator SendGameStatesPeriodically()
-    {
-        while (true)
-        {
-            if (!OnPause)
-            {
-                var curState = GetGameState();
-                foreach (var userID in userIDs)
-                {
-                    MessageManager.SendGameState(userID, curState);
-                }
-            }
-
-            yield return new WaitForSeconds(0.1f);
         }
     }
     
@@ -204,18 +184,10 @@ public class Server : MonoBehaviour, StateHolder
         Physics.autoSimulation = true;
 
         ApplyGameState(PausedState);
-    }
 
-    private void EndGame()
-    {
-        if (SendStateCoroutine != null)
+        foreach (var userID in userIDs)
         {
-            StopCoroutine(SendStateCoroutine);
+            MessageManager.SendResumeGame(userID, PausedState);
         }
-    }
-
-    private void OnDestroy()
-    {
-        EndGame();
     }
 }

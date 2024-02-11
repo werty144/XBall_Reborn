@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 enum GamePhase
 {
@@ -33,10 +34,6 @@ public class GameManager : MonoBehaviour
             case GamePhase.BeforeGame:
                 MessageManager.SendReady();
                 break;
-            case GamePhase.Pause:
-                UIManager.RemoveScreen();
-                GamePhase = GamePhase.InGame;
-                break;
         }
     }
     
@@ -64,13 +61,11 @@ public class GameManager : MonoBehaviour
         UIManager.DisplayPeerDropped();
     }
 
-    public void OnPeerConnected()
+    public void ResumeGame()
     {
-        if (GamePhase == GamePhase.Pause)
-        {
-            GamePhase = GamePhase.InGame;
-            UIManager.RemoveScreen();
-        }
+        Assert.AreEqual(GamePhase.Pause, GamePhase);
+        GamePhase = GamePhase.InGame;
+        UIManager.RemoveScreen();
     }
 
     public void OnConnectionUnknownProblem()

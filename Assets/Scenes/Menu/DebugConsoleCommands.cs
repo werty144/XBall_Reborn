@@ -19,7 +19,9 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand("EnableDummy", "Enables dummy player", EnableDummy);
         DebugLogConsole.AddCommand("DisableDummy", "Disables dummy player", DisableDummy);
-
+        
+        DebugLogConsole.AddCommand("EnableCameraMovement", "EnablesCameraMovement", EnableCameraMovement);
+        DebugLogConsole.AddCommand("DisableCameraMovement", "Disables camera movement", DisableCameraMovement);
     }
 
     void PeerConnected()
@@ -62,5 +64,15 @@ public class DebugConsoleCommands : MonoBehaviour
     void EnableDummy()
     {
         GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>().Enable();
+    }
+
+    void DisableCameraMovement()
+    {
+        GameObject.FindWithTag("MainCamera").GetComponent<CameraController>().enabled = false;
+    }
+    
+    void EnableCameraMovement()
+    {
+        GameObject.FindWithTag("MainCamera").GetComponent<CameraController>().enabled = true;
     }
 }

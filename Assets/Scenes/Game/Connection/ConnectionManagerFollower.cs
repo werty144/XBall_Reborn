@@ -50,6 +50,18 @@ public class ConnectionManagerFollower : ConnectionManagerBase
         ConnectToServer();
     }
 
+    public override void OnClosedByPeerWhenActive()
+    {
+        CloseConnection();
+        ConnectToServer();
+        GameManager.OnConnectionPeerDisconnected();
+    }
+
+    public override void OnClosedByPeerWhileConnecting()
+    {
+        throw new NotImplementedException();
+    }
+
     public override void OnRemoteProblem()
     {
         CloseConnection();
@@ -62,13 +74,6 @@ public class ConnectionManagerFollower : ConnectionManagerBase
         CloseConnection();
         ConnectToServer();
         GameManager.OnConnectionLocalProblem();
-    }
-
-    public override void OnClosedByPeer()
-    {
-        CloseConnection();
-        ConnectToServer();
-        GameManager.OnConnectionPeerDisconnected();
     }
 
     public void ReconnectTimeOut()
