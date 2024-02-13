@@ -36,17 +36,19 @@ public class PlayerController : MonoBehaviour
     }
     void Start()
     {
-        GetComponent<Outline>().OutlineWidth = 0;
-        GetComponent<Outline>().OutlineColor = PlayerConfig.OutlineColor;
-        GetComponent<Outline>().OutlineMode = Outline.Mode.OutlineAll;
+        var body = transform.Find("Body");
+        var outline = body.GetComponent<Outline>();
+        outline.OutlineWidth = 0;
+        outline.OutlineColor = PlayerConfig.OutlineColor;
+        outline.OutlineMode = Outline.Mode.OutlineAll;
 
         if (IsMy)
         {
-            GetComponent<Renderer>().material.color = PlayerConfig.MyColor;
+            body.GetComponent<Renderer>().material.color = PlayerConfig.MyColor;
         }
         else
         {
-            GetComponent<Renderer>().material.color = PlayerConfig.OpponentColor;
+            body.GetComponent<Renderer>().material.color = PlayerConfig.OpponentColor;
         }
     }
 
@@ -188,5 +190,16 @@ public class PlayerController : MonoBehaviour
     {
         var angle = CalculateViewAngle(targetPosition);
         return 0.25f + 0.75f * (1f - angle / Mathf.PI);
+    }
+
+    public void PlayGrabAnimation()
+    {
+        transform.Find("GrabCircle").GetComponent<Animator>().Play("GrabAnimation", -1, 0f);
+    }
+
+    public void PlayThroughAnimation()
+    {
+        transform.Find("ThroughCircle").GetComponent<Animator>().Play("ThroughAnimation", -1, 0f);
+
     }
 }

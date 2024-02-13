@@ -27,6 +27,9 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand("TakeStateSnapshot", "Remembers current game state", TakeStateSnapshot);
         DebugLogConsole.AddCommand("SendSnapshotToClient", "Sends a snapshot state to the client as if it was ReceiveState call", SendSnapshotToClient);
+        
+        DebugLogConsole.AddCommand<uint>("PlayGrabAnimation", "Plays a grab animation for a specified player", PlayGrabAnimation);
+        DebugLogConsole.AddCommand<uint>("PlayThroughAnimation", "Plays a through animation for a specified player", PlayThroughAnimation);
     }
 
     void PeerConnected()
@@ -94,5 +97,15 @@ public class DebugConsoleCommands : MonoBehaviour
     void SendSnapshotToClient()
     {
         GameObject.FindWithTag("Client").GetComponent<Client>().ReceiveState(SnapshotState);
+    }
+
+    void PlayGrabAnimation(uint playerID)
+    {
+        GameObject.FindWithTag("Server").GetComponent<Server>().GetPlayers()[playerID].PlayGrabAnimation();
+    }
+
+    void PlayThroughAnimation(uint playerID)
+    {
+        GameObject.FindWithTag("Server").GetComponent<Server>().GetPlayers()[playerID].PlayThroughAnimation();
     }
 }
