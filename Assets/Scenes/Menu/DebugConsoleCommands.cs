@@ -30,6 +30,11 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand<uint>("PlayGrabAnimation", "Plays a grab animation for a specified player", PlayGrabAnimation);
         DebugLogConsole.AddCommand<uint>("PlayThroughAnimation", "Plays a through animation for a specified player", PlayThroughAnimation);
+        
+        DebugLogConsole.AddCommand<Vector3>("BallPlace", "Places the ball to a given position", BallPlace);
+        DebugLogConsole.AddCommand<Vector3>("BallApplyVelocity", "Applies velocity to a ball", BallApplyVelocity);
+        
+        DebugLogConsole.AddCommand("Exit", "Quits the game", Exit);
     }
 
     void PeerConnected()
@@ -107,5 +112,24 @@ public class DebugConsoleCommands : MonoBehaviour
     void PlayThroughAnimation(uint playerID)
     {
         GameObject.FindWithTag("Server").GetComponent<Server>().GetPlayers()[playerID].PlayThroughAnimation();
+    }
+
+    void BallPlace(Vector3 position)
+    {
+        var ball = GameObject.FindWithTag("Ball");
+        ball.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        ball.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        ball.transform.position = position;
+    }
+
+    void BallApplyVelocity(Vector3 velocity)
+    {
+        var ball = GameObject.FindWithTag("Ball");
+        ball.GetComponent<Rigidbody>().velocity = velocity;
+    }
+
+    void Exit()
+    {
+        Application.Quit();
     }
 }

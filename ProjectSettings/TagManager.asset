@@ -14,6 +14,8 @@ TagManager:
   - Client
   - Server
   - Dummy
+  - PlayerBody
+  - Ball
   layers:
   - Default
   - TransparentFX

@@ -18,21 +18,7 @@ public class InputManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0)) // Left click
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                if (hit.collider.gameObject.CompareTag("Player"))
-                {
-                    DeselectPlayer();
-                    SelectPlayer(hit.collider.gameObject);
-                }
-                if (hit.collider.gameObject.CompareTag("Floor"))
-                {
-                    DeselectPlayer();
-                }
-            }
+            ProcessLeftClick();
         }
 
         if (Input.GetMouseButtonDown(1) && selectedPlayer != null) // Right click
@@ -104,5 +90,24 @@ public class InputManager : MonoBehaviour
         
         DeselectPlayer();
         SelectPlayer(myPlayers[nextInd]);
+    }
+
+    private void ProcessLeftClick()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            if (hit.collider.gameObject.CompareTag("Player"))
+            {
+                DeselectPlayer();
+                SelectPlayer(hit.collider.gameObject);
+            }
+            if (hit.collider.gameObject.CompareTag("Floor"))
+            {
+                DeselectPlayer();
+            }
+        }
     }
 }
