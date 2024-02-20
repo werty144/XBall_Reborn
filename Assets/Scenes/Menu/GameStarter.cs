@@ -10,6 +10,7 @@ public struct SetupInfo
 {
     public int NumberOfPlayers;
     public CSteamID OpponentID;
+    public CSteamID MyID;
     public bool IAmMaster;
 }
 

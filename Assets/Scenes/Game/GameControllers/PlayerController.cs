@@ -28,12 +28,7 @@ public class PlayerController : MonoBehaviour
     private bool isMoving;
     private float targetRotationAngle;
     private bool needsRotation;
-
-    public void Initialize(bool isMy, byte id)
-    {
-        IsMy = isMy;
-        ID = id;
-    }
+    
     void Start()
     {
         var body = transform.Find("Body");
@@ -41,15 +36,12 @@ public class PlayerController : MonoBehaviour
         outline.OutlineWidth = 0;
         outline.OutlineColor = PlayerConfig.OutlineColor;
         outline.OutlineMode = Outline.Mode.OutlineAll;
+    }
 
-        if (IsMy)
-        {
-            body.GetComponent<Renderer>().material.color = PlayerConfig.MyColor;
-        }
-        else
-        {
-            body.GetComponent<Renderer>().material.color = PlayerConfig.OpponentColor;
-        }
+    public void Colorize(Color color)
+    {
+        var body = transform.Find("Body");
+        body.GetComponent<Renderer>().material.color = color;
     }
 
     public PlayerState GetState()

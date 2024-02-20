@@ -34,7 +34,7 @@ public class Client : MonoBehaviour, StateHolder
         MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
     }
 
-    protected void CreatePlayers(int n, bool IAmMaster)
+    private void CreatePlayers(int n, bool IAmMaster)
     {
         var defaultPlaneWidth = 10;
         var defaultPlaneLength = 10;
@@ -47,29 +47,38 @@ public class Client : MonoBehaviour, StateHolder
         byte spareID = 0;
         float masterZ = -fieldLength / 4;
         float followerZ = fieldLength / 4;
+        int collisionLayer = LayerMask.NameToLayer("Client");
         for (int i = 0; i < n; i++)
         {
             var x = fieldWidth * (i + 1) / (n + 1) - fieldWidth / 2;
             
             var masterPlayer = Instantiate(PlayerPrefab, 
                 new Vector3(x, PlayerConfig.Height, masterZ), Quaternion.identity);
+            masterPlayer.layer = collisionLayer;
             var controller = masterPlayer.GetComponent<PlayerController>();
-            controller.Initialize(IAmMaster, spareID);
+            controller.IsMy = IAmMaster;
+            controller.ID = spareID;
             Players[spareID] = controller;
             spareID++;
+            controller.Colorize(PlayerConfig.MyColor);
             
             var followerPlayer = Instantiate(PlayerPrefab, 
                 new Vector3(x, PlayerConfig.Height, followerZ), Quaternion.Euler(0, 180, 0));
+            followerPlayer.layer = collisionLayer;
             var followerContorller = followerPlayer.GetComponent<PlayerController>();
-            followerContorller.Initialize(!IAmMaster, spareID);
+            followerContorller.IsMy = !IAmMaster;
+            followerContorller.ID = spareID;
             Players[spareID] = followerContorller;
             spareID++;
+            followerContorller.Colorize(PlayerConfig.OpponentColor);
         }
     }
 
     protected void CreateBall()
     {
+        int collisionLayer = LayerMask.NameToLayer("Client");
         var ballObject = Instantiate(BallPrefab, new Vector3(0, GameConfig.SphereRadius, 0), Quaternion.identity);
+        ballObject.layer = collisionLayer;
         Ball = ballObject.GetComponent<BallController>();
     }
 

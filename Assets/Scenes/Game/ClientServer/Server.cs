@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using Google.Protobuf;
 using Steamworks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Server : MonoBehaviour, StateHolder
 {
+    public GameObject PlayerPrefab;
+    public GameObject BallPrefab;
+    
     protected MessageManagerMaster MessageManager;
     protected PingManager PingManager;
     protected CSteamID[] userIDs = new CSteamID[2];
@@ -21,6 +25,8 @@ public class Server : MonoBehaviour, StateHolder
     
     private void Awake()
     {
+        PlayerPrefab = Resources.Load<GameObject>("Player Variant");
+        BallPrefab = Resources.Load<GameObject>("Ball");
         GameStateVersioning = new GameStateVersioning(this);
     }
 
@@ -31,16 +37,74 @@ public class Server : MonoBehaviour, StateHolder
         
         var global = GameObject.FindWithTag("Global");
         var gameStarter = global.GetComponent<GameStarter>();
-        userIDs[0] = Steam.MySteamID();
+        userIDs[0] = gameStarter.Info.MyID;
         userIDs[1] = gameStarter.Info.OpponentID;
 
-        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
-        {
-            var playerController = player.GetComponent<PlayerController>();
-            Players[playerController.ID] = playerController;
-        }
+        CreatePlayers(gameStarter.Info.NumberOfPlayers);
 
         Ball = GameObject.FindWithTag("Ball").GetComponent<BallController>();
+    }
+    
+    private void CreatePlayers(int n)
+    {
+        var defaultPlaneWidth = 10;
+        var defaultPlaneLength = 10;
+        
+        var floor = GameObject.FindWithTag("Floor");
+        var scale = floor.GetComponent<Transform>().localScale;
+        var fieldWidth = scale.x * defaultPlaneWidth;
+        var fieldLength = scale.z * defaultPlaneLength;
+        
+        byte spareID = 0;
+        float masterZ = -fieldLength / 8;
+        float followerZ = fieldLength / 8;
+        int collisionLayer = LayerMask.NameToLayer("Server");
+        for (int i = 0; i < n; i++)
+        {
+            var x = fieldWidth * (i + 1) / (n + 1) - fieldWidth / 2;
+            
+            var masterPlayer = Instantiate(PlayerPrefab, 
+                new Vector3(x, PlayerConfig.Height, masterZ), Quaternion.identity);
+            masterPlayer.layer = collisionLayer;
+            var controller = masterPlayer.GetComponent<PlayerController>();
+            controller.ID = spareID;
+            Players[spareID] = controller;
+            spareID++;
+            
+            var followerPlayer = Instantiate(PlayerPrefab, 
+                new Vector3(x, PlayerConfig.Height, followerZ), Quaternion.Euler(0, 180, 0));
+            followerPlayer.layer = collisionLayer;
+            var followerContorller = followerPlayer.GetComponent<PlayerController>();
+            followerContorller.ID = spareID;
+            Players[spareID] = followerContorller;
+            spareID++;
+        }
+
+        foreach (var playerController in Players.Values)
+        {
+            foreach (Renderer renderer in playerController.GetComponentsInChildren<Renderer>())
+            {
+                // renderer.enabled = false;
+                foreach (Material material in renderer.materials)
+                {
+                    if (material.HasProperty("_Color"))
+                    {
+                        Color color;
+                        if (playerController.ID % 2 == 0)
+                        {
+                            color = PlayerConfig.MyColor;
+                        }
+                        else
+                        {
+                           color = PlayerConfig.OpponentColor;
+                        }
+
+                        color.a = 0.5f;
+                        material.color = color;
+                    }
+                }
+            }
+        }
     }
 
     private void Update()

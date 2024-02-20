@@ -260,7 +260,8 @@ public class LobbyManager : MonoBehaviour
             {
                 IAmMaster =  iAmOwner,
                 NumberOfPlayers = numberOfPlayers,
-                OpponentID = opponentID
+                OpponentID = opponentID,
+                MyID = Steam.MySteamID()
             });
         Steam.LeaveLobby(currentLobbyID);
     }

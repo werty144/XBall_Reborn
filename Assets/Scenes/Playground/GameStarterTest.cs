@@ -14,7 +14,8 @@ public class GameStarterTest : GameStarter
         {
             IAmMaster = true,
             NumberOfPlayers = 3,
-            OpponentID = new CSteamID(1)
+            OpponentID = new CSteamID(1),
+            MyID = new CSteamID(0)
         };
     }
 }
