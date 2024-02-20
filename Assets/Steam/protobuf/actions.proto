@@ -11,3 +11,13 @@ message PlayerStopAction {
   uint32 action_id = 1;
   uint32 player_id = 2;
 }
+
+message GrabAction {
+  uint32 action_id = 1;
+  uint32 player_id = 2;
+}
+
+message ActionResponse {
+  uint32 action_id = 1;
+  bool success = 2;
+}

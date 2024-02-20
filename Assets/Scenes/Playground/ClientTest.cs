@@ -16,6 +16,7 @@ public class ClientTest : Client
         var setupInfo = global.GetComponent<GameStarter>().Info;
         
         CreatePlayers(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
+        CreateBall();
         MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
         
         

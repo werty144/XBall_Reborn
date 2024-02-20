@@ -14,7 +14,16 @@ message GameState {
   repeated PlayerState playerStates = 1;
 }
 
-message ActionResponse {
-  uint32 action_id = 1;
-  GameState game_state = 2;
+message Vector3ProtoBuf
+{
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message BallState
+{
+  Vector3ProtoBuf position = 1;
+  Vector3ProtoBuf velocity = 2;
+  Vector3ProtoBuf angularVelocity = 3;
 }

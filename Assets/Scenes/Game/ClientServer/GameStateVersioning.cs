@@ -147,6 +147,11 @@ public class GameStateVersioning
                 player = StateHolder.GetPlayers()[playerStopAction.PlayerId];
                 player.Stop();
                 break;
+            case GrabAction grabAction:
+                player = StateHolder.GetPlayers()[grabAction.PlayerId];
+                var ball = StateHolder.GetBall();
+                ball.SetOwner(player);
+                break;
             default:
                 Debug.LogWarning("Unknown action");
                 break;

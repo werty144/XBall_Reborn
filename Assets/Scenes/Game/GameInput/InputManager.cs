@@ -16,38 +16,27 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // Left click
+        if (Input.GetMouseButtonDown(0))
         {
             ProcessLeftClick();
         }
 
-        if (Input.GetMouseButtonDown(1) && selectedPlayer != null) // Right click
+        if (Input.GetMouseButtonDown(1))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                var action = new PlayerMovementAction
-                {
-                    PlayerId = selectedPlayer.GetComponent<PlayerController>().ID,
-                    X = hit.point.x,
-                    Y = hit.point.z
-                };
-                Client.InputAction(action);
-            }
+            ProcessRightClick();
         }
 
-        if (Input.GetKeyDown(KeyCode.S) && selectedPlayer != null)
+        if (Input.GetKeyDown(KeyCode.S))
         {
-            var action = new PlayerStopAction
-            {
-                PlayerId = selectedPlayer.GetComponent<PlayerController>().ID
-            };
-            Client.InputAction(action);
+            ProcessStop();
         }
 
-        if (Input.GetKeyDown(KeyCode.Tab) && selectedPlayer != null)
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            ProcessGrab();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab))
         {
             SelectNextPlayer();
         }
@@ -69,6 +58,11 @@ public class InputManager : MonoBehaviour
 
     void SelectNextPlayer()
     {
+        if (selectedPlayer == null)
+        {
+            return;
+            
+        }
         if (!selectedPlayer.GetComponent<PlayerController>().IsMy) { return; }
 
         List<uint> myIDs = new List<uint>();
@@ -109,5 +103,55 @@ public class InputManager : MonoBehaviour
                 DeselectPlayer();
             }
         }
+    }
+
+    private void ProcessRightClick()
+    {
+        if (selectedPlayer == null)
+        {
+            return;
+        }
+        
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            var action = new PlayerMovementAction
+            {
+                PlayerId = selectedPlayer.GetComponent<PlayerController>().ID,
+                X = hit.point.x,
+                Y = hit.point.z
+            };
+            Client.InputAction(action);
+        }
+    }
+
+    private void ProcessStop()
+    {
+        if (selectedPlayer == null)
+        {
+            return;
+            
+        }
+        var action = new PlayerStopAction
+        {
+            PlayerId = selectedPlayer.GetComponent<PlayerController>().ID
+        };
+        Client.InputAction(action);
+    }
+
+    private void ProcessGrab()
+    {
+        if (selectedPlayer == null)
+        {
+            return;
+        }
+
+        var action = new GrabAction
+        {
+            PlayerId = selectedPlayer.GetComponent<PlayerController>().ID
+        };
+        Client.InputAction(action);
     }
 }

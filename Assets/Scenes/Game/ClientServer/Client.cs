@@ -9,12 +9,13 @@ using UnityEngine;
 public class Client : MonoBehaviour, StateHolder
 {
     public GameObject PlayerPrefab;
+    public GameObject BallPrefab;
 
     protected MessageManager MessageManager;
     
     private Dictionary<uint, PlayerController> Players = new();
+    private BallController Ball;
     protected GameStateVersioning GameStateVersioning;
-    private Dictionary<uint, uint> PlayerToLastAction = new();
     private uint NextActionId = 1;
 
     private void Awake()
@@ -23,6 +24,7 @@ public class Client : MonoBehaviour, StateHolder
         var setupInfo = global.GetComponent<GameStarter>().Info;
         
         CreatePlayers(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
+        CreateBall();
         
         GameStateVersioning = new GameStateVersioning(this);
     }
@@ -65,6 +67,12 @@ public class Client : MonoBehaviour, StateHolder
         }
     }
 
+    protected void CreateBall()
+    {
+        var ballObject = Instantiate(BallPrefab, new Vector3(0, GameConfig.SphereRadius, 0), Quaternion.identity);
+        Ball = ballObject.GetComponent<BallController>();
+    }
+
     public void InputAction(IBufferMessage action)
     {
         PlayerController player;
@@ -79,7 +87,6 @@ public class Client : MonoBehaviour, StateHolder
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
                 player.SetMovementTarget(target);
 
-                PlayerToLastAction[playerMovementAction.PlayerId] = NextActionId;
                 playerMovementAction.ActionId = NextActionId;
                 NextActionId++;
                 break;
@@ -89,8 +96,19 @@ public class Client : MonoBehaviour, StateHolder
                 if (!player.IsMy) { return; }
 
                 player.Stop();
-                PlayerToLastAction[playerStopAction.PlayerId] = NextActionId;
                 playerStopAction.ActionId = NextActionId;
+                NextActionId++;
+                break;
+            case GrabAction grabAction:
+                player = Players[grabAction.PlayerId];
+                //Invalid action
+                if (!player.IsMy) { return; }
+                player.PlayGrabAnimation();
+                if (!ActionRules.IsValidGrab(player.transform, Ball.transform))
+                {
+                    return;
+                }
+                grabAction.ActionId = NextActionId;
                 NextActionId++;
                 break;
             default:
@@ -141,11 +159,11 @@ public class Client : MonoBehaviour, StateHolder
 
     public void ReceiveActionResponse(ActionResponse actionResponse)
     {
-        if (!PlayerToLastAction.ContainsValue(actionResponse.ActionId))
-        {
-            return;
-        }
-        ReceiveState(actionResponse.GameState);
+        // if (!PlayerToLastAction.ContainsValue(actionResponse.ActionId))
+        // {
+        //     return;
+        // }
+        // ReceiveState(actionResponse.GameState);
     }
     
     public GameState GetGameState()
@@ -162,6 +180,11 @@ public class Client : MonoBehaviour, StateHolder
     public Dictionary<uint, PlayerController> GetPlayers()
     {
         return Players;
+    }
+
+    public BallController GetBall()
+    {
+        return Ball;
     }
     
     public void ApplyGameState(GameState state)

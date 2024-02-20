@@ -23,7 +23,8 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("EnableCameraMovement", "EnablesCameraMovement", EnableCameraMovement);
         DebugLogConsole.AddCommand("DisableCameraMovement", "Disables camera movement", DisableCameraMovement);
         
-        DebugLogConsole.AddCommand<uint, float>("SetPlayerRotationTargetAngle", "Sets a given rotation angle for a player by ID", SetTargetRotationAngle);
+        DebugLogConsole.AddCommand<uint, float>("PlayerSetRotationTargetAngle", "Sets a given rotation angle for a player by ID", SetTargetRotationAngle);
+        DebugLogConsole.AddCommand<uint, Vector2>("PlayerSetPosition", "Sets player's position", PlayerSetPosition);
         
         DebugLogConsole.AddCommand("TakeStateSnapshot", "Remembers current game state", TakeStateSnapshot);
         DebugLogConsole.AddCommand("SendSnapshotToClient", "Sends a snapshot state to the client as if it was ReceiveState call", SendSnapshotToClient);
@@ -33,8 +34,12 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand<Vector3>("BallPlace", "Places the ball to a given position", BallPlace);
         DebugLogConsole.AddCommand<Vector3>("BallApplyVelocity", "Applies velocity to a ball", BallApplyVelocity);
+        DebugLogConsole.AddCommand<uint>("BallSetOwner", "Sets ball's' owner", BallSetOwner);
+        DebugLogConsole.AddCommand("BallRemoveOwner", "Removes ball's owner", BallRemoveOwner);
         
         DebugLogConsole.AddCommand("Exit", "Quits the game", Exit);
+        
+        DebugLogConsole.AddCommand<uint>("TestIsValidGrab", "Tests function ActionRules.IsValidGrab", TestIsValidGrab);
     }
 
     void PeerConnected()
@@ -128,8 +133,35 @@ public class DebugConsoleCommands : MonoBehaviour
         ball.GetComponent<Rigidbody>().velocity = velocity;
     }
 
+    void BallSetOwner(uint playerID)
+    {
+        var player = GameObject.FindWithTag("Server").GetComponent<Server>().GetPlayers()[playerID];
+        var ball = GameObject.FindWithTag("Ball").GetComponent<BallController>();
+        ball.SetOwner(player);
+    }
+
+    void BallRemoveOwner()
+    {
+        var ball = GameObject.FindWithTag("Ball").GetComponent<BallController>();
+        ball.RemoveOwner();
+    }
+
     void Exit()
     {
         Application.Quit();
+    }
+
+    void TestIsValidGrab(uint playerID)
+    {
+        var ball = GameObject.FindWithTag("Ball").GetComponent<BallController>();
+        var player = GameObject.FindWithTag("Server").GetComponent<Server>().GetPlayers()[playerID];
+        var result = ActionRules.IsValidGrab(player.transform, ball.transform);
+        Debug.Log(result);
+    }
+
+    void PlayerSetPosition(uint playerID, Vector2 position)
+    {
+        var player = GameObject.FindWithTag("Server").GetComponent<Server>().GetPlayers()[playerID];
+        player.SetPosition(position);
     }
 }

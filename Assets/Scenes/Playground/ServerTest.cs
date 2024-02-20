@@ -22,6 +22,7 @@ public class ServerTest : Server
             var playerController = player.GetComponent<PlayerController>();
             Players[playerController.ID] = playerController;
         }
+        Ball = GameObject.FindWithTag("Ball").GetComponent<BallController>();
     }
 
     public void RemovePlayers()

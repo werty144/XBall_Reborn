@@ -13,6 +13,7 @@ public class Server : MonoBehaviour, StateHolder
     private HashSet<CSteamID> PeersReady = new HashSet<CSteamID>();
     
     protected Dictionary<uint, PlayerController> Players = new ();
+    protected BallController Ball;
     private GameStateVersioning GameStateVersioning;
     
     private GameState PausedState;
@@ -38,6 +39,8 @@ public class Server : MonoBehaviour, StateHolder
             var playerController = player.GetComponent<PlayerController>();
             Players[playerController.ID] = playerController;
         }
+
+        Ball = GameObject.FindWithTag("Ball").GetComponent<BallController>();
     }
 
     private void Update()
@@ -52,7 +55,15 @@ public class Server : MonoBehaviour, StateHolder
 
         if (IsConflictingAction(action))
         {
-            
+            switch (action)
+            {
+                case GrabAction grabAction:
+                    GameStateVersioning.ApplyActionToCurrentState(grabAction);
+                    break;
+                default:
+                    Debug.LogWarning("Unknown action");
+                    break;
+            }
         }
         else
         {
@@ -96,6 +107,8 @@ public class Server : MonoBehaviour, StateHolder
                 return false;
             case PlayerStopAction:
                 return false;
+            case GrabAction:
+                return true;
             default:
                 Debug.LogWarning("Unknown action");
                 return true;
@@ -139,6 +152,11 @@ public class Server : MonoBehaviour, StateHolder
     public Dictionary<uint, PlayerController> GetPlayers()
     {
         return Players;
+    }
+
+    public BallController GetBall()
+    {
+        return Ball;
     }
     
     public void ApplyGameState(GameState state)
