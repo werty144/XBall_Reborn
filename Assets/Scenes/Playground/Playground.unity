@@ -147,6 +147,8 @@ GameObject:
   m_Component:
   - component: {fileID: 144675035}
   - component: {fileID: 144675036}
+  - component: {fileID: 144675038}
+  - component: {fileID: 144675037}
   m_Layer: 0
   m_Name: Dummy
   m_TagString: Dummy
@@ -181,7 +183,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34aa4d07cb93547188da88b22ee2bf5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slider: {fileID: 0}
+--- !u!114 &144675037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144675034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c839befb5b5fcbf0b3706d6d61fcc9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &144675038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144675034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7dfa9c3120ec7abeb5eb560c9156dc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlayerPrefab: {fileID: 0}
+  BallPrefab: {fileID: 0}
 --- !u!1001 &298412755
 PrefabInstance:
   m_ObjectHideFlags: 0

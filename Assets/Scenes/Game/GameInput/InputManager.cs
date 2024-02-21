@@ -67,13 +67,14 @@ public class InputManager : MonoBehaviour
 
         List<uint> myIDs = new List<uint>();
         List<GameObject> myPlayers = new List<GameObject>();
-        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
+        var client = GameObject.FindWithTag("Client").GetComponent<Client>();
+        foreach (var player in client.GetPlayers().Values)
         {
             var controller = player.GetComponent<PlayerController>();
             if (controller.IsMy)
             {
                 myIDs.Add(controller.ID);
-                myPlayers.Add(player);
+                myPlayers.Add(player.gameObject);
             }
         }
 
@@ -90,7 +91,10 @@ public class InputManager : MonoBehaviour
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        int layerMask = (1 << LayerMask.NameToLayer("Server")) + (1 << LayerMask.NameToLayer("Dummy"));
+        int layerMask = (1 << LayerMask.NameToLayer("Server")) +
+                        (1 << LayerMask.NameToLayer("Dummy")) + 
+                        (1 << LayerMask.NameToLayer("ClientServer")) + 
+                        (1 << LayerMask.NameToLayer("DummyServer"));
         layerMask = ~layerMask;
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
@@ -116,7 +120,10 @@ public class InputManager : MonoBehaviour
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        int layerMask = (1 << LayerMask.NameToLayer("Server")) + (1 << LayerMask.NameToLayer("Dummy"));
+        int layerMask = (1 << LayerMask.NameToLayer("Server")) +
+                        (1 << LayerMask.NameToLayer("Dummy")) + 
+                        (1 << LayerMask.NameToLayer("ClientServer")) + 
+                        (1 << LayerMask.NameToLayer("DummyServer"));
         layerMask = ~layerMask;
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))

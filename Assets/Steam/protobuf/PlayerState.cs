@@ -25,19 +25,20 @@ public static partial class PlayerStateReflection {
           "ChJwbGF5ZXJfc3RhdGUucHJvdG8iegoLUGxheWVyU3RhdGUSCgoCaWQYASAB",
           "KA0SCQoBeBgCIAEoAhIJCgF5GAMgASgCEhAKCGlzTW92aW5nGAQgASgIEg8K",
           "B3RhcmdldFgYBSABKAISDwoHdGFyZ2V0WRgGIAEoAhIVCg1yb3RhdGlvbkFu",
-          "Z2xlGAcgASgCIi8KCUdhbWVTdGF0ZRIiCgxwbGF5ZXJTdGF0ZXMYASADKAsy",
-          "DC5QbGF5ZXJTdGF0ZSIyCg9WZWN0b3IzUHJvdG9CdWYSCQoBeBgBIAEoAhIJ",
-          "CgF5GAIgASgCEgkKAXoYAyABKAIifgoJQmFsbFN0YXRlEiIKCHBvc2l0aW9u",
-          "GAEgASgLMhAuVmVjdG9yM1Byb3RvQnVmEiIKCHZlbG9jaXR5GAIgASgLMhAu",
-          "VmVjdG9yM1Byb3RvQnVmEikKD2FuZ3VsYXJWZWxvY2l0eRgDIAEoCzIQLlZl",
-          "Y3RvcjNQcm90b0J1ZmIGcHJvdG8z"));
+          "Z2xlGAcgASgCIk4KCUdhbWVTdGF0ZRIiCgxwbGF5ZXJTdGF0ZXMYASADKAsy",
+          "DC5QbGF5ZXJTdGF0ZRIdCgliYWxsU3RhdGUYAiABKAsyCi5CYWxsU3RhdGUi",
+          "MgoPVmVjdG9yM1Byb3RvQnVmEgkKAXgYASABKAISCQoBeRgCIAEoAhIJCgF6",
+          "GAMgASgCIqIBCglCYWxsU3RhdGUSIgoIcG9zaXRpb24YASABKAsyEC5WZWN0",
+          "b3IzUHJvdG9CdWYSIgoIdmVsb2NpdHkYAiABKAsyEC5WZWN0b3IzUHJvdG9C",
+          "dWYSKQoPYW5ndWxhclZlbG9jaXR5GAMgASgLMhAuVmVjdG9yM1Byb3RvQnVm",
+          "EhAKCGlzX293bmVkGAQgASgIEhAKCG93bmVyX2lkGAUgASgNYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerState), global::PlayerState.Parser, new[]{ "Id", "X", "Y", "IsMoving", "TargetX", "TargetY", "RotationAngle" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::GameState), global::GameState.Parser, new[]{ "PlayerStates" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::GameState), global::GameState.Parser, new[]{ "PlayerStates", "BallState" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::Vector3ProtoBuf), global::Vector3ProtoBuf.Parser, new[]{ "X", "Y", "Z" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::BallState), global::BallState.Parser, new[]{ "Position", "Velocity", "AngularVelocity" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::BallState), global::BallState.Parser, new[]{ "Position", "Velocity", "AngularVelocity", "IsOwned", "OwnerId" }, null, null, null, null)
         }));
   }
   #endregion
@@ -492,6 +493,7 @@ public sealed partial class GameState : pb::IMessage<GameState>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public GameState(GameState other) : this() {
     playerStates_ = other.playerStates_.Clone();
+    ballState_ = other.ballState_ != null ? other.ballState_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -512,6 +514,18 @@ public sealed partial class GameState : pb::IMessage<GameState>
     get { return playerStates_; }
   }
 
+  /// <summary>Field number for the "ballState" field.</summary>
+  public const int BallStateFieldNumber = 2;
+  private global::BallState ballState_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::BallState BallState {
+    get { return ballState_; }
+    set {
+      ballState_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -528,6 +542,7 @@ public sealed partial class GameState : pb::IMessage<GameState>
       return true;
     }
     if(!playerStates_.Equals(other.playerStates_)) return false;
+    if (!object.Equals(BallState, other.BallState)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -536,6 +551,7 @@ public sealed partial class GameState : pb::IMessage<GameState>
   public override int GetHashCode() {
     int hash = 1;
     hash ^= playerStates_.GetHashCode();
+    if (ballState_ != null) hash ^= BallState.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -555,6 +571,10 @@ public sealed partial class GameState : pb::IMessage<GameState>
     output.WriteRawMessage(this);
   #else
     playerStates_.WriteTo(output, _repeated_playerStates_codec);
+    if (ballState_ != null) {
+      output.WriteRawTag(18);
+      output.WriteMessage(BallState);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -566,6 +586,10 @@ public sealed partial class GameState : pb::IMessage<GameState>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
     playerStates_.WriteTo(ref output, _repeated_playerStates_codec);
+    if (ballState_ != null) {
+      output.WriteRawTag(18);
+      output.WriteMessage(BallState);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -577,6 +601,9 @@ public sealed partial class GameState : pb::IMessage<GameState>
   public int CalculateSize() {
     int size = 0;
     size += playerStates_.CalculateSize(_repeated_playerStates_codec);
+    if (ballState_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(BallState);
+    }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -590,6 +617,12 @@ public sealed partial class GameState : pb::IMessage<GameState>
       return;
     }
     playerStates_.Add(other.playerStates_);
+    if (other.ballState_ != null) {
+      if (ballState_ == null) {
+        BallState = new global::BallState();
+      }
+      BallState.MergeFrom(other.BallState);
+    }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -609,6 +642,13 @@ public sealed partial class GameState : pb::IMessage<GameState>
           playerStates_.AddEntriesFrom(input, _repeated_playerStates_codec);
           break;
         }
+        case 18: {
+          if (ballState_ == null) {
+            BallState = new global::BallState();
+          }
+          input.ReadMessage(BallState);
+          break;
+        }
       }
     }
   #endif
@@ -626,6 +666,13 @@ public sealed partial class GameState : pb::IMessage<GameState>
           break;
         case 10: {
           playerStates_.AddEntriesFrom(ref input, _repeated_playerStates_codec);
+          break;
+        }
+        case 18: {
+          if (ballState_ == null) {
+            BallState = new global::BallState();
+          }
+          input.ReadMessage(BallState);
           break;
         }
       }
@@ -937,6 +984,8 @@ public sealed partial class BallState : pb::IMessage<BallState>
     position_ = other.position_ != null ? other.position_.Clone() : null;
     velocity_ = other.velocity_ != null ? other.velocity_.Clone() : null;
     angularVelocity_ = other.angularVelocity_ != null ? other.angularVelocity_.Clone() : null;
+    isOwned_ = other.isOwned_;
+    ownerId_ = other.ownerId_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -982,6 +1031,30 @@ public sealed partial class BallState : pb::IMessage<BallState>
     }
   }
 
+  /// <summary>Field number for the "is_owned" field.</summary>
+  public const int IsOwnedFieldNumber = 4;
+  private bool isOwned_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool IsOwned {
+    get { return isOwned_; }
+    set {
+      isOwned_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "owner_id" field.</summary>
+  public const int OwnerIdFieldNumber = 5;
+  private uint ownerId_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public uint OwnerId {
+    get { return ownerId_; }
+    set {
+      ownerId_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -1000,6 +1073,8 @@ public sealed partial class BallState : pb::IMessage<BallState>
     if (!object.Equals(Position, other.Position)) return false;
     if (!object.Equals(Velocity, other.Velocity)) return false;
     if (!object.Equals(AngularVelocity, other.AngularVelocity)) return false;
+    if (IsOwned != other.IsOwned) return false;
+    if (OwnerId != other.OwnerId) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -1010,6 +1085,8 @@ public sealed partial class BallState : pb::IMessage<BallState>
     if (position_ != null) hash ^= Position.GetHashCode();
     if (velocity_ != null) hash ^= Velocity.GetHashCode();
     if (angularVelocity_ != null) hash ^= AngularVelocity.GetHashCode();
+    if (IsOwned != false) hash ^= IsOwned.GetHashCode();
+    if (OwnerId != 0) hash ^= OwnerId.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -1040,6 +1117,14 @@ public sealed partial class BallState : pb::IMessage<BallState>
       output.WriteRawTag(26);
       output.WriteMessage(AngularVelocity);
     }
+    if (IsOwned != false) {
+      output.WriteRawTag(32);
+      output.WriteBool(IsOwned);
+    }
+    if (OwnerId != 0) {
+      output.WriteRawTag(40);
+      output.WriteUInt32(OwnerId);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -1062,6 +1147,14 @@ public sealed partial class BallState : pb::IMessage<BallState>
       output.WriteRawTag(26);
       output.WriteMessage(AngularVelocity);
     }
+    if (IsOwned != false) {
+      output.WriteRawTag(32);
+      output.WriteBool(IsOwned);
+    }
+    if (OwnerId != 0) {
+      output.WriteRawTag(40);
+      output.WriteUInt32(OwnerId);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -1080,6 +1173,12 @@ public sealed partial class BallState : pb::IMessage<BallState>
     }
     if (angularVelocity_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(AngularVelocity);
+    }
+    if (IsOwned != false) {
+      size += 1 + 1;
+    }
+    if (OwnerId != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(OwnerId);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -1110,6 +1209,12 @@ public sealed partial class BallState : pb::IMessage<BallState>
         AngularVelocity = new global::Vector3ProtoBuf();
       }
       AngularVelocity.MergeFrom(other.AngularVelocity);
+    }
+    if (other.IsOwned != false) {
+      IsOwned = other.IsOwned;
+    }
+    if (other.OwnerId != 0) {
+      OwnerId = other.OwnerId;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -1147,6 +1252,14 @@ public sealed partial class BallState : pb::IMessage<BallState>
           input.ReadMessage(AngularVelocity);
           break;
         }
+        case 32: {
+          IsOwned = input.ReadBool();
+          break;
+        }
+        case 40: {
+          OwnerId = input.ReadUInt32();
+          break;
+        }
       }
     }
   #endif
@@ -1181,6 +1294,14 @@ public sealed partial class BallState : pb::IMessage<BallState>
             AngularVelocity = new global::Vector3ProtoBuf();
           }
           input.ReadMessage(AngularVelocity);
+          break;
+        }
+        case 32: {
+          IsOwned = input.ReadBool();
+          break;
+        }
+        case 40: {
+          OwnerId = input.ReadUInt32();
           break;
         }
       }

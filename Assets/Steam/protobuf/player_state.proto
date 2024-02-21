@@ -12,6 +12,7 @@ message PlayerState {
 
 message GameState {
   repeated PlayerState playerStates = 1;
+  BallState ballState = 2;
 }
 
 message Vector3ProtoBuf
@@ -26,4 +27,6 @@ message BallState
   Vector3ProtoBuf position = 1;
   Vector3ProtoBuf velocity = 2;
   Vector3ProtoBuf angularVelocity = 3;
+  bool is_owned = 4;
+  uint32 owner_id = 5;
 }

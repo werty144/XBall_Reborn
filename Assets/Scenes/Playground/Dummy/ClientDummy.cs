@@ -10,9 +10,16 @@ public class ClientDummy : Client
     protected override void Awake()
     {
         MyID = 1;
-        enabled = false;
         MessageManager = GameObject.FindWithTag("Dummy").GetComponent<MessageManagerDummy>();
+        
+        var global = GameObject.FindWithTag("Global");
+        var setupInfo = global.GetComponent<GameStarter>().Info;
+        CreateServerState(setupInfo.NumberOfPlayers, LayerMask.NameToLayer("DummyServer"));
+        CreateInitialState(setupInfo.NumberOfPlayers);
+
+        enabled = false;
     }
+
     protected override void Start()
     {
         
@@ -20,53 +27,82 @@ public class ClientDummy : Client
 
     private void OnEnable()
     {
-        CreatePlayers();
-        CreateBall();
-    }
-
-    void CreatePlayers()
-    {
-        foreach (var player in Players.Values)
+        foreach (var playerController in Players.Values)
         {
-            Destroy(player.gameObject);
-        }
-
-        var playerPrefab = Resources.Load<GameObject>("Player Variant");
-        var layerMask = LayerMask.NameToLayer("Dummy");
-        var server = GameObject.FindWithTag("Server").GetComponent<Server>();
-        foreach (var serverPlayer in server.GetPlayers().Values)
-        {
-            var localPlayer = Instantiate(playerPrefab, serverPlayer.transform.position, serverPlayer.transform.rotation);
-            localPlayer.layer = layerMask;
-            var playerController = localPlayer.GetComponent<PlayerController>();
-            playerController.ID = serverPlayer.ID;
-            Players[playerController.ID] = playerController;
-            if (serverPlayer.ID % 2 == 1)
+            foreach (Renderer renderer in playerController.GetComponentsInChildren<Renderer>())
             {
-                playerController.IsMy = true;
-                MyPlayers.Add(playerController);
+                renderer.enabled = true;
             }
         }
+        foreach (Renderer renderer in Ball.GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = true;
+        }
+    }
+
+    private void OnDisable()
+    {
+        foreach (var playerController in Players.Values)
+        {
+            if (playerController == null)
+            {
+                continue;
+            }
+            foreach (Renderer renderer in playerController.GetComponentsInChildren<Renderer>())
+            {
+                renderer.enabled = false;
+            }
+        }
+
+        if (Ball == null)
+        {
+            return;
+        }
+        foreach (Renderer renderer in Ball.GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = false;
+        }
+    }
+
+    void CreateInitialState(int n)
+    {
+        int collisionLayer = LayerMask.NameToLayer("Dummy");
+        uint spareID = 0;
+        for (int i = 0; i < 2 * n; i++)
+        {
+            var player = Instantiate(PlayerPrefab);
+            player.layer = collisionLayer;
+            var controller = player.GetComponent<PlayerController>();
+            controller.ID = spareID;
+            Players[spareID] = controller;
+            spareID++;
+        }
+        foreach (var player in Players.Values)
+        {
+            player.IsMy = player.ID % 2 == 1;
+            if (player.IsMy)
+            {
+                MyPlayers.Add(player);
+            }
+        }
+        
+        var ballObject = Instantiate(BallPrefab);
+        ballObject.layer = collisionLayer;
+        Ball = ballObject.GetComponent<BallController>();
+        
+        ApplyGameState(InitialState.GetInitialState(n));
         
         foreach (var playerController in Players.Values)
         {
             foreach (Renderer renderer in playerController.GetComponentsInChildren<Renderer>())
             {
-                // renderer.enabled = true;
+                renderer.enabled = false;
                 foreach (Material material in renderer.materials)
                 {
                     if (material.HasProperty("_Color"))
                     {
                         Color color;
-                        if (playerController.ID % 2 == 0)
-                        {
-                            color = PlayerConfig.MyColor;
-                        }
-                        else
-                        {
-                            color = PlayerConfig.OpponentColor;
-                        }
-
+                        color = playerController.ID % 2 == 0 ? PlayerConfig.MyColor : PlayerConfig.OpponentColor;
                         color.a = 0.5f;
                         material.color = color;
                     }
@@ -74,22 +110,7 @@ public class ClientDummy : Client
             }
         }
     }
-    
-    new void CreateBall()
-    {
-        Destroy(Ball);
-        var server = GameObject.FindWithTag("Server").GetComponent<Server>();
-        var serverBall = server.GetBall();
-        var ballPrefab = Resources.Load<GameObject>("Ball Variant");
-        var ballObject = Instantiate(ballPrefab,serverBall.transform.position, server.transform.rotation);
-        
-        ballObject.GetComponentInChildren<Renderer>().enabled = true;
-        
-        int collisionLayer = LayerMask.NameToLayer("Dummy");
-        ballObject.layer = collisionLayer;
-        
-        Ball = ballObject.GetComponent<BallController>();
-    }
+
 
     public List<PlayerController> GetMyPlayers()
     {

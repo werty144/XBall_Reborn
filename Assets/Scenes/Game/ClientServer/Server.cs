@@ -25,8 +25,8 @@ public class Server : MonoBehaviour, StateHolder
     
     private void Awake()
     {
-        PlayerPrefab = Resources.Load<GameObject>("Player Variant");
-        BallPrefab = Resources.Load<GameObject>("Ball Variant");
+        PlayerPrefab = Resources.Load<GameObject>("ServerPlayerPrefab");
+        BallPrefab = Resources.Load<GameObject>("ServerBallPrefab");
         GameStateVersioning = new GameStateVersioning(this);
     }
 
@@ -40,44 +40,36 @@ public class Server : MonoBehaviour, StateHolder
         userIDs[0] = gameStarter.Info.MyID;
         userIDs[1] = gameStarter.Info.OpponentID;
 
-        CreatePlayers(gameStarter.Info.NumberOfPlayers);
-        CreateBall();
+        CreateInitialState(gameStarter.Info.NumberOfPlayers);
     }
     
-    private void CreatePlayers(int n)
+    private void CreateInitialState(int n)
     {
-        var defaultPlaneWidth = 10;
-        var defaultPlaneLength = 10;
-        
-        var floor = GameObject.FindWithTag("Floor");
-        var scale = floor.GetComponent<Transform>().localScale;
-        var fieldWidth = scale.x * defaultPlaneWidth;
-        var fieldLength = scale.z * defaultPlaneLength;
-        
-        byte spareID = 0;
-        float masterZ = -fieldLength / 4;
-        float followerZ = fieldLength / 4;
-        int collisionLayer = LayerMask.NameToLayer("Server");
-        for (int i = 0; i < n; i++)
+        var collisionLayer = LayerMask.NameToLayer("Server");
+        uint spareID = 0;
+        for (int i = 0; i < 2 * n; i++)
         {
-            var x = fieldWidth * (i + 1) / (n + 1) - fieldWidth / 2;
-            
-            var masterPlayer = Instantiate(PlayerPrefab, 
-                new Vector3(x, PlayerConfig.Height, masterZ), Quaternion.identity);
-            masterPlayer.layer = collisionLayer;
-            var controller = masterPlayer.GetComponent<PlayerController>();
+            var player = Instantiate(PlayerPrefab);
+            player.layer = collisionLayer;
+            var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
             Players[spareID] = controller;
             spareID++;
-            
-            var followerPlayer = Instantiate(PlayerPrefab, 
-                new Vector3(x, PlayerConfig.Height, followerZ), Quaternion.Euler(0, 180, 0));
-            followerPlayer.layer = collisionLayer;
-            var followerContorller = followerPlayer.GetComponent<PlayerController>();
-            followerContorller.ID = spareID;
-            Players[spareID] = followerContorller;
-            spareID++;
+            foreach (Renderer renderer in controller.GetComponentsInChildren<Renderer>())
+            {
+                renderer.enabled = false;
+            }
         }
+        
+        var ballObject = Instantiate(BallPrefab);
+        ballObject.layer = collisionLayer;
+        Ball = ballObject.GetComponent<BallController>();
+        foreach (var renderer in Ball.GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = false;
+        }
+        
+        ApplyGameState(InitialState.GetInitialState(n));
 
         foreach (var playerController in Players.Values)
         {
@@ -104,15 +96,6 @@ public class Server : MonoBehaviour, StateHolder
                 }
             }
         }
-    }
-
-    private void CreateBall()
-    {
-        int collisionLayer = LayerMask.NameToLayer("Server");
-        var ballObject = Instantiate(BallPrefab, new Vector3(0, GameConfig.SphereRadius, 0), Quaternion.identity);
-        ballObject.GetComponentInChildren<Renderer>().enabled = false;
-        ballObject.layer = collisionLayer;
-        Ball = ballObject.GetComponent<BallController>();
     }
 
     private void Update()
@@ -212,6 +195,8 @@ public class Server : MonoBehaviour, StateHolder
             gameState.PlayerStates.Add(player.GetState());
         }
 
+        gameState.BallState = Ball.GetState();
+
         return gameState;
     }
     
@@ -272,6 +257,16 @@ public class Server : MonoBehaviour, StateHolder
         foreach (var userID in userIDs)
         {
             MessageManager.SendResumeGame(userID, PausedState);
+        }
+    }
+
+    public void CollisionExit()
+    {
+        // TODO: Consider cooldown and periodic sending
+        var curGameState = GetGameState();
+        foreach (var userID in userIDs)
+        {
+            MessageManager.SendGameState(userID, curGameState);
         }
     }
 }

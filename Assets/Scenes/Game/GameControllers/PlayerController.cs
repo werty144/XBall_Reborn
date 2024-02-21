@@ -73,6 +73,21 @@ public class PlayerController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, state.RotationAngle * Mathf.Rad2Deg, 0);
     }
 
+    public void InterpolateToState(PlayerController targetState)
+    {
+        var interpolationFactor = 0.1f;
+        SetMovementTarget(targetState.GetPosition());
+        // transform.position = Vector3.Lerp(
+        //     transform.position, 
+        //     targetState.transform.position, 
+        //     interpolationFactor);
+        
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation, 
+            targetState.transform.rotation, 
+            interpolationFactor);
+    }
+
     // Update is called once per frame
     void Update()
     {

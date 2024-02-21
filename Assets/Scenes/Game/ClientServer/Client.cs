@@ -7,6 +7,7 @@ using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Update = UnityEngine.PlayerLoop.Update;
 
 public class Client : MonoBehaviour, StateHolder
 {
@@ -20,6 +21,9 @@ public class Client : MonoBehaviour, StateHolder
     protected GameStateVersioning GameStateVersioning;
     private uint NextActionId = 1;
     private Dictionary<uint, Stopwatch> ActionTimers = new();
+    
+    protected Dictionary<uint, PlayerController> ServerPlayers = new();
+    protected BallController ServerBall;
 
     protected ulong MyID;
 
@@ -30,8 +34,8 @@ public class Client : MonoBehaviour, StateHolder
 
         MyID = setupInfo.MyID.m_SteamID;
         
-        CreatePlayers(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
-        CreateBall();
+        CreateInitialState(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
+        CreateServerState(setupInfo.NumberOfPlayers, LayerMask.NameToLayer("ClientServer"));
         
         GameStateVersioning = new GameStateVersioning(this);
     }
@@ -41,52 +45,63 @@ public class Client : MonoBehaviour, StateHolder
         MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
     }
 
-    private void CreatePlayers(int n, bool IAmMaster)
+    private void FixedUpdate()
     {
-        var defaultPlaneWidth = 10;
-        var defaultPlaneLength = 10;
-        
-        var floor = GameObject.FindWithTag("Floor");
-        var scale = floor.GetComponent<Transform>().localScale;
-        var fieldWidth = scale.x * defaultPlaneWidth;
-        var fieldLength = scale.z * defaultPlaneLength;
-        
-        byte spareID = 0;
-        float masterZ = -fieldLength / 4;
-        float followerZ = fieldLength / 4;
+        InterpolateToServerState();
+    }
+
+    private void CreateInitialState(int n, bool IAmMaster)
+    {
         int collisionLayer = LayerMask.NameToLayer("Client");
-        for (int i = 0; i < n; i++)
+        uint spareID = 0;
+        for (int i = 0; i < 2 * n; i++)
         {
-            var x = fieldWidth * (i + 1) / (n + 1) - fieldWidth / 2;
-            
-            var masterPlayer = Instantiate(PlayerPrefab, 
-                new Vector3(x, PlayerConfig.Height, masterZ), Quaternion.identity);
-            masterPlayer.layer = collisionLayer;
-            var controller = masterPlayer.GetComponent<PlayerController>();
-            controller.IsMy = IAmMaster;
+            var player = Instantiate(PlayerPrefab);
+            player.layer = collisionLayer;
+            var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
             Players[spareID] = controller;
             spareID++;
-            controller.Colorize(PlayerConfig.MyColor);
-            
-            var followerPlayer = Instantiate(PlayerPrefab, 
-                new Vector3(x, PlayerConfig.Height, followerZ), Quaternion.Euler(0, 180, 0));
-            followerPlayer.layer = collisionLayer;
-            var followerContorller = followerPlayer.GetComponent<PlayerController>();
-            followerContorller.IsMy = !IAmMaster;
-            followerContorller.ID = spareID;
-            Players[spareID] = followerContorller;
-            spareID++;
-            followerContorller.Colorize(PlayerConfig.OpponentColor);
         }
-    }
-
-    protected void CreateBall()
-    {
-        int collisionLayer = LayerMask.NameToLayer("Client");
-        var ballObject = Instantiate(BallPrefab, new Vector3(0, GameConfig.SphereRadius, 0), Quaternion.identity);
+        foreach (var player in Players.Values)
+        {
+            player.IsMy = IAmMaster ^ (player.ID % 2 == 1);
+            player.Colorize(player.IsMy ? PlayerConfig.MyColor : PlayerConfig.OpponentColor);
+        }
+        
+        var ballObject = Instantiate(BallPrefab);
         ballObject.layer = collisionLayer;
         Ball = ballObject.GetComponent<BallController>();
+        
+        ApplyGameState(InitialState.GetInitialState(n));
+    }
+
+    protected void CreateServerState(int n, int collisionLayer)
+    {
+        uint spareID = 0;
+        for (int i = 0; i < 2 * n; i++)
+        {
+            var player = Instantiate(PlayerPrefab);
+            player.layer = collisionLayer;
+            var controller = player.GetComponent<PlayerController>();
+            controller.ID = spareID;
+            ServerPlayers[spareID] = controller;
+            spareID++;
+            foreach (Renderer renderer in controller.GetComponentsInChildren<Renderer>())
+            {
+                renderer.enabled = false;
+            }
+        }
+        
+        var ballObject = Instantiate(BallPrefab);
+        ballObject.layer = collisionLayer;
+        ServerBall = ballObject.GetComponent<BallController>();
+        foreach (var renderer in ServerBall.GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = false;
+        }
+        
+        ApplyServerState(InitialState.GetInitialState(n));
     }
 
     public void InputAction(IBufferMessage action)
@@ -139,34 +154,23 @@ public class Client : MonoBehaviour, StateHolder
 
     public void ReceiveState(GameState gameState)
     {
-        CorrectOpponentPlayers(gameState);
+        ApplyServerState(gameState);
     }
 
-    private void CorrectOpponentPlayers(GameState referenceState)
+    private void InterpolateToServerState()
     {
-        foreach (var playerState in referenceState.PlayerStates)
+        foreach (var player in Players.Values)
         {
-            var player = GetPlayers()[playerState.Id];
-            if (player.IsMy) {continue;}
-
-            if (playerState.IsMoving)
+            if (player.IsMy)
             {
-                player.SetMovementTarget(new Vector2(playerState.TargetX, playerState.TargetY));
+                continue;
             }
-            else
-            {
-                var currentPosition = player.GetPosition();
-                var referencePosition = new Vector2(playerState.X, playerState.Y);
-                if (Vector2.Distance(currentPosition, referencePosition) >= PlayerConfig.Radius)
-                {
-                    player.SetMovementTarget(referencePosition);
-                }
+            player.InterpolateToState(ServerPlayers[player.ID]);
+        }
 
-                if (Mathf.Abs(player.GetAngle() - playerState.RotationAngle) >= 0.1)
-                {
-                    player.SetRotationTargetAngle(playerState.RotationAngle);
-                }
-            }
+        if (!Ball.Owned && !ServerBall.Owned)
+        {
+            Ball.InterpolateToState(ServerBall);
         }
     }
 
@@ -198,7 +202,22 @@ public class Client : MonoBehaviour, StateHolder
         }
         else
         {
-                
+            switch (relayedAction.ActionCase)
+            {
+                case RelayedAction.ActionOneofCase.GrabAction:
+                    var player = Players[relayedAction.GrabAction.PlayerId];
+                    player.PlayGrabAnimation();
+                    if (relayedAction.Success)
+                    {
+                        StartCoroutine(DelayedAction(ActionRulesConfig.GrabDuration,
+                            () =>
+                            {
+                                var newOwner = Players[relayedAction.GrabAction.PlayerId];
+                                Ball.SetOwner(newOwner);
+                            }));
+                    }
+                    break;
+            }
         }
     }
     
@@ -235,5 +254,16 @@ public class Client : MonoBehaviour, StateHolder
         {
             Players[playerState.Id].ApplyState(playerState);
         }
+        Ball.ApplyState(state.BallState);
+    }
+
+    public void ApplyServerState(GameState state)
+    {
+        foreach (var playerState in state.PlayerStates)
+        {
+            ServerPlayers[playerState.Id].ApplyState(playerState);
+        }
+
+        ServerBall.ApplyState(state.BallState);
     }
 }

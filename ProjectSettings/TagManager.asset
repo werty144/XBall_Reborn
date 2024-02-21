@@ -26,8 +26,8 @@ TagManager:
   - Server
   - Client
   - Dummy
-  - 
-  - 
+  - ClientServer
+  - DummyServer
   - 
   - 
   - 
