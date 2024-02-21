@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Google.Protobuf;
@@ -8,6 +9,8 @@ public class MessageManagerTest : MessageManagerMaster
 {
     private CSteamID DummyID = new CSteamID(1);
     private CSteamID MyID = new CSteamID(0);
+    private TimeSpan MyPing = TimeSpan.Zero;
+    private TimeSpan DummyPing = TimeSpan.Zero;
 
     
     // Disable Ping
@@ -16,9 +19,24 @@ public class MessageManagerTest : MessageManagerMaster
         
     }
     
+    public void SetMyPing(int millis)
+    {
+        MyPing = TimeSpan.FromMilliseconds(millis);
+    }
+    
+    public void SetDummyPing(int millis)
+    {
+        DummyPing = TimeSpan.FromMilliseconds(millis);
+    }
+    
     public override void SendAction(IBufferMessage action)
     {
-        Server.ProcessAction(MyID, action);
+        StartCoroutine(
+            DelayedAction(
+                MyPing,
+            () => Server.ProcessAction(MyID, action)
+            )
+            );
     }
 
     // ---------------- IGNORE MESSAGES TO DUMMY ---------------------
@@ -26,7 +44,12 @@ public class MessageManagerTest : MessageManagerMaster
     {
         if (userID == MyID)
         {
-            GameManager.OnGameStart();
+            StartCoroutine(
+                DelayedAction(
+                    MyPing,
+                    () => GameManager.OnGameStart()
+                )
+            );
         }
     }
 
@@ -34,7 +57,22 @@ public class MessageManagerTest : MessageManagerMaster
     {
         if (userID == MyID)
         {
-            Client.ReceiveState(gameState);
+            StartCoroutine(
+                DelayedAction(
+                    MyPing,
+                    () => Client.ReceiveState(gameState)
+                )
+            );
+        }
+        else
+        {
+            var dummy = GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>();
+            StartCoroutine(
+                DelayedAction(
+                    DummyPing,
+                    () => dummy.ReceiveState(gameState)
+                )
+            );
         }
     }
 
@@ -42,18 +80,39 @@ public class MessageManagerTest : MessageManagerMaster
     {
         if (userID == MyID)
         {
-            Client.ReceiveActionResponse(actionResponse);
+            StartCoroutine(
+                DelayedAction(
+                    MyPing,
+                    () => Client.ReceiveActionResponse(actionResponse)
+                )
+            );
         }
     }
     
     // --------------------------------- DUMMY ACTIONS -----------------------------
     public void DummyReady()
     {
-        Server.PeerReady(DummyID);
+        StartCoroutine(
+            DelayedAction(
+                DummyPing,
+                () => Server.PeerReady(DummyID)
+            )
+        );
     }
 
     public void DummySendAction(IBufferMessage action)
     {
-        Server.ProcessAction(DummyID, action);
+        StartCoroutine(
+            DelayedAction(
+                DummyPing,
+                () => Server.ProcessAction(DummyID, action)
+            )
+        );
+    }
+
+    IEnumerator DelayedAction(TimeSpan delay, Action action)
+    {
+        yield return new WaitForSeconds((float)delay.TotalSeconds);
+        action();
     }
 }

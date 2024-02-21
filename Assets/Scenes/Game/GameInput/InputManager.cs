@@ -90,8 +90,10 @@ public class InputManager : MonoBehaviour
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+        int layerMask = (1 << LayerMask.NameToLayer("Server")) + (1 << LayerMask.NameToLayer("Dummy"));
+        layerMask = ~layerMask;
 
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
             if (hit.collider.gameObject.CompareTag("Player"))
             {
@@ -114,8 +116,10 @@ public class InputManager : MonoBehaviour
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+        int layerMask = (1 << LayerMask.NameToLayer("Server")) + (1 << LayerMask.NameToLayer("Dummy"));
+        layerMask = ~layerMask;
 
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
             var action = new PlayerMovementAction
             {

@@ -26,7 +26,7 @@ public class Server : MonoBehaviour, StateHolder
     private void Awake()
     {
         PlayerPrefab = Resources.Load<GameObject>("Player Variant");
-        BallPrefab = Resources.Load<GameObject>("Ball");
+        BallPrefab = Resources.Load<GameObject>("Ball Variant");
         GameStateVersioning = new GameStateVersioning(this);
     }
 
@@ -41,8 +41,7 @@ public class Server : MonoBehaviour, StateHolder
         userIDs[1] = gameStarter.Info.OpponentID;
 
         CreatePlayers(gameStarter.Info.NumberOfPlayers);
-
-        Ball = GameObject.FindWithTag("Ball").GetComponent<BallController>();
+        CreateBall();
     }
     
     private void CreatePlayers(int n)
@@ -56,8 +55,8 @@ public class Server : MonoBehaviour, StateHolder
         var fieldLength = scale.z * defaultPlaneLength;
         
         byte spareID = 0;
-        float masterZ = -fieldLength / 8;
-        float followerZ = fieldLength / 8;
+        float masterZ = -fieldLength / 4;
+        float followerZ = fieldLength / 4;
         int collisionLayer = LayerMask.NameToLayer("Server");
         for (int i = 0; i < n; i++)
         {
@@ -84,7 +83,7 @@ public class Server : MonoBehaviour, StateHolder
         {
             foreach (Renderer renderer in playerController.GetComponentsInChildren<Renderer>())
             {
-                // renderer.enabled = false;
+                renderer.enabled = false;
                 foreach (Material material in renderer.materials)
                 {
                     if (material.HasProperty("_Color"))
@@ -105,6 +104,15 @@ public class Server : MonoBehaviour, StateHolder
                 }
             }
         }
+    }
+
+    private void CreateBall()
+    {
+        int collisionLayer = LayerMask.NameToLayer("Server");
+        var ballObject = Instantiate(BallPrefab, new Vector3(0, GameConfig.SphereRadius, 0), Quaternion.identity);
+        ballObject.GetComponentInChildren<Renderer>().enabled = false;
+        ballObject.layer = collisionLayer;
+        Ball = ballObject.GetComponent<BallController>();
     }
 
     private void Update()

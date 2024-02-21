@@ -14,8 +14,8 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("LocalProblem", "Triggers connection manager's LocalProblem", LocalProblem);
         DebugLogConsole.AddCommand("CloseConnection", "Closes connection", CloseConnection);
         
-        DebugLogConsole.AddCommand("EnableDummy", "Enables dummy player", EnableDummy);
-        DebugLogConsole.AddCommand("DisableDummy", "Disables dummy player", DisableDummy);
+        DebugLogConsole.AddCommand("DummyEnable", "Enables dummy player", DummyEnable);
+        DebugLogConsole.AddCommand("DummyDisable", "Disables dummy player", DummyDisable);
         
         DebugLogConsole.AddCommand("EnableCameraMovement", "EnablesCameraMovement", EnableCameraMovement);
         DebugLogConsole.AddCommand("DisableCameraMovement", "Disables camera movement", DisableCameraMovement);
@@ -33,6 +33,13 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand<Vector3>("BallApplyVelocity", "Applies velocity to a ball", BallApplyVelocity);
         DebugLogConsole.AddCommand<uint>("BallSetOwner", "Sets ball's' owner", BallSetOwner);
         DebugLogConsole.AddCommand("BallRemoveOwner", "Removes ball's owner", BallRemoveOwner);
+        
+        DebugLogConsole.AddCommand<int>("PingSetMy", "Sets my ping", PingSetMy);
+        DebugLogConsole.AddCommand<int>("PingSetDummy", "Sets dummy's ping", PingSetDummy);
+        
+        DebugLogConsole.AddCommand("HideServerView", "Hides server's players and ball", HideServerView);
+        DebugLogConsole.AddCommand("ShowServerView", "Shows server's players and ball", ShowServerView);
+
         
         DebugLogConsole.AddCommand("Exit", "Quits the game", Exit);
         
@@ -59,12 +66,12 @@ public class DebugConsoleCommands : MonoBehaviour
         GameObject.FindWithTag("P2P").GetComponent<ConnectionManagerBase>().CloseConnection();
     }
     
-    void DisableDummy()
+    void DummyDisable()
     {
         GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>().Disable();
     }
 
-    void EnableDummy()
+    void DummyEnable()
     {
         GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>().Enable();
     }
@@ -148,5 +155,44 @@ public class DebugConsoleCommands : MonoBehaviour
     {
         var player = GameObject.FindWithTag("Server").GetComponent<Server>().GetPlayers()[playerID];
         player.SetPosition(position);
+    }
+
+    void PingSetMy(int millis)
+    {
+        GameObject.FindWithTag("P2P").GetComponent<MessageManagerTest>().SetMyPing(millis);
+        GameObject.FindWithTag("P2P").GetComponent<PingManagerTest>().SetMyPing(millis);
+    }
+    
+    void PingSetDummy(int millis)
+    {
+        GameObject.FindWithTag("P2P").GetComponent<MessageManagerTest>().SetDummyPing(millis);
+        GameObject.FindWithTag("P2P").GetComponent<PingManagerTest>().SetDummyPing(millis);
+    }
+
+    void HideServerView()
+    {
+        var server = GameObject.FindWithTag("Server").GetComponent<Server>();
+        foreach (var player in server.GetPlayers().Values)
+        {
+            foreach (Renderer renderer in player.GetComponentsInChildren<Renderer>())
+            {
+                renderer.enabled = false;
+            }
+        }
+        server.GetBall().GetComponentInChildren<Renderer>().enabled = false;
+    }
+
+    void ShowServerView()
+    {
+        var server = GameObject.FindWithTag("Server").GetComponent<Server>();
+        foreach (var player in server.GetPlayers().Values)
+        {
+            foreach (Renderer renderer in player.GetComponentsInChildren<Renderer>())
+            {
+                renderer.enabled = true;
+            }
+        }
+
+        server.GetBall().GetComponentInChildren<Renderer>().enabled = true;
     }
 }
