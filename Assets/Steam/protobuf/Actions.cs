@@ -22,20 +22,25 @@ public static partial class ActionsReflection {
   static ActionsReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cg1hY3Rpb25zLnByb3RvIlIKFFBsYXllck1vdmVtZW50QWN0aW9uEhEKCWFj",
-          "dGlvbl9pZBgBIAEoDRIRCglwbGF5ZXJfaWQYAiABKA0SCQoBeBgDIAEoAhIJ",
-          "CgF5GAQgASgCIjgKEFBsYXllclN0b3BBY3Rpb24SEQoJYWN0aW9uX2lkGAEg",
-          "ASgNEhEKCXBsYXllcl9pZBgCIAEoDSIyCgpHcmFiQWN0aW9uEhEKCWFjdGlv",
-          "bl9pZBgBIAEoDRIRCglwbGF5ZXJfaWQYAiABKA0iNAoOQWN0aW9uUmVzcG9u",
-          "c2USEQoJYWN0aW9uX2lkGAEgASgNEg8KB3N1Y2Nlc3MYAiABKAhiBnByb3Rv",
-          "Mw=="));
+          "Cg1hY3Rpb25zLnByb3RvGhJwbGF5ZXJfc3RhdGUucHJvdG8iUgoUUGxheWVy",
+          "TW92ZW1lbnRBY3Rpb24SEQoJYWN0aW9uX2lkGAEgASgNEhEKCXBsYXllcl9p",
+          "ZBgCIAEoDRIJCgF4GAMgASgCEgkKAXkYBCABKAIiOAoQUGxheWVyU3RvcEFj",
+          "dGlvbhIRCglhY3Rpb25faWQYASABKA0SEQoJcGxheWVyX2lkGAIgASgNIjIK",
+          "CkdyYWJBY3Rpb24SEQoJYWN0aW9uX2lkGAEgASgNEhEKCXBsYXllcl9pZBgC",
+          "IAEoDSJVCg1UaHJvdWdoQWN0aW9uEhEKCWFjdGlvbl9pZBgBIAEoDRIRCglw",
+          "bGF5ZXJfaWQYAiABKA0SHgoKYmFsbF9zdGF0ZRgDIAEoCzIKLkJhbGxTdGF0",
+          "ZSKJAQoNUmVsYXllZEFjdGlvbhIPCgd1c2VyX2lkGAEgASgEEiIKC2dyYWJf",
+          "YWN0aW9uGAIgASgLMgsuR3JhYkFjdGlvbkgAEigKDnRocm91Z2hfYWN0aW9u",
+          "GAMgASgLMg4uVGhyb3VnaEFjdGlvbkgAEg8KB3N1Y2Nlc3MYBCABKAhCCAoG",
+          "YWN0aW9uYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { },
+        new pbr::FileDescriptor[] { global::PlayerStateReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMovementAction), global::PlayerMovementAction.Parser, new[]{ "ActionId", "PlayerId", "X", "Y" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerStopAction), global::PlayerStopAction.Parser, new[]{ "ActionId", "PlayerId" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::GrabAction), global::GrabAction.Parser, new[]{ "ActionId", "PlayerId" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::ActionResponse), global::ActionResponse.Parser, new[]{ "ActionId", "Success" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThroughAction), global::ThroughAction.Parser, new[]{ "ActionId", "PlayerId", "BallState" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::RelayedAction), global::RelayedAction.Parser, new[]{ "UserId", "GrabAction", "ThroughAction", "Success" }, new[]{ "Action" }, null, null, null)
         }));
   }
   #endregion
@@ -798,16 +803,16 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
 }
 
 [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
+public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
 #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     , pb::IBufferMessage
 #endif
 {
-  private static readonly pb::MessageParser<ActionResponse> _parser = new pb::MessageParser<ActionResponse>(() => new ActionResponse());
+  private static readonly pb::MessageParser<ThroughAction> _parser = new pb::MessageParser<ThroughAction>(() => new ThroughAction());
   private pb::UnknownFieldSet _unknownFields;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public static pb::MessageParser<ActionResponse> Parser { get { return _parser; } }
+  public static pb::MessageParser<ThroughAction> Parser { get { return _parser; } }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -823,7 +828,7 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public ActionResponse() {
+  public ThroughAction() {
     OnConstruction();
   }
 
@@ -831,16 +836,17 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public ActionResponse(ActionResponse other) : this() {
+  public ThroughAction(ThroughAction other) : this() {
     actionId_ = other.actionId_;
-    success_ = other.success_;
+    playerId_ = other.playerId_;
+    ballState_ = other.ballState_ != null ? other.ballState_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public ActionResponse Clone() {
-    return new ActionResponse(this);
+  public ThroughAction Clone() {
+    return new ThroughAction(this);
   }
 
   /// <summary>Field number for the "action_id" field.</summary>
@@ -855,27 +861,39 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
     }
   }
 
-  /// <summary>Field number for the "success" field.</summary>
-  public const int SuccessFieldNumber = 2;
-  private bool success_;
+  /// <summary>Field number for the "player_id" field.</summary>
+  public const int PlayerIdFieldNumber = 2;
+  private uint playerId_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public bool Success {
-    get { return success_; }
+  public uint PlayerId {
+    get { return playerId_; }
     set {
-      success_ = value;
+      playerId_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "ball_state" field.</summary>
+  public const int BallStateFieldNumber = 3;
+  private global::BallState ballState_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::BallState BallState {
+    get { return ballState_; }
+    set {
+      ballState_ = value;
     }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
-    return Equals(other as ActionResponse);
+    return Equals(other as ThroughAction);
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public bool Equals(ActionResponse other) {
+  public bool Equals(ThroughAction other) {
     if (ReferenceEquals(other, null)) {
       return false;
     }
@@ -883,7 +901,8 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
       return true;
     }
     if (ActionId != other.ActionId) return false;
-    if (Success != other.Success) return false;
+    if (PlayerId != other.PlayerId) return false;
+    if (!object.Equals(BallState, other.BallState)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -892,7 +911,8 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
   public override int GetHashCode() {
     int hash = 1;
     if (ActionId != 0) hash ^= ActionId.GetHashCode();
-    if (Success != false) hash ^= Success.GetHashCode();
+    if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
+    if (ballState_ != null) hash ^= BallState.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -915,9 +935,13 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
       output.WriteRawTag(8);
       output.WriteUInt32(ActionId);
     }
-    if (Success != false) {
+    if (PlayerId != 0) {
       output.WriteRawTag(16);
-      output.WriteBool(Success);
+      output.WriteUInt32(PlayerId);
+    }
+    if (ballState_ != null) {
+      output.WriteRawTag(26);
+      output.WriteMessage(BallState);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -933,9 +957,13 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
       output.WriteRawTag(8);
       output.WriteUInt32(ActionId);
     }
-    if (Success != false) {
+    if (PlayerId != 0) {
       output.WriteRawTag(16);
-      output.WriteBool(Success);
+      output.WriteUInt32(PlayerId);
+    }
+    if (ballState_ != null) {
+      output.WriteRawTag(26);
+      output.WriteMessage(BallState);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -950,8 +978,11 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
     if (ActionId != 0) {
       size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ActionId);
     }
-    if (Success != false) {
-      size += 1 + 1;
+    if (PlayerId != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerId);
+    }
+    if (ballState_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(BallState);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -961,15 +992,21 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public void MergeFrom(ActionResponse other) {
+  public void MergeFrom(ThroughAction other) {
     if (other == null) {
       return;
     }
     if (other.ActionId != 0) {
       ActionId = other.ActionId;
     }
-    if (other.Success != false) {
-      Success = other.Success;
+    if (other.PlayerId != 0) {
+      PlayerId = other.PlayerId;
+    }
+    if (other.ballState_ != null) {
+      if (ballState_ == null) {
+        BallState = new global::BallState();
+      }
+      BallState.MergeFrom(other.BallState);
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -991,7 +1028,14 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
           break;
         }
         case 16: {
-          Success = input.ReadBool();
+          PlayerId = input.ReadUInt32();
+          break;
+        }
+        case 26: {
+          if (ballState_ == null) {
+            BallState = new global::BallState();
+          }
+          input.ReadMessage(BallState);
           break;
         }
       }
@@ -1014,6 +1058,373 @@ public sealed partial class ActionResponse : pb::IMessage<ActionResponse>
           break;
         }
         case 16: {
+          PlayerId = input.ReadUInt32();
+          break;
+        }
+        case 26: {
+          if (ballState_ == null) {
+            BallState = new global::BallState();
+          }
+          input.ReadMessage(BallState);
+          break;
+        }
+      }
+    }
+  }
+  #endif
+
+}
+
+[global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+public sealed partial class RelayedAction : pb::IMessage<RelayedAction>
+#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    , pb::IBufferMessage
+#endif
+{
+  private static readonly pb::MessageParser<RelayedAction> _parser = new pb::MessageParser<RelayedAction>(() => new RelayedAction());
+  private pb::UnknownFieldSet _unknownFields;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public static pb::MessageParser<RelayedAction> Parser { get { return _parser; } }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public static pbr::MessageDescriptor Descriptor {
+    get { return global::ActionsReflection.Descriptor.MessageTypes[4]; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  pbr::MessageDescriptor pb::IMessage.Descriptor {
+    get { return Descriptor; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public RelayedAction() {
+    OnConstruction();
+  }
+
+  partial void OnConstruction();
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public RelayedAction(RelayedAction other) : this() {
+    userId_ = other.userId_;
+    success_ = other.success_;
+    switch (other.ActionCase) {
+      case ActionOneofCase.GrabAction:
+        GrabAction = other.GrabAction.Clone();
+        break;
+      case ActionOneofCase.ThroughAction:
+        ThroughAction = other.ThroughAction.Clone();
+        break;
+    }
+
+    _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public RelayedAction Clone() {
+    return new RelayedAction(this);
+  }
+
+  /// <summary>Field number for the "user_id" field.</summary>
+  public const int UserIdFieldNumber = 1;
+  private ulong userId_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ulong UserId {
+    get { return userId_; }
+    set {
+      userId_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "grab_action" field.</summary>
+  public const int GrabActionFieldNumber = 2;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::GrabAction GrabAction {
+    get { return actionCase_ == ActionOneofCase.GrabAction ? (global::GrabAction) action_ : null; }
+    set {
+      action_ = value;
+      actionCase_ = value == null ? ActionOneofCase.None : ActionOneofCase.GrabAction;
+    }
+  }
+
+  /// <summary>Field number for the "through_action" field.</summary>
+  public const int ThroughActionFieldNumber = 3;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThroughAction ThroughAction {
+    get { return actionCase_ == ActionOneofCase.ThroughAction ? (global::ThroughAction) action_ : null; }
+    set {
+      action_ = value;
+      actionCase_ = value == null ? ActionOneofCase.None : ActionOneofCase.ThroughAction;
+    }
+  }
+
+  /// <summary>Field number for the "success" field.</summary>
+  public const int SuccessFieldNumber = 4;
+  private bool success_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool Success {
+    get { return success_; }
+    set {
+      success_ = value;
+    }
+  }
+
+  private object action_;
+  /// <summary>Enum of possible cases for the "action" oneof.</summary>
+  public enum ActionOneofCase {
+    None = 0,
+    GrabAction = 2,
+    ThroughAction = 3,
+  }
+  private ActionOneofCase actionCase_ = ActionOneofCase.None;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ActionOneofCase ActionCase {
+    get { return actionCase_; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void ClearAction() {
+    actionCase_ = ActionOneofCase.None;
+    action_ = null;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override bool Equals(object other) {
+    return Equals(other as RelayedAction);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool Equals(RelayedAction other) {
+    if (ReferenceEquals(other, null)) {
+      return false;
+    }
+    if (ReferenceEquals(other, this)) {
+      return true;
+    }
+    if (UserId != other.UserId) return false;
+    if (!object.Equals(GrabAction, other.GrabAction)) return false;
+    if (!object.Equals(ThroughAction, other.ThroughAction)) return false;
+    if (Success != other.Success) return false;
+    if (ActionCase != other.ActionCase) return false;
+    return Equals(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override int GetHashCode() {
+    int hash = 1;
+    if (UserId != 0UL) hash ^= UserId.GetHashCode();
+    if (actionCase_ == ActionOneofCase.GrabAction) hash ^= GrabAction.GetHashCode();
+    if (actionCase_ == ActionOneofCase.ThroughAction) hash ^= ThroughAction.GetHashCode();
+    if (Success != false) hash ^= Success.GetHashCode();
+    hash ^= (int) actionCase_;
+    if (_unknownFields != null) {
+      hash ^= _unknownFields.GetHashCode();
+    }
+    return hash;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override string ToString() {
+    return pb::JsonFormatter.ToDiagnosticString(this);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void WriteTo(pb::CodedOutputStream output) {
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    output.WriteRawMessage(this);
+  #else
+    if (UserId != 0UL) {
+      output.WriteRawTag(8);
+      output.WriteUInt64(UserId);
+    }
+    if (actionCase_ == ActionOneofCase.GrabAction) {
+      output.WriteRawTag(18);
+      output.WriteMessage(GrabAction);
+    }
+    if (actionCase_ == ActionOneofCase.ThroughAction) {
+      output.WriteRawTag(26);
+      output.WriteMessage(ThroughAction);
+    }
+    if (Success != false) {
+      output.WriteRawTag(32);
+      output.WriteBool(Success);
+    }
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(output);
+    }
+  #endif
+  }
+
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+    if (UserId != 0UL) {
+      output.WriteRawTag(8);
+      output.WriteUInt64(UserId);
+    }
+    if (actionCase_ == ActionOneofCase.GrabAction) {
+      output.WriteRawTag(18);
+      output.WriteMessage(GrabAction);
+    }
+    if (actionCase_ == ActionOneofCase.ThroughAction) {
+      output.WriteRawTag(26);
+      output.WriteMessage(ThroughAction);
+    }
+    if (Success != false) {
+      output.WriteRawTag(32);
+      output.WriteBool(Success);
+    }
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(ref output);
+    }
+  }
+  #endif
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public int CalculateSize() {
+    int size = 0;
+    if (UserId != 0UL) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt64Size(UserId);
+    }
+    if (actionCase_ == ActionOneofCase.GrabAction) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(GrabAction);
+    }
+    if (actionCase_ == ActionOneofCase.ThroughAction) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(ThroughAction);
+    }
+    if (Success != false) {
+      size += 1 + 1;
+    }
+    if (_unknownFields != null) {
+      size += _unknownFields.CalculateSize();
+    }
+    return size;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void MergeFrom(RelayedAction other) {
+    if (other == null) {
+      return;
+    }
+    if (other.UserId != 0UL) {
+      UserId = other.UserId;
+    }
+    if (other.Success != false) {
+      Success = other.Success;
+    }
+    switch (other.ActionCase) {
+      case ActionOneofCase.GrabAction:
+        if (GrabAction == null) {
+          GrabAction = new global::GrabAction();
+        }
+        GrabAction.MergeFrom(other.GrabAction);
+        break;
+      case ActionOneofCase.ThroughAction:
+        if (ThroughAction == null) {
+          ThroughAction = new global::ThroughAction();
+        }
+        ThroughAction.MergeFrom(other.ThroughAction);
+        break;
+    }
+
+    _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void MergeFrom(pb::CodedInputStream input) {
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    input.ReadRawMessage(this);
+  #else
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+          break;
+        case 8: {
+          UserId = input.ReadUInt64();
+          break;
+        }
+        case 18: {
+          global::GrabAction subBuilder = new global::GrabAction();
+          if (actionCase_ == ActionOneofCase.GrabAction) {
+            subBuilder.MergeFrom(GrabAction);
+          }
+          input.ReadMessage(subBuilder);
+          GrabAction = subBuilder;
+          break;
+        }
+        case 26: {
+          global::ThroughAction subBuilder = new global::ThroughAction();
+          if (actionCase_ == ActionOneofCase.ThroughAction) {
+            subBuilder.MergeFrom(ThroughAction);
+          }
+          input.ReadMessage(subBuilder);
+          ThroughAction = subBuilder;
+          break;
+        }
+        case 32: {
+          Success = input.ReadBool();
+          break;
+        }
+      }
+    }
+  #endif
+  }
+
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+          break;
+        case 8: {
+          UserId = input.ReadUInt64();
+          break;
+        }
+        case 18: {
+          global::GrabAction subBuilder = new global::GrabAction();
+          if (actionCase_ == ActionOneofCase.GrabAction) {
+            subBuilder.MergeFrom(GrabAction);
+          }
+          input.ReadMessage(subBuilder);
+          GrabAction = subBuilder;
+          break;
+        }
+        case 26: {
+          global::ThroughAction subBuilder = new global::ThroughAction();
+          if (actionCase_ == ActionOneofCase.ThroughAction) {
+            subBuilder.MergeFrom(ThroughAction);
+          }
+          input.ReadMessage(subBuilder);
+          ThroughAction = subBuilder;
+          break;
+        }
+        case 32: {
           Success = input.ReadBool();
           break;
         }

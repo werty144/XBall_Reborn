@@ -68,12 +68,18 @@ public class DebugConsoleCommands : MonoBehaviour
     
     void DummyDisable()
     {
-        GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>().Disable();
+        foreach (var component in GameObject.FindWithTag("Dummy").GetComponents<MonoBehaviour>())
+        {
+            component.enabled = false;
+        }
     }
 
     void DummyEnable()
     {
-        GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>().Enable();
+        foreach (var component in GameObject.FindWithTag("Dummy").GetComponents<MonoBehaviour>())
+        {
+            component.enabled = true;
+        }
     }
 
     void DisableCameraMovement()

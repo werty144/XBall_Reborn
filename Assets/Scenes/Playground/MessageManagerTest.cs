@@ -66,7 +66,7 @@ public class MessageManagerTest : MessageManagerMaster
         }
         else
         {
-            var dummy = GameObject.FindWithTag("Dummy").GetComponent<DummyPlayer>();
+            var dummy = GameObject.FindWithTag("Dummy").GetComponent<ClientDummy>();
             StartCoroutine(
                 DelayedAction(
                     DummyPing,
@@ -76,14 +76,24 @@ public class MessageManagerTest : MessageManagerMaster
         }
     }
 
-    public override void SendActionResponse(CSteamID userID, ActionResponse actionResponse)
+    public override void RelayAction(CSteamID userID, RelayedAction relayedAction)
     {
         if (userID == MyID)
         {
             StartCoroutine(
                 DelayedAction(
                     MyPing,
-                    () => Client.ReceiveActionResponse(actionResponse)
+                    () => Client.ReceiveRelayedAction(relayedAction)
+                )
+            );
+        }
+        else
+        {
+            var dummy = GameObject.FindWithTag("Dummy").GetComponent<ClientDummy>();
+            StartCoroutine(
+                DelayedAction(
+                    DummyPing,
+                    () => dummy.ReceiveRelayedAction(relayedAction)
                 )
             );
         }

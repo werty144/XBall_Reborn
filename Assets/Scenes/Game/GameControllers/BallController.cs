@@ -44,8 +44,9 @@ public class BallController : MonoBehaviour
         if (Owned)
         {
             var ownerPosition = Owner.GetPosition();
-            transform.position = new Vector3(ownerPosition.x, PlayerConfig.Height * 2 + GameConfig.SphereRadius,
+            var targetPosition = new Vector3(ownerPosition.x, PlayerConfig.Height * 2 + GameConfig.SphereRadius,
                 ownerPosition.y);
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 20f);
         }
     }
 }

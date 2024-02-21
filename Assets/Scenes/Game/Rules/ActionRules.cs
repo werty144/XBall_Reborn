@@ -6,6 +6,8 @@ public struct ActionRulesConfig
 {
     public static float GrabRadius = 2f;
     public static float GrabAngle = 120;
+
+    public static int GrabDuration = 200; // millis
 }
 
 public static class ActionRules

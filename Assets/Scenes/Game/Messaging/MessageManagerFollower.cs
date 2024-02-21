@@ -87,9 +87,9 @@ public class MessageManagerFollower : MonoBehaviour, MessageManager
                 var gameState = ParseUtils.UnmarshalGameState(message);
                 Client.ReceiveState(gameState);
                 break;
-            case (byte)MessageType.ActionResponse:
-                var actionResponse = ParseUtils.UnmarshalActionResponse(message);
-                Client.ReceiveActionResponse(actionResponse);
+            case (byte)MessageType.RelayedAction:
+                var relayedAction = ParseUtils.UnmarshalRelayedAction(message);
+                Client.ReceiveRelayedAction(relayedAction);
                 break;
         }
     }

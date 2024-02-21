@@ -102,22 +102,22 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
         }
     }
     
-    public virtual void SendActionResponse(CSteamID userID, ActionResponse actionResponse)
+    public virtual void RelayAction(CSteamID userID, RelayedAction relayedAction)
     {
         if (userID == Steam.MySteamID())
         {
-            Client.ReceiveActionResponse(actionResponse);
+            Client.ReceiveRelayedAction(relayedAction);
         }
         else
         {
             using MemoryStream stream = new MemoryStream();
-            stream.WriteByte((byte)MessageType.ActionResponse);
-            actionResponse.WriteTo(stream);
+            stream.WriteByte((byte)MessageType.RelayedAction);
+            relayedAction.WriteTo(stream);
             byte[] bytes = stream.ToArray();
             ConnectionManager.SendMessage(bytes);
         }
     }
-
+    
     // ----------------------------- PROCESS MESSAGES --------------------------------
     public void ProcessMessage(byte[] message)
     {

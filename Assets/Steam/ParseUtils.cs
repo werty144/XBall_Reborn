@@ -81,14 +81,14 @@ public static class ParseUtils
         return gameState;
     }
 
-    public static ActionResponse UnmarshalActionResponse(byte[] message)
+    public static RelayedAction UnmarshalRelayedAction(byte[] message)
     {
-        ActionResponse actionResponse;
-        Assert.AreEqual((byte)MessageType.ActionResponse, message[0]);
+        RelayedAction relayedAction;
+        Assert.AreEqual((byte)MessageType.RelayedAction, message[0]);
         using MemoryStream stream = new MemoryStream(message, 1, message.Length - 1);
         try
         {
-            actionResponse = ActionResponse.Parser.ParseFrom(stream);
+            relayedAction = RelayedAction.Parser.ParseFrom(stream);
         }
         catch (InvalidProtocolBufferException e)
         {
@@ -96,7 +96,7 @@ public static class ParseUtils
             return null;
         }
 
-        return actionResponse;
+        return relayedAction;
     }
     
     public static uint GetActionId(IBufferMessage mbAction)

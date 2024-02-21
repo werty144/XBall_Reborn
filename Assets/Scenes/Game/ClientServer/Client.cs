@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Google.Protobuf;
 using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public class Client : MonoBehaviour, StateHolder
 {
@@ -13,15 +15,20 @@ public class Client : MonoBehaviour, StateHolder
 
     protected MessageManager MessageManager;
     
-    private Dictionary<uint, PlayerController> Players = new();
-    private BallController Ball;
+    protected Dictionary<uint, PlayerController> Players = new();
+    protected BallController Ball;
     protected GameStateVersioning GameStateVersioning;
     private uint NextActionId = 1;
+    private Dictionary<uint, Stopwatch> ActionTimers = new();
 
-    private void Awake()
+    protected ulong MyID;
+
+    protected virtual void Awake()
     {
         var global = GameObject.FindWithTag("Global");
         var setupInfo = global.GetComponent<GameStarter>().Info;
+
+        MyID = setupInfo.MyID.m_SteamID;
         
         CreatePlayers(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
         CreateBall();
@@ -29,7 +36,7 @@ public class Client : MonoBehaviour, StateHolder
         GameStateVersioning = new GameStateVersioning(this);
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
     }
@@ -85,12 +92,10 @@ public class Client : MonoBehaviour, StateHolder
     public void InputAction(IBufferMessage action)
     {
         PlayerController player;
-        // Optimistic execution
         switch (action)
         {
             case PlayerMovementAction playerMovementAction:
                 player = Players[playerMovementAction.PlayerId];
-                //Invalid action
                 if (!player.IsMy) { return; }
                 
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
@@ -101,7 +106,6 @@ public class Client : MonoBehaviour, StateHolder
                 break;
             case PlayerStopAction playerStopAction:
                 player = Players[playerStopAction.PlayerId];
-                //Invalid action
                 if (!player.IsMy) { return; }
 
                 player.Stop();
@@ -110,7 +114,6 @@ public class Client : MonoBehaviour, StateHolder
                 break;
             case GrabAction grabAction:
                 player = Players[grabAction.PlayerId];
-                //Invalid action
                 if (!player.IsMy) { return; }
                 player.PlayGrabAnimation();
                 if (!ActionRules.IsValidGrab(player.transform, Ball.transform))
@@ -118,6 +121,7 @@ public class Client : MonoBehaviour, StateHolder
                     return;
                 }
                 grabAction.ActionId = NextActionId;
+                ActionTimers[grabAction.ActionId] = Stopwatch.StartNew();
                 NextActionId++;
                 break;
             default:
@@ -166,13 +170,42 @@ public class Client : MonoBehaviour, StateHolder
         }
     }
 
-    public void ReceiveActionResponse(ActionResponse actionResponse)
+    public void ReceiveRelayedAction(RelayedAction relayedAction)
     {
-        // if (!PlayerToLastAction.ContainsValue(actionResponse.ActionId))
-        // {
-        //     return;
-        // }
-        // ReceiveState(actionResponse.GameState);
+        if (relayedAction.UserId == MyID)
+        {
+            if (relayedAction.Success == false)
+            {
+                return;
+            }
+
+            switch (relayedAction.ActionCase)
+            {
+                case RelayedAction.ActionOneofCase.GrabAction:
+                    var timer = ActionTimers[relayedAction.GrabAction.ActionId];
+                    ActionTimers.Remove(relayedAction.GrabAction.ActionId);
+                    timer.Stop();
+                    var timePassed = timer.ElapsedMilliseconds;
+                    var timeLeft = Mathf.Max(0, ActionRulesConfig.GrabDuration - (int)timePassed);
+                    StartCoroutine(DelayedAction(timeLeft,
+                        () =>
+                        {
+                            var newOwner = Players[relayedAction.GrabAction.PlayerId];
+                            Ball.SetOwner(newOwner);
+                        }));
+                    break;
+            }
+        }
+        else
+        {
+                
+        }
+    }
+    
+    IEnumerator DelayedAction(int millis, Action action)
+    {
+        yield return new WaitForSeconds(0.001f * millis);
+        action();
     }
     
     public GameState GetGameState()

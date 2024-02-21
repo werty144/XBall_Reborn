@@ -124,23 +124,33 @@ public class Server : MonoBehaviour, StateHolder
     public void ProcessAction(CSteamID actorID, IBufferMessage action)
     {
         if (OnPause) {return;}
-
-        if (IsConflictingAction(action))
+        
+        switch (action)
         {
-            switch (action)
-            {
-                case GrabAction grabAction:
-                    GameStateVersioning.ApplyActionToCurrentState(grabAction);
-                    break;
-                default:
-                    Debug.LogWarning("Unknown action");
-                    break;
-            }
-        }
-        else
-        {
-            GameStateVersioning.ApplyActionToCurrentState(action);
-            MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
+            case PlayerMovementAction:
+                GameStateVersioning.ApplyActionToCurrentState(action);
+                MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
+                break;
+            case PlayerStopAction:
+                GameStateVersioning.ApplyActionToCurrentState(action);
+                MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
+                break;  
+            case GrabAction grabAction:
+                GameStateVersioning.ApplyActionToCurrentState(grabAction);
+                var relayedAction = new RelayedAction
+                {
+                    UserId = actorID.m_SteamID,
+                    GrabAction = grabAction,
+                    Success = true
+                };
+                foreach (var userID in userIDs)
+                {
+                    MessageManager.RelayAction(userID, relayedAction);
+                }
+                break;
+            default:
+                Debug.LogWarning("Unknown action");
+                break;
         }
         
         // var actorPing = PingManager.GetPingToUser(actorID);
@@ -169,22 +179,6 @@ public class Server : MonoBehaviour, StateHolder
         //
         //     ApplyGameState(currentState);
         // }
-    }
-
-    private bool IsConflictingAction(IBufferMessage action)
-    {
-        switch (action)
-        {
-            case PlayerMovementAction:
-                return false;
-            case PlayerStopAction:
-                return false;
-            case GrabAction:
-                return true;
-            default:
-                Debug.LogWarning("Unknown action");
-                return true;
-        }
     }
 
     private CSteamID GetAnotherID(CSteamID userID)
