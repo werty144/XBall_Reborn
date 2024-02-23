@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using IngameDebugConsole;
 using Steamworks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DebugConsoleCommands : MonoBehaviour
@@ -31,6 +32,7 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand<Vector3>("BallPlace", "Places the ball to a given position", BallPlace);
         DebugLogConsole.AddCommand<Vector3>("BallApplyVelocity", "Applies velocity to a ball", BallApplyVelocity);
+        DebugLogConsole.AddCommand<Vector3>("BallThrowTo", "Throws a ball to a given destination", BallThrowTo);
         DebugLogConsole.AddCommand<uint>("BallSetOwner", "Sets ball's' owner", BallSetOwner);
         DebugLogConsole.AddCommand("BallRemoveOwner", "Removes ball's owner", BallRemoveOwner);
         
@@ -119,7 +121,7 @@ public class DebugConsoleCommands : MonoBehaviour
 
     void BallPlace(Vector3 position)
     {
-        var ball = GameObject.FindWithTag("Ball");
+        var ball = GameObject.FindWithTag("Server").GetComponent<Server>().GetBall();
         ball.GetComponent<Rigidbody>().velocity = Vector3.zero;
         ball.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         ball.transform.position = position;
@@ -127,8 +129,16 @@ public class DebugConsoleCommands : MonoBehaviour
 
     void BallApplyVelocity(Vector3 velocity)
     {
-        var ball = GameObject.FindWithTag("Ball");
+        var ball = GameObject.FindWithTag("Server").GetComponent<Server>().GetBall();
         ball.GetComponent<Rigidbody>().velocity = velocity;
+    }
+
+    void BallThrowTo(Vector3 destination)
+    {
+        Instantiate(Resources.Load<GameObject>("TargetMarker/TargetMarker"), destination, Quaternion.identity);
+        
+        var ball = GameObject.FindWithTag("Server").GetComponent<Server>().GetBall();
+        ball.ThrowTo(destination);
     }
 
     void BallSetOwner(uint playerID)

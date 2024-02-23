@@ -207,8 +207,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7dfa9c3120ec7abeb5eb560c9156dc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerPrefab: {fileID: 0}
-  BallPrefab: {fileID: 0}
+  PlayerPrefab: {fileID: 5395654648800661422, guid: 935265c851c72aaa28eb8dd03d2c0b52, type: 3}
+  BallPrefab: {fileID: 7668133164203131654, guid: bbbd3e1119399ef6ba07505ebf8b1281, type: 3}
 --- !u!1001 &298412755
 PrefabInstance:
   m_ObjectHideFlags: 0

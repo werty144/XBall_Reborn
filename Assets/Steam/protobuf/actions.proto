@@ -22,7 +22,7 @@ message GrabAction {
 message ThroughAction {
   uint32 action_id = 1;
   uint32 player_id = 2;
-  BallState ball_state = 3;
+  Vector3ProtoBuf destination = 3;
 }
 
 message RelayedAction {

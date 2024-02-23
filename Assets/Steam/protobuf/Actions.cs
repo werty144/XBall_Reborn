@@ -27,19 +27,19 @@ public static partial class ActionsReflection {
           "ZBgCIAEoDRIJCgF4GAMgASgCEgkKAXkYBCABKAIiOAoQUGxheWVyU3RvcEFj",
           "dGlvbhIRCglhY3Rpb25faWQYASABKA0SEQoJcGxheWVyX2lkGAIgASgNIjIK",
           "CkdyYWJBY3Rpb24SEQoJYWN0aW9uX2lkGAEgASgNEhEKCXBsYXllcl9pZBgC",
-          "IAEoDSJVCg1UaHJvdWdoQWN0aW9uEhEKCWFjdGlvbl9pZBgBIAEoDRIRCglw",
-          "bGF5ZXJfaWQYAiABKA0SHgoKYmFsbF9zdGF0ZRgDIAEoCzIKLkJhbGxTdGF0",
-          "ZSKJAQoNUmVsYXllZEFjdGlvbhIPCgd1c2VyX2lkGAEgASgEEiIKC2dyYWJf",
-          "YWN0aW9uGAIgASgLMgsuR3JhYkFjdGlvbkgAEigKDnRocm91Z2hfYWN0aW9u",
-          "GAMgASgLMg4uVGhyb3VnaEFjdGlvbkgAEg8KB3N1Y2Nlc3MYBCABKAhCCAoG",
-          "YWN0aW9uYgZwcm90bzM="));
+          "IAEoDSJcCg1UaHJvdWdoQWN0aW9uEhEKCWFjdGlvbl9pZBgBIAEoDRIRCglw",
+          "bGF5ZXJfaWQYAiABKA0SJQoLZGVzdGluYXRpb24YAyABKAsyEC5WZWN0b3Iz",
+          "UHJvdG9CdWYiiQEKDVJlbGF5ZWRBY3Rpb24SDwoHdXNlcl9pZBgBIAEoBBIi",
+          "CgtncmFiX2FjdGlvbhgCIAEoCzILLkdyYWJBY3Rpb25IABIoCg50aHJvdWdo",
+          "X2FjdGlvbhgDIAEoCzIOLlRocm91Z2hBY3Rpb25IABIPCgdzdWNjZXNzGAQg",
+          "ASgIQggKBmFjdGlvbmIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::PlayerStateReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMovementAction), global::PlayerMovementAction.Parser, new[]{ "ActionId", "PlayerId", "X", "Y" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerStopAction), global::PlayerStopAction.Parser, new[]{ "ActionId", "PlayerId" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::GrabAction), global::GrabAction.Parser, new[]{ "ActionId", "PlayerId" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThroughAction), global::ThroughAction.Parser, new[]{ "ActionId", "PlayerId", "BallState" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThroughAction), global::ThroughAction.Parser, new[]{ "ActionId", "PlayerId", "Destination" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::RelayedAction), global::RelayedAction.Parser, new[]{ "UserId", "GrabAction", "ThroughAction", "Success" }, new[]{ "Action" }, null, null, null)
         }));
   }
@@ -839,7 +839,7 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
   public ThroughAction(ThroughAction other) : this() {
     actionId_ = other.actionId_;
     playerId_ = other.playerId_;
-    ballState_ = other.ballState_ != null ? other.ballState_.Clone() : null;
+    destination_ = other.destination_ != null ? other.destination_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -873,15 +873,15 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
     }
   }
 
-  /// <summary>Field number for the "ball_state" field.</summary>
-  public const int BallStateFieldNumber = 3;
-  private global::BallState ballState_;
+  /// <summary>Field number for the "destination" field.</summary>
+  public const int DestinationFieldNumber = 3;
+  private global::Vector3ProtoBuf destination_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::BallState BallState {
-    get { return ballState_; }
+  public global::Vector3ProtoBuf Destination {
+    get { return destination_; }
     set {
-      ballState_ = value;
+      destination_ = value;
     }
   }
 
@@ -902,7 +902,7 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
     }
     if (ActionId != other.ActionId) return false;
     if (PlayerId != other.PlayerId) return false;
-    if (!object.Equals(BallState, other.BallState)) return false;
+    if (!object.Equals(Destination, other.Destination)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -912,7 +912,7 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
     int hash = 1;
     if (ActionId != 0) hash ^= ActionId.GetHashCode();
     if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
-    if (ballState_ != null) hash ^= BallState.GetHashCode();
+    if (destination_ != null) hash ^= Destination.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -939,9 +939,9 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
       output.WriteRawTag(16);
       output.WriteUInt32(PlayerId);
     }
-    if (ballState_ != null) {
+    if (destination_ != null) {
       output.WriteRawTag(26);
-      output.WriteMessage(BallState);
+      output.WriteMessage(Destination);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -961,9 +961,9 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
       output.WriteRawTag(16);
       output.WriteUInt32(PlayerId);
     }
-    if (ballState_ != null) {
+    if (destination_ != null) {
       output.WriteRawTag(26);
-      output.WriteMessage(BallState);
+      output.WriteMessage(Destination);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -981,8 +981,8 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
     if (PlayerId != 0) {
       size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerId);
     }
-    if (ballState_ != null) {
-      size += 1 + pb::CodedOutputStream.ComputeMessageSize(BallState);
+    if (destination_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Destination);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -1002,11 +1002,11 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
     if (other.PlayerId != 0) {
       PlayerId = other.PlayerId;
     }
-    if (other.ballState_ != null) {
-      if (ballState_ == null) {
-        BallState = new global::BallState();
+    if (other.destination_ != null) {
+      if (destination_ == null) {
+        Destination = new global::Vector3ProtoBuf();
       }
-      BallState.MergeFrom(other.BallState);
+      Destination.MergeFrom(other.Destination);
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -1032,10 +1032,10 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
           break;
         }
         case 26: {
-          if (ballState_ == null) {
-            BallState = new global::BallState();
+          if (destination_ == null) {
+            Destination = new global::Vector3ProtoBuf();
           }
-          input.ReadMessage(BallState);
+          input.ReadMessage(Destination);
           break;
         }
       }
@@ -1062,10 +1062,10 @@ public sealed partial class ThroughAction : pb::IMessage<ThroughAction>
           break;
         }
         case 26: {
-          if (ballState_ == null) {
-            BallState = new global::BallState();
+          if (destination_ == null) {
+            Destination = new global::Vector3ProtoBuf();
           }
-          input.ReadMessage(BallState);
+          input.ReadMessage(Destination);
           break;
         }
       }

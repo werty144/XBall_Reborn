@@ -96,4 +96,37 @@ public BallState GetState()
             transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 20f);
         }
     }
+
+    public void ThrowTo(Vector3 target)
+    {
+        Owned = false;
+
+        var ballPosition = transform.position;
+        Vector3 ballToTarget = target - ballPosition;
+        if (ballToTarget.magnitude < 0.1)
+        {
+            return;
+        }
+        Vector3 ballToTargetXZ = new Vector3(ballToTarget.x, 0, ballToTarget.z);
+        float dot = Vector3.Dot(ballToTarget.normalized, Vector3.up);
+        float angleRadians = Mathf.Acos(dot);
+        float launchAngleRadians = (Mathf.PI - angleRadians) * 0.5f;
+        float horizontalDistance = ballToTargetXZ.magnitude;
+        float heightDifference = target.y - ballPosition.y;
+
+        if (horizontalDistance < 0.1f)
+        {
+            float velocity = Mathf.Sqrt(2 * Mathf.Abs(Physics.gravity.y) * (heightDifference + 0.5f));
+            GetComponent<Rigidbody>().velocity = ballToTarget.normalized * velocity;
+            return;
+        }
+        
+        float gravity = Physics.gravity.magnitude;
+        float velocityMagnitude = Mathf.Sqrt((gravity * horizontalDistance * horizontalDistance) / 
+                                             (2 * Mathf.Cos(launchAngleRadians) * Mathf.Cos(launchAngleRadians) * (horizontalDistance * Mathf.Tan(launchAngleRadians) - heightDifference)));
+
+        Vector3 toTargetXZ = ballToTargetXZ.normalized;
+        var launchVelocity = toTargetXZ * Mathf.Cos(launchAngleRadians) * velocityMagnitude + Vector3.up * Mathf.Sin(launchAngleRadians) * velocityMagnitude;
+        GetComponent<Rigidbody>().velocity = launchVelocity;
+    }
 }
