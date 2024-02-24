@@ -9,6 +9,8 @@ public class InputManager : MonoBehaviour
     
     private GameObject selectedPlayer;
 
+    private bool ThrowIntention;
+
     private void Start()
     {
         Client = GameObject.FindWithTag("Client").GetComponent<Client>();
@@ -40,6 +42,16 @@ public class InputManager : MonoBehaviour
         {
             SelectNextPlayer();
         }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            ProcessThroughIntention();
+        }
+    }
+
+    void ProcessThroughIntention()
+    {
+        ThrowIntention = true;
     }
 
     void DeselectPlayer()
@@ -99,6 +111,17 @@ public class InputManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
+            if (ThrowIntention)
+            {
+                Instantiate(Resources.Load<GameObject>("TargetMarker/TargetMarker"), hit.point, Quaternion.identity);
+                var action = new ThrowAction
+                {
+                    Destination = ProtobufUtils.ToVector3ProtoBuf(hit.point)
+                };
+                Client.InputAction(action);
+                ThrowIntention = false;
+                return;
+            }
             if (hit.collider.gameObject.CompareTag("Player"))
             {
                 DeselectPlayer();

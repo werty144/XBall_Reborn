@@ -19,7 +19,7 @@ message GrabAction {
   uint32 player_id = 2;
 }
 
-message ThroughAction {
+message ThrowAction {
   uint32 action_id = 1;
   uint32 player_id = 2;
   Vector3ProtoBuf destination = 3;
@@ -29,7 +29,7 @@ message RelayedAction {
   uint64 user_id = 1;
   oneof action {
     GrabAction grab_action = 2;
-    ThroughAction through_action = 3;
+    ThrowAction throw_action = 3;
   }
   bool success = 4;
 }

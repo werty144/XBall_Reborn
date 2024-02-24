@@ -17,6 +17,7 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand("DummyEnable", "Enables dummy player", DummyEnable);
         DebugLogConsole.AddCommand("DummyDisable", "Disables dummy player", DummyDisable);
+        DebugLogConsole.AddCommand("StartGameDummy", "Ment to be called from Menu. Switches to the Game Scene with dummy", StartGameDummy);
         
         DebugLogConsole.AddCommand("EnableCameraMovement", "EnablesCameraMovement", EnableCameraMovement);
         DebugLogConsole.AddCommand("DisableCameraMovement", "Disables camera movement", DisableCameraMovement);
@@ -210,5 +211,19 @@ public class DebugConsoleCommands : MonoBehaviour
         }
 
         server.GetBall().GetComponentInChildren<Renderer>().enabled = true;
+    }
+
+    void StartGameDummy()
+    {
+        var gameStarter = GameObject.FindWithTag("Global").GetComponent<GameStarter>();
+        gameStarter.IsTest = true;
+        var setUpInfo = new SetupInfo
+        {
+            IAmMaster = true,
+            MyID = new CSteamID(0),
+            NumberOfPlayers = 3,
+            OpponentID = new CSteamID(1)
+        };
+        gameStarter.Initiate(setUpInfo);
     }
 }

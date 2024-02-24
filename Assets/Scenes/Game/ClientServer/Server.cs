@@ -120,7 +120,7 @@ public class Server : MonoBehaviour, StateHolder
                 break;  
             case GrabAction grabAction:
                 GameStateVersioning.ApplyActionToCurrentState(grabAction);
-                var relayedAction = new RelayedAction
+                var relayedGrabAction = new RelayedAction
                 {
                     UserId = actorID.m_SteamID,
                     GrabAction = grabAction,
@@ -128,7 +128,25 @@ public class Server : MonoBehaviour, StateHolder
                 };
                 foreach (var userID in userIDs)
                 {
-                    MessageManager.RelayAction(userID, relayedAction);
+                    MessageManager.RelayAction(userID, relayedGrabAction);
+                }
+                break;
+            case ThrowAction throwAction:
+                StartCoroutine(DelayedAction(ActionRulesConfig.ThrowDuration,
+                    () =>
+                    {
+                        Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
+                        BroadCastState();
+                    }));
+                var relayedThrowAction = new RelayedAction
+                {
+                    UserId = actorID.m_SteamID,
+                    ThrowAction = throwAction,
+                    Success = true
+                };
+                foreach (var userID in userIDs)
+                {
+                    MessageManager.RelayAction(userID, relayedThrowAction);
                 }
                 break;
             default:
@@ -162,6 +180,21 @@ public class Server : MonoBehaviour, StateHolder
         //
         //     ApplyGameState(currentState);
         // }
+    }
+
+    private void BroadCastState()
+    {
+        var curGameState = GetGameState();
+        foreach (var userID in userIDs)
+        {
+            MessageManager.SendGameState(userID, curGameState);
+        }
+    }
+    
+    IEnumerator DelayedAction(int millis, Action action)
+    {
+        yield return new WaitForSeconds(0.001f * millis);
+        action();
     }
 
     private CSteamID GetAnotherID(CSteamID userID)
@@ -263,10 +296,6 @@ public class Server : MonoBehaviour, StateHolder
     public void CollisionExit()
     {
         // TODO: Consider cooldown and periodic sending
-        var curGameState = GetGameState();
-        foreach (var userID in userIDs)
-        {
-            MessageManager.SendGameState(userID, curGameState);
-        }
+        BroadCastState();
     }
 }

@@ -8,6 +8,7 @@ public struct ActionRulesConfig
     public static float GrabAngle = 120;
 
     public static int GrabDuration = 200; // millis
+    public static int ThrowDuration = GrabDuration;
 }
 
 public static class ActionRules

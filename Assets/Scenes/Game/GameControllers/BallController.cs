@@ -5,16 +5,16 @@ using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    private PlayerController Owner;
-    public bool Owned { get; private set; } = false ;
+    public PlayerController Owner { get; private set; }
+    public bool Owned { get; private set; }
 
 public BallState GetState()
     {
         return new BallState
         {
-            Position = ToVector3ProtoBuf(transform.position),
-            AngularVelocity = ToVector3ProtoBuf(GetComponent<Rigidbody>().angularVelocity),
-            Velocity = ToVector3ProtoBuf(GetComponent<Rigidbody>().velocity),
+            Position = ProtobufUtils.ToVector3ProtoBuf(transform.position),
+            AngularVelocity = ProtobufUtils.ToVector3ProtoBuf(GetComponent<Rigidbody>().angularVelocity),
+            Velocity = ProtobufUtils.ToVector3ProtoBuf(GetComponent<Rigidbody>().velocity),
             IsOwned = Owned,
             OwnerId = Owned ? Owner.ID : 0
         };
@@ -22,9 +22,9 @@ public BallState GetState()
 
     public void ApplyState(BallState state)
     {
-        transform.position = FromVector3Protobuf(state.Position);
-        GetComponent<Rigidbody>().angularVelocity = FromVector3Protobuf(state.AngularVelocity);
-        GetComponent<Rigidbody>().velocity = FromVector3Protobuf(state.Velocity);
+        transform.position = ProtobufUtils.FromVector3Protobuf(state.Position);
+        GetComponent<Rigidbody>().angularVelocity = ProtobufUtils.FromVector3Protobuf(state.AngularVelocity);
+        GetComponent<Rigidbody>().velocity = ProtobufUtils.FromVector3Protobuf(state.Velocity);
         Owned = state.IsOwned;
         if (Owned)
         {
@@ -53,26 +53,6 @@ public BallState GetState()
             transform.rotation, 
             targetState.transform.rotation, 
             interpolationFactor);
-    }
-
-    Vector3ProtoBuf ToVector3ProtoBuf(Vector3 vector3)
-    {
-        return new Vector3ProtoBuf
-        {
-            X = vector3.x,
-            Y = vector3.y,
-            Z = vector3.z
-        };
-    }
-
-    Vector3 FromVector3Protobuf(Vector3ProtoBuf vector3ProtoBuf)
-    {
-        return new Vector3
-        {
-            x = vector3ProtoBuf.X,
-            y = vector3ProtoBuf.Y,
-            z = vector3ProtoBuf.Z
-        };
     }
 
     public void SetOwner(PlayerController owner)

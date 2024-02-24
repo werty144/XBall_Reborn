@@ -17,7 +17,7 @@ public struct SetupInfo
 public class GameStarter : MonoBehaviour
 {
     public SetupInfo Info { get; protected set; }
-    public bool IsTest { get; protected set; }
+    public bool IsTest { get; set; }
 
     public void Initiate(SetupInfo info)
     {

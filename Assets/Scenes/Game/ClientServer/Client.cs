@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Google.Protobuf;
+using IngameDebugConsole;
 using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -139,6 +140,17 @@ public class Client : MonoBehaviour, StateHolder
                 ActionTimers[grabAction.ActionId] = Stopwatch.StartNew();
                 NextActionId++;
                 break;
+            case ThrowAction throwAction:
+                if (!Ball.Owned || !Ball.Owner.IsMy)
+                {
+                    return;
+                }
+                throwAction.PlayerId = Ball.Owner.ID;
+                Ball.Owner.PlayThroughAnimation();
+                throwAction.ActionId = NextActionId;
+                ActionTimers[throwAction.ActionId] = Stopwatch.StartNew();
+                NextActionId++;
+                break;
             default:
                 Debug.LogWarning("Unknown input action");
                 break;
@@ -183,14 +195,17 @@ public class Client : MonoBehaviour, StateHolder
                 return;
             }
 
+            Stopwatch timer;
+            long timePassed;
+            int timeLeft;
             switch (relayedAction.ActionCase)
             {
                 case RelayedAction.ActionOneofCase.GrabAction:
-                    var timer = ActionTimers[relayedAction.GrabAction.ActionId];
+                    timer = ActionTimers[relayedAction.GrabAction.ActionId];
                     ActionTimers.Remove(relayedAction.GrabAction.ActionId);
                     timer.Stop();
-                    var timePassed = timer.ElapsedMilliseconds;
-                    var timeLeft = Mathf.Max(0, ActionRulesConfig.GrabDuration - (int)timePassed);
+                    timePassed = timer.ElapsedMilliseconds;
+                    timeLeft = Mathf.Max(0, ActionRulesConfig.GrabDuration - (int)timePassed);
                     StartCoroutine(DelayedAction(timeLeft,
                         () =>
                         {
@@ -198,14 +213,27 @@ public class Client : MonoBehaviour, StateHolder
                             Ball.SetOwner(newOwner);
                         }));
                     break;
+                case RelayedAction.ActionOneofCase.ThrowAction:
+                    timer = ActionTimers[relayedAction.ThrowAction.ActionId];
+                    ActionTimers.Remove(relayedAction.ThrowAction.ActionId);
+                    timer.Stop();
+                    timePassed = timer.ElapsedMilliseconds;
+                    timeLeft = Mathf.Max(0, ActionRulesConfig.ThrowDuration - (int)timePassed);
+                    StartCoroutine(DelayedAction(timeLeft,
+                        () =>
+                        {
+                            Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(relayedAction.ThrowAction.Destination));
+                        }));
+                    break;
             }
         }
         else
         {
+            PlayerController player;
             switch (relayedAction.ActionCase)
             {
                 case RelayedAction.ActionOneofCase.GrabAction:
-                    var player = Players[relayedAction.GrabAction.PlayerId];
+                    player = Players[relayedAction.GrabAction.PlayerId];
                     player.PlayGrabAnimation();
                     if (relayedAction.Success)
                     {
@@ -214,6 +242,18 @@ public class Client : MonoBehaviour, StateHolder
                             {
                                 var newOwner = Players[relayedAction.GrabAction.PlayerId];
                                 Ball.SetOwner(newOwner);
+                            }));
+                    }
+                    break;
+                case RelayedAction.ActionOneofCase.ThrowAction:
+                    player = Players[relayedAction.ThrowAction.PlayerId];
+                    player.PlayThroughAnimation();
+                    if (relayedAction.Success)
+                    {
+                        StartCoroutine(DelayedAction(ActionRulesConfig.ThrowDuration,
+                            () =>
+                            {
+                                Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(relayedAction.ThrowAction.Destination));
                             }));
                     }
                     break;
@@ -234,6 +274,8 @@ public class Client : MonoBehaviour, StateHolder
         { 
             gameState.PlayerStates.Add(player.GetState());
         }
+
+        gameState.BallState = Ball.GetState();
 
         return gameState;
     }

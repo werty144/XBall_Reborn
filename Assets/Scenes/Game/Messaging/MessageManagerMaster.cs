@@ -4,6 +4,7 @@ using System.IO;
 using Google.Protobuf;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public class MessageManagerMaster : MonoBehaviour, MessageManager
 {
@@ -131,11 +132,19 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
                 PingManager.ReceiveReplyPing();
                 break;
             case (byte)MessageType.PlayerMovementAction:
-                action = ParseUtils.UnmarshalPlayerMovementAction(message);
+                action = ParseUtils.Unmarshal<PlayerMovementAction>(message);
                 Server.ProcessAction(ConnectionManager.GetPeerID(), action);
                 break;
             case (byte)MessageType.PlayerStopAction:
-                action = ParseUtils.UnmarshalPlayerStopAction(message);
+                action = ParseUtils.Unmarshal<PlayerStopAction>(message);
+                Server.ProcessAction(ConnectionManager.GetPeerID(), action);
+                break;
+            case (byte)MessageType.GrabAction:
+                action = ParseUtils.Unmarshal<GrabAction>(message);
+                Server.ProcessAction(ConnectionManager.GetPeerID(), action);
+                break;
+            case (byte)MessageType.ThrowAction:
+                action = ParseUtils.Unmarshal<ThrowAction>(message);
                 Server.ProcessAction(ConnectionManager.GetPeerID(), action);
                 break;
             case (byte)MessageType.Ready:

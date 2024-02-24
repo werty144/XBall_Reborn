@@ -39,6 +39,12 @@ public class MessageManagerFollower : MonoBehaviour, MessageManager
             case PlayerStopAction:
                 stream.WriteByte((byte)MessageType.PlayerStopAction);
                 break;
+            case GrabAction:
+                stream.WriteByte((byte)MessageType.GrabAction);
+                break;
+            case ThrowAction:
+                stream.WriteByte((byte)MessageType.ThrowAction);
+                break;
             default:
                 Debug.LogWarning("Unknown action");
                 break;
@@ -79,16 +85,16 @@ public class MessageManagerFollower : MonoBehaviour, MessageManager
                 GameManager.OnGameStart();
                 break;
             case (byte)MessageType.ResumeGame:
-                var pausedGameState = ParseUtils.UnmarshalResumeGame(message);
+                var pausedGameState = ParseUtils.Unmarshal<GameState>(message);
                 Client.ReceiveResumeGame(pausedGameState);
                 GameManager.ResumeGame();
                 break;
             case (byte)MessageType.GameState:
-                var gameState = ParseUtils.UnmarshalGameState(message);
+                var gameState = ParseUtils.Unmarshal<GameState>(message);
                 Client.ReceiveState(gameState);
                 break;
             case (byte)MessageType.RelayedAction:
-                var relayedAction = ParseUtils.UnmarshalRelayedAction(message);
+                var relayedAction = ParseUtils.Unmarshal<RelayedAction>(message);
                 Client.ReceiveRelayedAction(relayedAction);
                 break;
         }

@@ -16,6 +16,7 @@ TagManager:
   - Dummy
   - PlayerBody
   - Ball
+  - Wall
   layers:
   - Default
   - TransparentFX

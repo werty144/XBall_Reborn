@@ -5,98 +5,27 @@ using UnityEngine.Assertions;
 
 public static class ParseUtils
 {
-    public static PlayerMovementAction UnmarshalPlayerMovementAction(byte[] message)
+    public static T Unmarshal<T>(byte[] message) where T: IMessage<T>, new()
     {
-        Assert.AreEqual((byte)MessageType.PlayerMovementAction, message[0]);
-        PlayerMovementAction action;
-        using (MemoryStream stream = new MemoryStream(message, 1, message.Length - 1))
-        {
-            try
-            {
-                action = PlayerMovementAction.Parser.ParseFrom(stream);
-            }
-            catch (InvalidProtocolBufferException e)
-            {
-                Debug.LogException(e);
-                return null;
-            }
-        }
-
-        return action;
-    }
-    
-    public static PlayerStopAction UnmarshalPlayerStopAction(byte[] message)
-    {
-        Assert.AreEqual((byte)MessageType.PlayerStopAction, message[0]);
-        PlayerStopAction action;
-        using (MemoryStream stream = new MemoryStream(message, 1, message.Length - 1))
-        {
-            try
-            {
-                action = PlayerStopAction.Parser.ParseFrom(stream);
-            }
-            catch (InvalidProtocolBufferException e)
-            {
-                Debug.LogException(e);
-                return null;
-            }
-        }
-
-        return action;
-    }
-
-    public static GameState UnmarshalGameState(byte[] message)
-    {
-        Assert.AreEqual((byte)MessageType.GameState, message[0]);
-        GameState gameState;
+        T output = new T();
         using MemoryStream stream = new MemoryStream(message, 1, message.Length - 1);
         try
         {
-            gameState = GameState.Parser.ParseFrom(stream);
+            if (output.Descriptor.Parser is MessageParser<T> parser)
+            {
+                return parser.ParseFrom(stream);
+            }
+            else
+            {
+                Debug.LogError("Can not create parser for " + typeof(T));
+                return new T();
+            }
         }
         catch (InvalidProtocolBufferException e)
         {
             Debug.LogException(e);
-            return null;
+            return new T();
         }
-
-        return gameState;
-    }
-    
-    public static GameState UnmarshalResumeGame(byte[] message)
-    {
-        Assert.AreEqual((byte)MessageType.ResumeGame, message[0]);
-        GameState gameState;
-        using MemoryStream stream = new MemoryStream(message, 1, message.Length - 1);
-        try
-        {
-            gameState = GameState.Parser.ParseFrom(stream);
-        }
-        catch (InvalidProtocolBufferException e)
-        {
-            Debug.LogException(e);
-            return null;
-        }
-
-        return gameState;
-    }
-
-    public static RelayedAction UnmarshalRelayedAction(byte[] message)
-    {
-        RelayedAction relayedAction;
-        Assert.AreEqual((byte)MessageType.RelayedAction, message[0]);
-        using MemoryStream stream = new MemoryStream(message, 1, message.Length - 1);
-        try
-        {
-            relayedAction = RelayedAction.Parser.ParseFrom(stream);
-        }
-        catch (InvalidProtocolBufferException e)
-        {
-            Debug.LogException(e);
-            return null;
-        }
-
-        return relayedAction;
     }
     
     public static uint GetActionId(IBufferMessage mbAction)
