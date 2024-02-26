@@ -9,18 +9,17 @@ public struct PlayerConfig
     // The height of the center of the cylinder
     public static float Height = 1;
     public static float Radius = 0.5F;
-
-    public static float OutlineWidth = 4;
-
+    
     public static Color MyColor = new Color(100/255f, 149/255f, 237/255f);
     public static Color OpponentColor = new Color(205f/255f, 92f/255f, 92f/255f, 1f);
-    public static Color OutlineColor = new Color(100f/255f, 239f/255f, 213f/255f, 1f);
 }
 
 public class PlayerController : MonoBehaviour
 {
     public bool IsMy;
     public uint ID;
+
+    private Outline outline;
     
     private float moveSpeed = 5f;
     private float rotationSpeed = 5f;
@@ -32,10 +31,18 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         var body = transform.Find("Body");
-        var outline = body.GetComponent<Outline>();
-        outline.OutlineWidth = 0;
-        outline.OutlineColor = PlayerConfig.OutlineColor;
-        outline.OutlineMode = Outline.Mode.OutlineAll;
+        outline = body.GetComponent<Outline>();
+        DeOutline();
+    }
+
+    public void Outline()
+    {
+        outline.enabled = true;
+    }
+
+    public void DeOutline()
+    {
+        outline.enabled = false;
     }
 
     public void Colorize(Color color)

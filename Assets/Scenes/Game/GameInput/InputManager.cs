@@ -58,14 +58,14 @@ public class InputManager : MonoBehaviour
     {
         if (selectedPlayer == null) { return; }
 
-        selectedPlayer.transform.Find("Body").GetComponent<Outline>().OutlineWidth = 0;
+        selectedPlayer.GetComponent<PlayerController>().DeOutline();
         selectedPlayer = null;
     }
 
     void SelectPlayer(GameObject selected)
     {
         selectedPlayer = selected;
-        selectedPlayer.transform.Find("Body").GetComponent<Outline>().OutlineWidth = PlayerConfig.OutlineWidth;
+        selectedPlayer.GetComponent<PlayerController>().Outline();
     }
 
     void SelectNextPlayer()

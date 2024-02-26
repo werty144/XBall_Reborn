@@ -289,7 +289,9 @@ public class Outline : MonoBehaviour {
 
       case Mode.OutlineHidden:
         outlineMaskMaterial.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+        outlineMaskMaterial.renderQueue = 2000;
         outlineFillMaterial.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Greater);
+        outlineFillMaterial.renderQueue = 2000;
         outlineFillMaterial.SetFloat("_OutlineWidth", outlineWidth);
         break;
 

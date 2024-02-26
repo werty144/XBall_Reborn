@@ -1,14 +1,30 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using OpenCover.Framework.Model;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
+
+public struct BallConfig
+{
+    public static Color CanGrabColor = new Color(102f/255f, 204f/255f, 153f/255f);
+}
 
 public class BallController : MonoBehaviour
 {
     public PlayerController Owner { get; private set; }
     public bool Owned { get; private set; }
 
-public BallState GetState()
+    private Outline Outline;
+    private Client Client;
+
+    private void Start()
+    {
+        Outline = transform.Find("Sphere").GetComponent<Outline>();
+        Client = GameObject.FindWithTag("Client").GetComponent<Client>();
+    }
+
+    public BallState GetState()
     {
         return new BallState
         {
@@ -68,12 +84,38 @@ public BallState GetState()
 
     private void Update()
     {
+        ManageOutline();
         if (Owned)
         {
             var ownerPosition = Owner.GetPosition();
             var targetPosition = new Vector3(ownerPosition.x, PlayerConfig.Height * 2 + GameConfig.BallRadius,
                 ownerPosition.y);
             transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 20f);
+        }
+    }
+
+    private void ManageOutline()
+    {
+        Outline.enabled = !Owned;
+        Outline.OutlineMode = Outline.Mode.OutlineHidden;
+        Outline.OutlineColor = Color.white;
+        foreach (var player in Client.GetPlayers().Values)
+        {
+            if (!player.IsMy)
+            {
+                continue;
+            }
+
+            if (Owned && Owner.ID == player.ID)
+            {
+                continue;
+            }
+
+            if (ActionRules.IsValidGrab(player.transform, transform))
+            {
+                Outline.OutlineMode = Outline.Mode.OutlineAll;
+                Outline.OutlineColor = BallConfig.CanGrabColor;
+            }
         }
     }
 
