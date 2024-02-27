@@ -42,6 +42,8 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand("HideServerView", "Hides server's players and ball", HideServerView);
         DebugLogConsole.AddCommand("ShowServerView", "Shows server's players and ball", ShowServerView);
+        DebugLogConsole.AddCommand("ShowClientServerView", "Shows a local server simulation", ShowClientServerView);
+        DebugLogConsole.AddCommand("HideClientServerView", "Hides a local server simulation", HideClientServerView);
 
         
         DebugLogConsole.AddCommand("Exit", "Quits the game", Exit);
@@ -211,6 +213,32 @@ public class DebugConsoleCommands : MonoBehaviour
         }
 
         server.GetBall().GetComponentInChildren<Renderer>().enabled = true;
+    }
+
+    void ShowClientServerView()
+    {
+        var client = GameObject.FindWithTag("Client").GetComponent<Client>();
+        foreach (var player in client.ServerPlayers.Values)
+        {
+            foreach (Renderer renderer in player.GetComponentsInChildren<Renderer>())
+            {
+                renderer.enabled = true;
+            }
+        }
+        client.ServerBall.GetComponentInChildren<Renderer>().enabled = true;
+    }
+
+    void HideClientServerView()
+    {
+        var client = GameObject.FindWithTag("Client").GetComponent<Client>();
+        foreach (var player in client.ServerPlayers.Values)
+        {
+            foreach (Renderer renderer in player.GetComponentsInChildren<Renderer>())
+            {
+                renderer.enabled = false;
+            }
+        }
+        client.ServerBall.GetComponentInChildren<Renderer>().enabled = false;
     }
 
     void StartGameDummy()

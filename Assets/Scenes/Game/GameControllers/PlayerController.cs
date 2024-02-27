@@ -186,7 +186,7 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    float CalculateViewAngle(Vector3 point)
+    public float CalculateViewAngle(Vector3 point)
     {
         if ((point - transform.position).sqrMagnitude < 0.001f)
         {

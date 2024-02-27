@@ -132,18 +132,20 @@ public class Server : MonoBehaviour, StateHolder
                 }
                 break;
             case ThrowAction throwAction:
-                StartCoroutine(DelayedAction(ActionRulesConfig.ThrowDuration,
-                    () =>
-                    {
-                        Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
-                        BroadCastState();
-                    }));
                 var relayedThrowAction = new RelayedAction
                 {
                     UserId = actorID.m_SteamID,
                     ThrowAction = throwAction,
-                    Success = true
                 };
+                if (Ball.Owned && Ball.Owner.ID == throwAction.PlayerId)
+                {
+                    Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
+                    relayedThrowAction.Success = true;
+                }
+                else
+                {
+                    relayedThrowAction.Success = false;
+                }
                 foreach (var userID in userIDs)
                 {
                     MessageManager.RelayAction(userID, relayedThrowAction);

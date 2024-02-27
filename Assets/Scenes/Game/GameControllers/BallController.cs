@@ -54,7 +54,7 @@ public class BallController : MonoBehaviour
         transform.position = Vector3.Lerp(
             transform.position, 
             targetState.transform.position, 
-            interpolationFactor);
+            interpolationFactor / 2);
 
         GetComponent<Rigidbody>().velocity = Vector3.Lerp(
             GetComponent<Rigidbody>().velocity, 

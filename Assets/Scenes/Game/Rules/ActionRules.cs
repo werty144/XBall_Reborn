@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
+using Random = System.Random;
 
 public struct ActionRulesConfig
 {
@@ -13,6 +15,7 @@ public struct ActionRulesConfig
 
 public static class ActionRules
 {
+    private static Random random = new Random();
     public static bool IsValidGrab(Transform player, Transform ball)
     {
         if (Vector3.Distance(player.position, ball.position) > ActionRulesConfig.GrabRadius)
@@ -30,5 +33,27 @@ public static class ActionRules
         }
 
         return true;
+    }
+
+    public static Vector3 CalculateThrowTarget(PlayerController player, Vector3 initialTarget)
+    {
+        var viewAngle = player.CalculateViewAngle(initialTarget);
+        var distance = Vector3.Distance(player.transform.position, initialTarget);
+        var distanceVariation = new Vector3(
+            ThrowDistanceDeviation(distance),
+            ThrowDistanceDeviation(distance),
+            ThrowDistanceDeviation(distance)
+        );
+        
+
+        return initialTarget + distanceVariation;
+    }
+
+    private static float ThrowDistanceDeviation(float distance)
+    {
+
+        var variance = distance / 15;
+        var distanceDeviation = (float)(random.NextDouble() * 2 * variance - variance);
+        return distanceDeviation;
     }
 }
