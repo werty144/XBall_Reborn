@@ -25,20 +25,20 @@ public static partial class ActionsReflection {
           "Cg1hY3Rpb25zLnByb3RvGhJwbGF5ZXJfc3RhdGUucHJvdG8iUgoUUGxheWVy",
           "TW92ZW1lbnRBY3Rpb24SEQoJYWN0aW9uX2lkGAEgASgNEhEKCXBsYXllcl9p",
           "ZBgCIAEoDRIJCgF4GAMgASgCEgkKAXkYBCABKAIiOAoQUGxheWVyU3RvcEFj",
-          "dGlvbhIRCglhY3Rpb25faWQYASABKA0SEQoJcGxheWVyX2lkGAIgASgNIjIK",
+          "dGlvbhIRCglhY3Rpb25faWQYASABKA0SEQoJcGxheWVyX2lkGAIgASgNIkcK",
           "CkdyYWJBY3Rpb24SEQoJYWN0aW9uX2lkGAEgASgNEhEKCXBsYXllcl9pZBgC",
-          "IAEoDSJaCgtUaHJvd0FjdGlvbhIRCglhY3Rpb25faWQYASABKA0SEQoJcGxh",
-          "eWVyX2lkGAIgASgNEiUKC2Rlc3RpbmF0aW9uGAMgASgLMhAuVmVjdG9yM1By",
-          "b3RvQnVmIoUBCg1SZWxheWVkQWN0aW9uEg8KB3VzZXJfaWQYASABKAQSIgoL",
-          "Z3JhYl9hY3Rpb24YAiABKAsyCy5HcmFiQWN0aW9uSAASJAoMdGhyb3dfYWN0",
-          "aW9uGAMgASgLMgwuVGhyb3dBY3Rpb25IABIPCgdzdWNjZXNzGAQgASgIQggK",
-          "BmFjdGlvbmIGcHJvdG8z"));
+          "IAEoDRITCgtwcmVfc3VjY2VzcxgDIAEoCCJaCgtUaHJvd0FjdGlvbhIRCglh",
+          "Y3Rpb25faWQYASABKA0SEQoJcGxheWVyX2lkGAIgASgNEiUKC2Rlc3RpbmF0",
+          "aW9uGAMgASgLMhAuVmVjdG9yM1Byb3RvQnVmIoUBCg1SZWxheWVkQWN0aW9u",
+          "Eg8KB3VzZXJfaWQYASABKAQSIgoLZ3JhYl9hY3Rpb24YAiABKAsyCy5HcmFi",
+          "QWN0aW9uSAASJAoMdGhyb3dfYWN0aW9uGAMgASgLMgwuVGhyb3dBY3Rpb25I",
+          "ABIPCgdzdWNjZXNzGAQgASgIQggKBmFjdGlvbmIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::PlayerStateReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMovementAction), global::PlayerMovementAction.Parser, new[]{ "ActionId", "PlayerId", "X", "Y" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerStopAction), global::PlayerStopAction.Parser, new[]{ "ActionId", "PlayerId" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::GrabAction), global::GrabAction.Parser, new[]{ "ActionId", "PlayerId" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::GrabAction), global::GrabAction.Parser, new[]{ "ActionId", "PlayerId", "PreSuccess" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ThrowAction), global::ThrowAction.Parser, new[]{ "ActionId", "PlayerId", "Destination" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::RelayedAction), global::RelayedAction.Parser, new[]{ "UserId", "GrabAction", "ThrowAction", "Success" }, new[]{ "Action" }, null, null, null)
         }));
@@ -612,6 +612,7 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
   public GrabAction(GrabAction other) : this() {
     actionId_ = other.actionId_;
     playerId_ = other.playerId_;
+    preSuccess_ = other.preSuccess_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -645,6 +646,18 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
     }
   }
 
+  /// <summary>Field number for the "pre_success" field.</summary>
+  public const int PreSuccessFieldNumber = 3;
+  private bool preSuccess_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool PreSuccess {
+    get { return preSuccess_; }
+    set {
+      preSuccess_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -662,6 +675,7 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
     }
     if (ActionId != other.ActionId) return false;
     if (PlayerId != other.PlayerId) return false;
+    if (PreSuccess != other.PreSuccess) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -671,6 +685,7 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
     int hash = 1;
     if (ActionId != 0) hash ^= ActionId.GetHashCode();
     if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
+    if (PreSuccess != false) hash ^= PreSuccess.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -697,6 +712,10 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
       output.WriteRawTag(16);
       output.WriteUInt32(PlayerId);
     }
+    if (PreSuccess != false) {
+      output.WriteRawTag(24);
+      output.WriteBool(PreSuccess);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -715,6 +734,10 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
       output.WriteRawTag(16);
       output.WriteUInt32(PlayerId);
     }
+    if (PreSuccess != false) {
+      output.WriteRawTag(24);
+      output.WriteBool(PreSuccess);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -730,6 +753,9 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
     }
     if (PlayerId != 0) {
       size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerId);
+    }
+    if (PreSuccess != false) {
+      size += 1 + 1;
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -748,6 +774,9 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
     }
     if (other.PlayerId != 0) {
       PlayerId = other.PlayerId;
+    }
+    if (other.PreSuccess != false) {
+      PreSuccess = other.PreSuccess;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -772,6 +801,10 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
           PlayerId = input.ReadUInt32();
           break;
         }
+        case 24: {
+          PreSuccess = input.ReadBool();
+          break;
+        }
       }
     }
   #endif
@@ -793,6 +826,10 @@ public sealed partial class GrabAction : pb::IMessage<GrabAction>
         }
         case 16: {
           PlayerId = input.ReadUInt32();
+          break;
+        }
+        case 24: {
+          PreSuccess = input.ReadBool();
           break;
         }
       }

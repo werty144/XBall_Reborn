@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using IngameDebugConsole;
 using OpenCover.Framework.Model;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
@@ -16,6 +18,7 @@ public class BallController : MonoBehaviour
     public bool Owned { get; private set; }
 
     private Outline Outline;
+    private float OutlineWidth = 3f;
     private Client Client;
 
     private void Start()
@@ -96,25 +99,29 @@ public class BallController : MonoBehaviour
 
     private void ManageOutline()
     {
-        Outline.enabled = !Owned;
-        Outline.OutlineMode = Outline.Mode.OutlineHidden;
-        Outline.OutlineColor = Color.white;
-        foreach (var player in Client.GetPlayers().Values)
+        var existsMyNotOwnerWhoCanGrab = false;
+        foreach (var player in from player in Client.GetPlayers().Values where player.IsMy where !Owned || Owner.ID != player.ID where ActionRules.IsValidGrab(player.transform, transform) select player)
         {
-            if (!player.IsMy)
+            existsMyNotOwnerWhoCanGrab = true;
+        }
+        
+        if (existsMyNotOwnerWhoCanGrab)
+        {
+            Outline.OutlineWidth = OutlineWidth;
+            Outline.OutlineMode = Outline.Mode.OutlineAll;
+            Outline.OutlineColor = BallConfig.CanGrabColor;
+        }
+        else
+        {
+            if (Owned)
             {
-                continue;
+                Outline.OutlineWidth = 0;
             }
-
-            if (Owned && Owner.ID == player.ID)
+            else
             {
-                continue;
-            }
-
-            if (ActionRules.IsValidGrab(player.transform, transform))
-            {
-                Outline.OutlineMode = Outline.Mode.OutlineAll;
-                Outline.OutlineColor = BallConfig.CanGrabColor;
+                Outline.OutlineWidth = OutlineWidth;
+                Outline.OutlineMode = Outline.Mode.OutlineHidden;
+                Outline.OutlineColor = Color.white;
             }
         }
     }

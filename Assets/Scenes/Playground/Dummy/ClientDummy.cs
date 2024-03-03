@@ -16,8 +16,8 @@ public class ClientDummy : Client
         var setupInfo = global.GetComponent<GameStarter>().Info;
         CreateServerState(setupInfo.NumberOfPlayers, LayerMask.NameToLayer("DummyServer"));
         CreateInitialState(setupInfo.NumberOfPlayers);
-
-        enabled = false;
+        InitiateCooldowns();
+        Hide();
     }
 
     protected override void Start()
@@ -25,7 +25,7 @@ public class ClientDummy : Client
         
     }
 
-    private void OnEnable()
+    public void Show()
     {
         foreach (var playerController in Players.Values)
         {
@@ -40,7 +40,7 @@ public class ClientDummy : Client
         }
     }
 
-    private void OnDisable()
+    public void Hide()
     {
         foreach (var playerController in Players.Values)
         {
@@ -67,6 +67,11 @@ public class ClientDummy : Client
     void CreateInitialState(int n)
     {
         int collisionLayer = LayerMask.NameToLayer("Dummy");
+        
+        var ballObject = Instantiate(BallPrefab);
+        ballObject.layer = collisionLayer;
+        Ball = ballObject.GetComponent<BallController>();
+        
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
@@ -74,9 +79,11 @@ public class ClientDummy : Client
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
+            controller.Ball = Ball;
             Players[spareID] = controller;
             spareID++;
         }
+
         foreach (var player in Players.Values)
         {
             player.IsMy = player.ID % 2 == 1;
@@ -85,11 +92,7 @@ public class ClientDummy : Client
                 MyPlayers.Add(player);
             }
         }
-        
-        var ballObject = Instantiate(BallPrefab);
-        ballObject.layer = collisionLayer;
-        Ball = ballObject.GetComponent<BallController>();
-        
+
         ApplyGameState(InitialState.GetInitialState(n));
         
         foreach (var playerController in Players.Values)

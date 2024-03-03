@@ -15,8 +15,9 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("LocalProblem", "Triggers connection manager's LocalProblem", LocalProblem);
         DebugLogConsole.AddCommand("CloseConnection", "Closes connection", CloseConnection);
         
-        DebugLogConsole.AddCommand("DummyEnable", "Enables dummy player", DummyEnable);
-        DebugLogConsole.AddCommand("DummyDisable", "Disables dummy player", DummyDisable);
+        DebugLogConsole.AddCommand("DummyShow", "Shows dummy's players", DummyShow);
+        DebugLogConsole.AddCommand("DummyHide", "Hides dummy's players", DummyHide);
+        DebugLogConsole.AddCommand<uint>("DummyGrab", "Sets a grab intention for a given dummy player", DummyGrab);
         DebugLogConsole.AddCommand("StartGameDummy", "Ment to be called from Menu. Switches to the Game Scene with dummy", StartGameDummy);
         
         DebugLogConsole.AddCommand("EnableCameraMovement", "EnablesCameraMovement", EnableCameraMovement);
@@ -44,7 +45,6 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("ShowServerView", "Shows server's players and ball", ShowServerView);
         DebugLogConsole.AddCommand("ShowClientServerView", "Shows a local server simulation", ShowClientServerView);
         DebugLogConsole.AddCommand("HideClientServerView", "Hides a local server simulation", HideClientServerView);
-
         
         DebugLogConsole.AddCommand("Exit", "Quits the game", Exit);
         
@@ -71,20 +71,14 @@ public class DebugConsoleCommands : MonoBehaviour
         GameObject.FindWithTag("P2P").GetComponent<ConnectionManagerBase>().CloseConnection();
     }
     
-    void DummyDisable()
+    void DummyHide()
     {
-        foreach (var component in GameObject.FindWithTag("Dummy").GetComponents<MonoBehaviour>())
-        {
-            component.enabled = false;
-        }
+        GameObject.FindWithTag("Dummy").GetComponent<ClientDummy>().Hide();
     }
 
-    void DummyEnable()
+    void DummyShow()
     {
-        foreach (var component in GameObject.FindWithTag("Dummy").GetComponents<MonoBehaviour>())
-        {
-            component.enabled = true;
-        }
+        GameObject.FindWithTag("Dummy").GetComponent<ClientDummy>().Show();
     }
 
     void DisableCameraMovement()
@@ -253,5 +247,10 @@ public class DebugConsoleCommands : MonoBehaviour
             OpponentID = new CSteamID(1)
         };
         gameStarter.Initiate(setUpInfo);
+    }
+
+    void DummyGrab(uint playerID)
+    {
+        GameObject.FindWithTag("Dummy").GetComponent<DummyUser>().SetPlayerGrabIntention(playerID);
     }
 }

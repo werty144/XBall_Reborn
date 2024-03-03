@@ -209,6 +209,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerPrefab: {fileID: 5395654648800661422, guid: 935265c851c72aaa28eb8dd03d2c0b52, type: 3}
   BallPrefab: {fileID: 7668133164203131654, guid: bbbd3e1119399ef6ba07505ebf8b1281, type: 3}
+  ServerBall: {fileID: 0}
 --- !u!1001 &298412755
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -654,6 +655,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerPrefab: {fileID: 7563179792530239496, guid: 4d7da0b80967ff87a880b331f1032242, type: 3}
   BallPrefab: {fileID: 3015573755741814911, guid: 1da720c98dd6c5dbeb9923685d41ecdd, type: 3}
+  ServerBall: {fileID: 0}
 --- !u!64 &586138579
 MeshCollider:
   m_ObjectHideFlags: 0

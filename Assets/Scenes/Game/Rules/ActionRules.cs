@@ -11,6 +11,8 @@ public struct ActionRulesConfig
 
     public static int GrabDuration = 200; // millis
     public static int ThrowDuration = GrabDuration;
+
+    public static float GrabCooldown = 1f; // secs
 }
 
 public static class ActionRules
@@ -44,9 +46,13 @@ public static class ActionRules
             ThrowDistanceDeviation(distance),
             ThrowDistanceDeviation(distance)
         );
-        
+        var angleVariation = new Vector3(
+            ThrowAngleDeviation(viewAngle),
+            ThrowAngleDeviation(viewAngle),
+            ThrowAngleDeviation(viewAngle)
+        );
 
-        return initialTarget + distanceVariation;
+        return initialTarget + distanceVariation + angleVariation;
     }
 
     private static float ThrowDistanceDeviation(float distance)
@@ -55,5 +61,27 @@ public static class ActionRules
         var variance = distance / 15;
         var distanceDeviation = (float)(random.NextDouble() * 2 * variance - variance);
         return distanceDeviation;
+    }
+    
+    private static float ThrowAngleDeviation(float angle)
+    {
+        if (angle <= 90)
+        {
+            return 0;
+        }
+
+        return 2 * (angle - 90) / 90;
+    }
+
+    public static bool BallGrabSuccess(PlayerController player, BallController ball)
+    {
+        if (!IsValidGrab(player.transform, ball.transform)) { return false; }
+
+        if (!ball.Owned || ball.Owner.IsMy)
+        {
+            return true;
+        }
+        var uniformValue = random.NextDouble();
+        return  uniformValue > 0.5;
     }
 }

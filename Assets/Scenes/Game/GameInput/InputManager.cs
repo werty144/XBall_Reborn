@@ -9,7 +9,7 @@ public class InputManager : MonoBehaviour
     
     private GameObject selectedPlayer;
 
-    private bool ThrowIntention;
+    private bool ThrowIntention = false;
 
     private void Start()
     {
@@ -43,7 +43,7 @@ public class InputManager : MonoBehaviour
             SelectNextPlayer();
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             ProcessThroughIntention();
         }

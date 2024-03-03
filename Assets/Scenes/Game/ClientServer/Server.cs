@@ -46,6 +46,11 @@ public class Server : MonoBehaviour, StateHolder
     private void CreateInitialState(int n)
     {
         var collisionLayer = LayerMask.NameToLayer("Server");
+        
+        var ballObject = Instantiate(BallPrefab);
+        ballObject.layer = collisionLayer;
+        Ball = ballObject.GetComponent<BallController>();
+        
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
@@ -53,6 +58,7 @@ public class Server : MonoBehaviour, StateHolder
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
+            controller.Ball = Ball;
             Players[spareID] = controller;
             spareID++;
             foreach (Renderer renderer in controller.GetComponentsInChildren<Renderer>())
@@ -61,9 +67,6 @@ public class Server : MonoBehaviour, StateHolder
             }
         }
         
-        var ballObject = Instantiate(BallPrefab);
-        ballObject.layer = collisionLayer;
-        Ball = ballObject.GetComponent<BallController>();
         foreach (var renderer in Ball.GetComponentsInChildren<Renderer>())
         {
             renderer.enabled = false;
@@ -119,12 +122,15 @@ public class Server : MonoBehaviour, StateHolder
                 MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
                 break;  
             case GrabAction grabAction:
-                GameStateVersioning.ApplyActionToCurrentState(grabAction);
+                if (grabAction.PreSuccess)
+                {
+                    GameStateVersioning.ApplyActionToCurrentState(grabAction);
+                }
                 var relayedGrabAction = new RelayedAction
                 {
                     UserId = actorID.m_SteamID,
                     GrabAction = grabAction,
-                    Success = true
+                    Success = grabAction.PreSuccess
                 };
                 foreach (var userID in userIDs)
                 {

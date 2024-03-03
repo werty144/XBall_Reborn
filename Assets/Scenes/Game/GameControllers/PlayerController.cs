@@ -19,10 +19,10 @@ public class PlayerController : MonoBehaviour
     public bool IsMy;
     public uint ID;
 
+    public BallController Ball { set; private get; }
+
     private Outline outline;
-    
-    private float moveSpeed = 5f;
-    private float rotationSpeed = 5f;
+
     private Vector3 targetPosition;
     private bool isMoving;
     private float targetRotationAngle;
@@ -131,15 +131,25 @@ public class PlayerController : MonoBehaviour
     {
         if (!isMoving) { return; }
         
+        var viewAngle = CalculateViewAngle(targetPosition);
+
         transform.position = Vector3.MoveTowards(
             transform.position, 
             targetPosition, 
-            AngleMovementSlowingCoefficient() * moveSpeed * timeDelta
+            MovementRules.AngleMovementSlowingCoefficient(viewAngle) * 
+            MovementRules.BallOwningSlowingCoefficient(IsBallOwner()) * 
+            MovementConfig.moveSpeed * 
+            timeDelta
             );
         if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
         {
             isMoving = false;
         }
+    }
+
+    private bool IsBallOwner()
+    {
+        return Ball.Owned && Ball.Owner.ID == ID;
     }
 
     public Vector2 GetPosition()
@@ -169,7 +179,7 @@ public class PlayerController : MonoBehaviour
         targetDirection.y = 0;
         
         Quaternion lookRotation = Quaternion.LookRotation(targetDirection);
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, deltaTime * rotationSpeed);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, deltaTime * MovementConfig.rotationSpeed);
     }
 
     private void TurnTowardsTargetRotationAngle(float deltaTime)
@@ -178,7 +188,7 @@ public class PlayerController : MonoBehaviour
         transform.rotation = Quaternion.Slerp(
             transform.rotation, 
             targetQuaternion,
-            deltaTime * rotationSpeed);
+            deltaTime * MovementConfig.rotationSpeed);
 
         if (Quaternion.Angle(transform.rotation, targetQuaternion) < 1f)
         {
@@ -197,13 +207,7 @@ public class PlayerController : MonoBehaviour
         
         float dotProduct = Vector3.Dot(transform.forward.normalized, directionToPoint);
         float angleInRadians = Mathf.Acos(Mathf.Clamp(dotProduct, -1f, 1f));
-        return angleInRadians;
-    }
-
-    float AngleMovementSlowingCoefficient()
-    {
-        var angle = CalculateViewAngle(targetPosition);
-        return 0.25f + 0.75f * (1f - angle / Mathf.PI);
+        return angleInRadians * Mathf.Rad2Deg;
     }
 
     public void PlayGrabAnimation()

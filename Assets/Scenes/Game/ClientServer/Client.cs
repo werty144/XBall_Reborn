@@ -20,11 +20,14 @@ public class Client : MonoBehaviour, StateHolder
     protected Dictionary<uint, PlayerController> Players = new();
     protected BallController Ball;
     protected GameStateVersioning GameStateVersioning;
+    
     private uint NextActionId = 1;
     private Dictionary<uint, Stopwatch> ActionTimers = new();
     
     public Dictionary<uint, PlayerController> ServerPlayers = new();
     public BallController ServerBall;
+
+    private Dictionary<uint, float> NextGrabTime = new();
 
     protected ulong MyID;
 
@@ -36,6 +39,7 @@ public class Client : MonoBehaviour, StateHolder
         MyID = setupInfo.MyID.m_SteamID;
         
         CreateInitialState(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
+        InitiateCooldowns();
         CreateServerState(setupInfo.NumberOfPlayers, LayerMask.NameToLayer("ClientServer"));
         
         GameStateVersioning = new GameStateVersioning(this);
@@ -51,9 +55,27 @@ public class Client : MonoBehaviour, StateHolder
         InterpolateToServerState();
     }
 
+    protected void InitiateCooldowns()
+    {
+        foreach (var player in Players.Values)
+        {
+            if (!player.IsMy)
+            {
+                continue;
+            }
+
+            NextGrabTime[player.ID] = 0;
+        }
+    }
+
     private void CreateInitialState(int n, bool IAmMaster)
     {
         int collisionLayer = LayerMask.NameToLayer("Client");
+        
+        var ballObject = Instantiate(BallPrefab);
+        ballObject.layer = collisionLayer;
+        Ball = ballObject.GetComponent<BallController>();
+        
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
@@ -61,6 +83,7 @@ public class Client : MonoBehaviour, StateHolder
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
+            controller.Ball = Ball;
             Players[spareID] = controller;
             spareID++;
         }
@@ -70,15 +93,15 @@ public class Client : MonoBehaviour, StateHolder
             player.Colorize(player.IsMy ? PlayerConfig.MyColor : PlayerConfig.OpponentColor);
         }
         
-        var ballObject = Instantiate(BallPrefab);
-        ballObject.layer = collisionLayer;
-        Ball = ballObject.GetComponent<BallController>();
-        
         ApplyGameState(InitialState.GetInitialState(n));
     }
 
     protected void CreateServerState(int n, int collisionLayer)
     {
+        var ballObject = Instantiate(BallPrefab);
+        ballObject.layer = collisionLayer;
+        ServerBall = ballObject.GetComponent<BallController>();
+        
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
@@ -86,6 +109,7 @@ public class Client : MonoBehaviour, StateHolder
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
+            controller.Ball = ServerBall;
             ServerPlayers[spareID] = controller;
             spareID++;
             foreach (Renderer renderer in controller.GetComponentsInChildren<Renderer>())
@@ -94,9 +118,6 @@ public class Client : MonoBehaviour, StateHolder
             }
         }
         
-        var ballObject = Instantiate(BallPrefab);
-        ballObject.layer = collisionLayer;
-        ServerBall = ballObject.GetComponent<BallController>();
         foreach (var renderer in ServerBall.GetComponentsInChildren<Renderer>())
         {
             renderer.enabled = false;
@@ -131,11 +152,12 @@ public class Client : MonoBehaviour, StateHolder
             case GrabAction grabAction:
                 player = Players[grabAction.PlayerId];
                 if (!player.IsMy) { return; }
+                
+                if (Time.time < NextGrabTime[player.ID]) { return; }
+                NextGrabTime[player.ID] = Time.time + ActionRulesConfig.GrabCooldown;
+                
                 player.PlayGrabAnimation();
-                if (!ActionRules.IsValidGrab(player.transform, Ball.transform))
-                {
-                    return;
-                }
+                grabAction.PreSuccess = ActionRules.BallGrabSuccess(player, Ball);
                 grabAction.ActionId = NextActionId;
                 ActionTimers[grabAction.ActionId] = Stopwatch.StartNew();
                 NextActionId++;
