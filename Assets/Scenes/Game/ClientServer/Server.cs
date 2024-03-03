@@ -18,6 +18,7 @@ public class Server : MonoBehaviour, StateHolder
     
     protected Dictionary<uint, PlayerController> Players = new ();
     protected BallController Ball;
+    protected Dictionary<ulong, GoalController> Goal = new();
     private GameStateVersioning GameStateVersioning;
     
     private GameState PausedState;
@@ -25,8 +26,8 @@ public class Server : MonoBehaviour, StateHolder
     
     private void Awake()
     {
-        PlayerPrefab = Resources.Load<GameObject>("ServerPlayerPrefab");
-        BallPrefab = Resources.Load<GameObject>("ServerBallPrefab");
+        PlayerPrefab = Resources.Load<GameObject>("Player/ServerPlayerPrefab");
+        BallPrefab = Resources.Load<GameObject>("Ball/ServerBallPrefab");
         GameStateVersioning = new GameStateVersioning(this);
     }
 
@@ -41,6 +42,18 @@ public class Server : MonoBehaviour, StateHolder
         userIDs[1] = gameStarter.Info.OpponentID;
 
         CreateInitialState(gameStarter.Info.NumberOfPlayers);
+        InitiateGoals();
+    }
+
+    private void InitiateGoals()
+    {
+        foreach (var goal in GameObject.FindGameObjectsWithTag("Goal"))
+        {
+            var userID = goal.transform.position.z > 0 ? userIDs[1] : userIDs[0];
+            var controller = goal.AddComponent<GoalController>();
+            controller.UserID = userID.m_SteamID;
+            Goal[controller.UserID] = controller;
+        }
     }
     
     private void CreateInitialState(int n)
@@ -305,5 +318,19 @@ public class Server : MonoBehaviour, StateHolder
     {
         // TODO: Consider cooldown and periodic sending
         BroadCastState();
+    }
+
+    public void OnGoalAttempt(ulong userID)
+    {
+        var success = GoalRules.GoalAttemptSuccess(Ball, Goal[userID]);
+        Debug.Log("Goal attempt! Success: " + success);
+        if (success)
+        {
+            Goal[userID].PlaySuccessAnimation();
+        }
+        else
+        {
+            Goal[userID].PlayFailAnimation();
+        }
     }
 }

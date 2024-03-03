@@ -17,6 +17,7 @@ TagManager:
   - PlayerBody
   - Ball
   - Wall
+  - Goal
   layers:
   - Default
   - TransparentFX

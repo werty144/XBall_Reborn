@@ -49,6 +49,15 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("Exit", "Quits the game", Exit);
         
         DebugLogConsole.AddCommand<uint>("TestIsValidGrab", "Tests function ActionRules.IsValidGrab", TestIsValidGrab);
+        DebugLogConsole.AddCommand("PlaySuccessAnimation", "", TestPlayGoalSuccessAnimation);
+    }
+
+    void TestPlayGoalSuccessAnimation()
+    {
+        foreach (var goal in GameObject.FindGameObjectsWithTag("Goal"))
+        {
+            goal.GetComponent<GoalController>().PlaySuccessAnimation();
+        }
     }
 
     void PeerConnected()
