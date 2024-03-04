@@ -15,7 +15,8 @@ public enum MessageType
     PlayerStopAction = 8,
     GrabAction = 9,
     ThrowAction = 10,
-    ResumeGame = 11
+    ResumeGame = 11,
+    GoalAttempt = 12
 }
 
 public interface MessageManager

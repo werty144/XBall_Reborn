@@ -118,6 +118,22 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
             ConnectionManager.SendMessage(bytes);
         }
     }
+
+    public virtual void SendGoalAttempt(CSteamID userID, GoalAttempt message)
+    {
+        if (userID == Steam.MySteamID())
+        {
+            Client.ReceiveGoalAttempt(message);
+        }
+        else
+        {
+            using MemoryStream stream = new MemoryStream();
+            stream.WriteByte((byte)MessageType.GoalAttempt);
+            message.WriteTo(stream);
+            byte[] bytes = stream.ToArray();
+            ConnectionManager.SendMessage(bytes);
+        }
+    }
     
     // ----------------------------- PROCESS MESSAGES --------------------------------
     public void ProcessMessage(byte[] message)

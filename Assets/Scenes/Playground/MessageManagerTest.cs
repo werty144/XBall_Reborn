@@ -39,7 +39,6 @@ public class MessageManagerTest : MessageManagerMaster
             );
     }
 
-    // ---------------- IGNORE MESSAGES TO DUMMY ---------------------
     public override void SendGameStart(CSteamID userID)
     {
         if (userID == MyID)
@@ -98,7 +97,30 @@ public class MessageManagerTest : MessageManagerMaster
             );
         }
     }
-    
+
+    public override void SendGoalAttempt(CSteamID userID, GoalAttempt message)
+    {
+        if (userID == MyID)
+        {
+            StartCoroutine(
+                DelayedAction(
+                    MyPing,
+                    () => Client.ReceiveGoalAttempt(message)
+                )
+            );
+        }
+        else
+        {
+            var dummy = GameObject.FindWithTag("Dummy").GetComponent<ClientDummy>();
+            StartCoroutine(
+                DelayedAction(
+                    DummyPing,
+                    () => dummy.ReceiveGoalAttempt(message)
+                )
+            );
+        }
+    }
+
     // --------------------------------- DUMMY ACTIONS -----------------------------
     public void DummyReady()
     {

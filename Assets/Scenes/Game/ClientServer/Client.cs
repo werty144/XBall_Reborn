@@ -19,6 +19,7 @@ public class Client : MonoBehaviour, StateHolder
     
     protected Dictionary<uint, PlayerController> Players = new();
     protected BallController Ball;
+    protected Dictionary<ulong, GameObject> Goals = new();
     protected GameStateVersioning GameStateVersioning;
     
     private uint NextActionId = 1;
@@ -30,6 +31,7 @@ public class Client : MonoBehaviour, StateHolder
     private Dictionary<uint, float> NextGrabTime = new();
 
     protected ulong MyID;
+    protected ulong OpponentID;
 
     protected virtual void Awake()
     {
@@ -37,9 +39,11 @@ public class Client : MonoBehaviour, StateHolder
         var setupInfo = global.GetComponent<GameStarter>().Info;
 
         MyID = setupInfo.MyID.m_SteamID;
+        OpponentID = setupInfo.OpponentID.m_SteamID;
         
         CreateInitialState(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
         InitiateCooldowns();
+        InitiateGoals();
         CreateServerState(setupInfo.NumberOfPlayers, LayerMask.NameToLayer("ClientServer"));
         
         GameStateVersioning = new GameStateVersioning(this);
@@ -53,6 +57,23 @@ public class Client : MonoBehaviour, StateHolder
     private void FixedUpdate()
     {
         InterpolateToServerState();
+    }
+
+    protected void InitiateGoals()
+    {
+        var global = GameObject.FindWithTag("Global");
+        var setupInfo = global.GetComponent<GameStarter>().Info;
+        foreach (var goal in GameObject.FindGameObjectsWithTag("Goal"))
+        {
+            if (goal.transform.position.z < 0 && setupInfo.IAmMaster || goal.transform.position.z > 0 && !setupInfo.IAmMaster)
+            {
+                Goals[setupInfo.MyID.m_SteamID] = goal;
+            }
+            else
+            {
+                Goals[setupInfo.OpponentID.m_SteamID] = goal;
+            }
+        }
     }
 
     protected void InitiateCooldowns()
@@ -169,8 +190,6 @@ public class Client : MonoBehaviour, StateHolder
                 }
                 var initialTarget = ProtobufUtils.FromVector3Protobuf(throwAction.Destination);
                 var resultingTarget = ActionRules.CalculateThrowTarget(Ball.Owner, initialTarget);
-                Instantiate(Resources.Load<GameObject>("TargetMarker/EventualTarget"), resultingTarget,
-                    Quaternion.identity);
                 throwAction.Destination = ProtobufUtils.ToVector3ProtoBuf(resultingTarget);
                 throwAction.PlayerId = Ball.Owner.ID;
                 Ball.Owner.PlayThroughAnimation();
@@ -342,5 +361,21 @@ public class Client : MonoBehaviour, StateHolder
         }
 
         ServerBall.ApplyState(state.BallState);
+    }
+
+    public virtual void ReceiveGoalAttempt(GoalAttempt goalAttempt)
+    {
+        Goals[goalAttempt.GoalOwner].transform.Find("Sphere").GetComponent<Animator>()
+            .Play(goalAttempt.Success ? "TargetSuccessAnimation" : "TargetFailAnimation", -1, 0f);
+    }
+
+    public void GaolShotInput(uint playerID)
+    {
+        var throwAction = new ThrowAction
+        {
+            PlayerId = playerID,
+            Destination = ProtobufUtils.ToVector3ProtoBuf(Goals[OpponentID].transform.position)
+        };
+        InputAction(throwAction);
     }
 }

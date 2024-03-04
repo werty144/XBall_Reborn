@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message GoalAttempt {
+  uint64 goal_owner = 1;
+  bool success = 2;
+}

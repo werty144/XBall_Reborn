@@ -19,14 +19,4 @@ public class GoalController : MonoBehaviour
         
         Server.OnGoalAttempt(UserID);
     }
-
-    public void PlaySuccessAnimation()
-    {
-        transform.Find("Sphere").GetComponent<Animator>().Play("TargetSuccessAnimation", -1, 0f);
-    }
-
-    public void PlayFailAnimation()
-    {
-        transform.Find("Sphere").GetComponent<Animator>().Play("TargetFailAnimation", -1, 0f);
-    }
 }

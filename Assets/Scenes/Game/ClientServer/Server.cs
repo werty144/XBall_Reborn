@@ -158,8 +158,15 @@ public class Server : MonoBehaviour, StateHolder
                 };
                 if (Ball.Owned && Ball.Owner.ID == throwAction.PlayerId)
                 {
-                    Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
                     relayedThrowAction.Success = true;
+                    var pingToActor = PingManager.GetPingToUser(actorID).Milliseconds;
+                    var delay = Math.Max(0, ActionRulesConfig.ThrowDuration - pingToActor);
+                    StartCoroutine(DelayedAction(delay, () =>
+                    {
+                        if (!Ball.Owned || Ball.Owner.ID != throwAction.PlayerId) return;
+                        Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
+                        BroadCastState();
+                    }));
                 }
                 else
                 {
@@ -320,17 +327,17 @@ public class Server : MonoBehaviour, StateHolder
         BroadCastState();
     }
 
-    public void OnGoalAttempt(ulong userID)
+    public void OnGoalAttempt(ulong goalOwner)
     {
-        var success = GoalRules.GoalAttemptSuccess(Ball, Goal[userID]);
-        Debug.Log("Goal attempt! Success: " + success);
-        if (success)
+        var success = GoalRules.GoalAttemptSuccess(Ball, Goal[goalOwner]);
+        var message = new GoalAttempt
         {
-            Goal[userID].PlaySuccessAnimation();
-        }
-        else
+            GoalOwner = goalOwner,
+            Success = success
+        };
+        foreach (var userID in userIDs)
         {
-            Goal[userID].PlayFailAnimation();
+            MessageManager.SendGoalAttempt(userID, message);
         }
     }
 }

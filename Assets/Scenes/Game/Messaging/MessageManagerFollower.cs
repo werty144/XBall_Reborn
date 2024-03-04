@@ -97,6 +97,10 @@ public class MessageManagerFollower : MonoBehaviour, MessageManager
                 var relayedAction = ParseUtils.Unmarshal<RelayedAction>(message);
                 Client.ReceiveRelayedAction(relayedAction);
                 break;
+            case (byte)MessageType.GoalAttempt:
+                var goalAttempt = ParseUtils.Unmarshal<GoalAttempt>(message);
+                Client.ReceiveGoalAttempt(goalAttempt);
+                break;
         }
     }
 }

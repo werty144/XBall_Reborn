@@ -114,9 +114,12 @@ public class ClientDummy : Client
         }
     }
 
-
     public List<PlayerController> GetMyPlayers()
     {
         return MyPlayers;
+    }
+
+    public override void ReceiveGoalAttempt(GoalAttempt goalAttempt)
+    {
     }
 }

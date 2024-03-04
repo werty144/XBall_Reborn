@@ -51,7 +51,16 @@ public class InputManager : MonoBehaviour
 
     void ProcessThroughIntention()
     {
-        ThrowIntention = true;
+        if (ThrowIntention)
+        {
+            if (selectedPlayer == null) return;
+            Client.GaolShotInput(selectedPlayer.GetComponent<PlayerController>().ID);
+            ThrowIntention = false;
+        }
+        else
+        {
+            ThrowIntention = true;
+        }
     }
 
     void DeselectPlayer()
