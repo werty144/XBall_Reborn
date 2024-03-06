@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 public struct SetupInfo
 {
     public int NumberOfPlayers;
+    public string Speed;
     public CSteamID OpponentID;
     public CSteamID MyID;
     public bool IAmMaster;
@@ -24,5 +25,20 @@ public class GameStarter : MonoBehaviour
         Debug.Log("Initiate switching scenes" );
         Info = info;
         SceneManager.LoadScene("Game");
+        switch (Info.Speed)
+        {
+            case LobbyManager.SpeedSlow:
+                Time.timeScale = 0.5f;
+                break;
+            case LobbyManager.SpeedNormal:
+                Time.timeScale = 1f;
+                break;
+            case LobbyManager.SpeedFast:
+                Time.timeScale = 2f;
+                break;
+            default:
+                Debug.LogWarning("Unknown speed");
+                break;
+        }
     }
 }

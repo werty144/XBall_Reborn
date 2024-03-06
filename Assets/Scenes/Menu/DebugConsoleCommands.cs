@@ -46,6 +46,8 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("ShowClientServerView", "Shows a local server simulation", ShowClientServerView);
         DebugLogConsole.AddCommand("HideClientServerView", "Hides a local server simulation", HideClientServerView);
         
+        DebugLogConsole.AddCommand<float>("SetTimeScale", "Sets time scale", SetTimeScale);
+        
         DebugLogConsole.AddCommand("Exit", "Quits the game", Exit);
         
         DebugLogConsole.AddCommand<uint>("TestIsValidGrab", "Tests function ActionRules.IsValidGrab", TestIsValidGrab);
@@ -252,5 +254,10 @@ public class DebugConsoleCommands : MonoBehaviour
     void DummyGrab(uint playerID)
     {
         GameObject.FindWithTag("Dummy").GetComponent<DummyUser>().SetPlayerGrabIntention(playerID);
+    }
+
+    void SetTimeScale(float timeScale)
+    {
+        Time.timeScale = timeScale;
     }
 }

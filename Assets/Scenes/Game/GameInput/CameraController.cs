@@ -41,11 +41,11 @@ public class CameraController : MonoBehaviour
         // Check if the mouse is in the upper part of the screen
         if (Input.mousePosition.y > Screen.height * 0.9)
         {
-            translation = movementSpeed * Time.deltaTime;
+            translation = movementSpeed * Time.unscaledDeltaTime;
         }
         else if (Input.mousePosition.y < Screen.height * 0.1)
         {
-            translation = -movementSpeed * Time.deltaTime;
+            translation = -movementSpeed * Time.unscaledDeltaTime;
         }
 
         float newZ = Mathf.Clamp(transform.position.z + translation, -fieldLength, fieldLength);

@@ -15,6 +15,11 @@ public class LobbyManager : MonoBehaviour
 {
     private const string ReadyStatusKey = "ReadyStatusKey";
     private const string NumberOfPlayersKey = "NumberOfPlayersKey";
+    private const string SpeedKey = "SpeedKey";
+
+    public const string SpeedSlow = "SpeedSlow";
+    public const string SpeedNormal = "SpeedNormal";
+    public const string SpeedFast = "SpeedFast";
     
     private ulong currentLobbyID;
     private ulong pendingInvitedID;
@@ -22,6 +27,7 @@ public class LobbyManager : MonoBehaviour
     public GameObject lobbyMemberPrefab;
     public Transform membersContainer;
     public Transform numberOfPlayersDropdown;
+    public Transform speedDropdown;
     public GameObject global;
 
     private void OnEnable()
@@ -52,6 +58,7 @@ public class LobbyManager : MonoBehaviour
     public void OnLobbyCreate(ulong lobbyID)
     {
         Steam.SetLobbyMetaData(lobbyID, NumberOfPlayersKey, 2.ToString());
+        Steam.SetLobbyMetaData(lobbyID, SpeedKey, SpeedNormal);
     }
 
     public void OnLobbyEnter(ulong lobbyID)
@@ -93,20 +100,41 @@ public class LobbyManager : MonoBehaviour
 
     private void UpdateMetaData()
     {
-        var dropdown = numberOfPlayersDropdown.GetComponent<TMP_Dropdown>();
-        if (dropdown == null)
+        var playersDropdown = numberOfPlayersDropdown.GetComponent<TMP_Dropdown>();
+        if (playersDropdown == null)
         {
             Debug.LogWarning("Failed to get number of players dropdown");
             return;
         }
-        else
+        var numberOfPlayers = GetNumberOfPlayers();
+        if (numberOfPlayers == -1)
         {
-            var numberOfPlayers = GetNumberOfPlayers();
-            if (numberOfPlayers == -1)
-            {
+            return;
+        }
+        playersDropdown.value = numberOfPlayers - 1;
+        
+
+        var speedDropdown_ = this.speedDropdown.GetComponent<TMP_Dropdown>();
+        if (speedDropdown_ == null)
+        {
+            Debug.LogWarning("Failed to get speed dropdown");
+            return;
+        }
+        var speed = GetSpeed();
+        switch (speed)
+        {
+            case SpeedSlow:
+                speedDropdown_.value = 0;
+                break;
+            case SpeedNormal:
+                speedDropdown_.value = 1;
+                break;
+            case SpeedFast:
+                speedDropdown_.value = 2;
+                break;
+            default:
+                Debug.LogWarning("Unknown speed");
                 return;
-            }
-            dropdown.value = numberOfPlayers - 1;
         }
     }
 
@@ -220,6 +248,45 @@ public class LobbyManager : MonoBehaviour
         Steam.SetLobbyMetaData(currentLobbyID, NumberOfPlayersKey, newNumberOfPlayers.ToString());
     }
 
+    public void OnSpeedChange()
+    {
+        if (currentLobbyID == 0)
+        {
+            Debug.LogWarning("On speed change while not in lobby");
+            return;
+        }
+        if (Steam.GetLobbyOwner(currentLobbyID) != Steam.MySteamID())
+        {
+            // This means that the owner have changed the speed.
+            // We don't need to do anything
+            return;
+        }
+        var dropdown = speedDropdown.GetComponent<TMP_Dropdown>();
+        if (dropdown == null)
+        {
+            Debug.LogWarning("Failed to get speed dropdown");
+            return;
+        }
+
+        string speed;
+        switch (dropdown.value)
+        {
+            case 0:
+                speed = SpeedSlow;
+                break;
+            case 1:
+                speed = SpeedNormal;
+                break;
+            case 2:
+                speed = SpeedFast;
+                break;
+            default:
+                Debug.LogWarning("Unknown speed dropdown value");
+                return;
+        }
+        Steam.SetLobbyMetaData(currentLobbyID, SpeedKey, speed);
+    }
+
     private void CheckAllReady()
     {
         var members = Steam.GetLobbyMembers(currentLobbyID);
@@ -254,12 +321,14 @@ public class LobbyManager : MonoBehaviour
         Assert.AreNotEqual(-1, numberOfPlayers, "Can't get number of players");
         var opponentID = GetPartnerID();
         Assert.AreNotEqual(CSteamID.Nil, opponentID, "Can't get opponent ID");
+        var speed = GetSpeed();
         
         global.GetComponent<GameStarter>().Initiate(
             new SetupInfo
             {
                 IAmMaster =  iAmOwner,
                 NumberOfPlayers = numberOfPlayers,
+                Speed = speed,
                 OpponentID = opponentID,
                 MyID = Steam.MySteamID()
             });
@@ -268,20 +337,24 @@ public class LobbyManager : MonoBehaviour
 
     private void OwnerOrNot()
     {
-        var dropdown = numberOfPlayersDropdown.GetComponent<TMP_Dropdown>();
-        if (dropdown == null)
+        var playersDropdown = numberOfPlayersDropdown.GetComponent<TMP_Dropdown>();
+        if (playersDropdown == null)
         {
             Debug.LogWarning("Failed to get number of players dropdown");
             return;
         }
+
+        var speedDropdown_ = speedDropdown.GetComponent<TMP_Dropdown>();
         
         if (Steam.GetLobbyOwner(currentLobbyID) == Steam.MySteamID())
         {
-            dropdown.interactable = true;
+            playersDropdown.interactable = true;
+            speedDropdown_.interactable = true;
         }
         else
         {
-            dropdown.interactable = false;
+            playersDropdown.interactable = false;
+            speedDropdown_.interactable = false;
         }
     }
 
@@ -321,6 +394,13 @@ public class LobbyManager : MonoBehaviour
         }
 
         return numberOfPlayers;
+    }
+
+    private string GetSpeed()
+    {
+        var speed = Steam.GetLobbyMetaData(currentLobbyID, SpeedKey);
+        Assert.IsTrue(speed == SpeedSlow || speed == SpeedNormal || speed == SpeedFast);
+        return speed;
     }
 
     public void TestCreateLobby()
