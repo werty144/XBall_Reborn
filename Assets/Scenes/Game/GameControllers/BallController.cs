@@ -99,7 +99,7 @@ public class BallController : MonoBehaviour
     private void ManageOutline()
     {
         var existsMyNotOwnerWhoCanGrab = false;
-        foreach (var player in from player in Client.GetPlayers().Values where player.IsMy where !Owned || Owner.ID != player.ID where ActionRules.IsValidGrab(player.transform, transform) select player)
+        foreach (var _ in from player in Client.GetPlayers().Values where player.IsMy where !Owned || Owner.ID != player.ID where ActionRules.IsValidGrab(player.transform, transform) select player)
         {
             existsMyNotOwnerWhoCanGrab = true;
         }
