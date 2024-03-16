@@ -1025,6 +1025,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1151241157}
   - component: {fileID: 1151241156}
+  - component: {fileID: 1151241158}
   m_Layer: 0
   m_Name: InputManager
   m_TagString: Untagged
@@ -1059,6 +1060,18 @@ Transform:
   m_Father: {fileID: 36558777}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1151241158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1151241155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2514bc9026bdde67aaab31c216411256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1202036719
 GameObject:
   m_ObjectHideFlags: 0
@@ -1311,6 +1324,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerPrefab: {fileID: 7563179792530239496, guid: 4d7da0b80967ff87a880b331f1032242, type: 3}
   BallPrefab: {fileID: 3015573755741814911, guid: 1da720c98dd6c5dbeb9923685d41ecdd, type: 3}
+  ServerBall: {fileID: 0}
 --- !u!4 &1442913114
 Transform:
   m_ObjectHideFlags: 0

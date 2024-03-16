@@ -20,34 +20,15 @@ public class PlayerController : MonoBehaviour
     public uint ID;
 
     public BallController Ball { set; private get; }
-
-    private Outline outline;
-
+    
     private Vector3 targetPosition;
     private bool isMoving;
     private float targetRotationAngle;
     private bool needsRotation;
     
-    void Start()
-    {
-        var body = transform.Find("Body");
-        outline = body.GetComponent<Outline>();
-        DeOutline();
-    }
-
-    public void Outline()
-    {
-        outline.enabled = true;
-    }
-
-    public void DeOutline()
-    {
-        outline.enabled = false;
-    }
-
     public void Colorize(Color color)
     {
-        var body = transform.Find("Body");
+        var body = transform.Find("Skin/Body");
         body.GetComponent<Renderer>().material.color = color;
     }
 

@@ -6,11 +6,6 @@ using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
-public struct BallConfig
-{
-    public static Color CanGrabColor = new Color(102f/255f, 204f/255f, 153f/255f);
-}
-
 public class BallController : MonoBehaviour
 {
     public PlayerController Owner { get; private set; }
@@ -98,30 +93,15 @@ public class BallController : MonoBehaviour
 
     private void ManageOutline()
     {
-        var existsMyNotOwnerWhoCanGrab = false;
-        foreach (var _ in from player in Client.GetPlayers().Values where player.IsMy where !Owned || Owner.ID != player.ID where ActionRules.IsValidGrab(player.transform, transform) select player)
+        if (Owned)
         {
-            existsMyNotOwnerWhoCanGrab = true;
-        }
-        
-        if (existsMyNotOwnerWhoCanGrab)
-        {
-            Outline.OutlineWidth = OutlineWidth;
-            Outline.OutlineMode = Outline.Mode.OutlineAll;
-            Outline.OutlineColor = BallConfig.CanGrabColor;
+            Outline.OutlineWidth = 0;
         }
         else
         {
-            if (Owned)
-            {
-                Outline.OutlineWidth = 0;
-            }
-            else
-            {
-                Outline.OutlineWidth = OutlineWidth;
-                Outline.OutlineMode = Outline.Mode.OutlineHidden;
-                Outline.OutlineColor = Color.white;
-            }
+            Outline.OutlineWidth = OutlineWidth;
+            Outline.OutlineMode = Outline.Mode.OutlineHidden;
+            Outline.OutlineColor = Color.white;
         }
     }
 
