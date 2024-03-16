@@ -8,7 +8,7 @@ public class SelectionManager : MonoBehaviour
 
     private Color SelectColor = new Color(82f/255, 186f/255, 221f/255, 1);
     private Color SelectNextColor = new Color(111f/255, 111f/255, 111f/255, 0.5f);
-    void Start()
+    void Awake()
     {
         Selection = transform.Find("Selection").gameObject.GetComponent<MeshRenderer>();
         Selection.enabled = false;
