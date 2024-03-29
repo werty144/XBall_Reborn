@@ -8,9 +8,10 @@ using UnityEngine.SceneManagement;
 
 public class Callbacks : MonoBehaviour
 {
-    private LobbyManager lobby;
+    public GameObject lobby;
     private FriendsListController friendsList;
     public GameObject global;
+    public GameObject UIManagerMenu;
     
     protected Callback<LobbyCreated_t> m_LobbyCreated;
     protected Callback<LobbyEnter_t> m_LobbyEnter;
@@ -34,11 +35,6 @@ public class Callbacks : MonoBehaviour
         }
     }
 
-    public void SetLobby(LobbyManager lobbyManager)
-    {
-        lobby = lobbyManager;
-    }
-
     public void SetFriendsList(FriendsListController friendsListController)
     {
         friendsList = friendsListController;
@@ -48,14 +44,15 @@ public class Callbacks : MonoBehaviour
     {
         Debug.Log("Lobby with id " + pCallback.m_ulSteamIDLobby + " created");
         
-        lobby.OnLobbyCreate(pCallback.m_ulSteamIDLobby);
+        lobby.GetComponent<LobbyManager>().OnLobbyCreate(pCallback.m_ulSteamIDLobby);
     }
 
     private void OnLobbyEnter(LobbyEnter_t pCallback)
     {
         Debug.Log("Enter lobby " + pCallback.m_ulSteamIDLobby);
 
-        lobby.OnLobbyEnter(pCallback.m_ulSteamIDLobby);
+        UIManagerMenu.GetComponent<UIManagerMenu>().OnLobbyEnter();
+        lobby.GetComponent<LobbyManager>().OnLobbyEnter(pCallback.m_ulSteamIDLobby);
     }
     
     private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
@@ -72,7 +69,7 @@ public class Callbacks : MonoBehaviour
             Assert.AreEqual("Game", SceneManager.GetActiveScene().name);
             return;
         }
-        lobby.OnDataUpdate();
+        lobby.GetComponent<LobbyManager>().OnDataUpdate();
     }
     
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)

@@ -10,6 +10,7 @@ public class FriendsListController : MonoBehaviour
     public GameObject listItemPrefab;
     public Transform contentPanel;
     public GameObject lobby;
+    public GameObject UIManagerMenu;
     void Start()
     {
         UpdateFriendsList();
@@ -40,6 +41,10 @@ public class FriendsListController : MonoBehaviour
                 inviteButton.onClick.AddListener(() => {
                     var lobbyManager = lobby.GetComponent<LobbyManager>();
                     lobbyManager.InviteAndCreateOnNeed(friend.ID);
+                });
+                inviteButton.onClick.AddListener(() =>
+                {
+                    UIManagerMenu.GetComponent<UIManagerMenu>().OnInviteButton();
                 });
             }
             else

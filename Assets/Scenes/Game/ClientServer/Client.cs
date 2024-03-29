@@ -154,7 +154,7 @@ public class Client : MonoBehaviour, StateHolder
         {
             case PlayerMovementAction playerMovementAction:
                 player = Players[playerMovementAction.PlayerId];
-                if (!player.IsMy) { return; }
+                // if (!player.IsMy) { return; }
                 
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
                 player.SetMovementTarget(target);

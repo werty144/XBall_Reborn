@@ -30,29 +30,18 @@ public class LobbyManager : MonoBehaviour
     public Transform speedDropdown;
     public GameObject global;
 
-    private void OnEnable()
-    {
-        global = GameObject.FindWithTag("Global");
-        global.GetComponent<Callbacks>().SetLobby(this);
-    }
-
-    public void Start()
-    {
-        pendingInvitedID = 0;
-        currentLobbyID = 0;
-    }
-
     public void InviteAndCreateOnNeed(CSteamID invitedID)
     {
-        if (currentLobbyID == 0)
-        {
+        // if (currentLobbyID == 0)
+        // {
             pendingInvitedID = invitedID.m_SteamID;
             Steam.CreateLobby();
-        }
-        else
-        {
-            Steam.SendInvite(currentLobbyID, invitedID.m_SteamID);
-        }
+        // }
+        // else
+        // {
+        //     print("Sending invite");
+        //     Steam.SendInvite(currentLobbyID, invitedID.m_SteamID);
+        // }
     }
 
     public void OnLobbyCreate(ulong lobbyID)
@@ -68,6 +57,7 @@ public class LobbyManager : MonoBehaviour
 
         if (pendingInvitedID != 0)
         {
+            print("Iiinvite");
             Steam.SendInvite(currentLobbyID, pendingInvitedID);
             pendingInvitedID = 0;
         }
