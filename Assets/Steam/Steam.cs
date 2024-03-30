@@ -118,4 +118,58 @@ public class Steam
         if (!SteamManager.Initialized) { return; }
         SteamMatchmaking.LeaveLobby(new CSteamID(lobbyID));
     }
+
+    public static Texture2D GetUserLargeAvatar(CSteamID userID)
+    {
+        if (!SteamManager.Initialized)
+        {
+            return null;
+        }
+        
+        var avatarInt = SteamFriends.GetLargeFriendAvatar(userID);
+        if (avatarInt == -1)
+        {
+            return null;
+        }
+
+        SteamUtils.GetImageSize(avatarInt, out var width, out var height);
+        if (width <= 0 || height <= 0) return null;
+        
+        var image = new byte[width * height * 4];
+        var texture = new Texture2D((int)width, (int)height, TextureFormat.RGBA32, false);
+
+        if (!SteamUtils.GetImageRGBA(avatarInt, image, (int)(width * height * 4))) return null;
+        texture.LoadRawTextureData(image);
+        texture.Apply();
+        var flipped = FlipTextureVertically(texture);
+        return flipped;
+    }
+    
+    static Texture2D FlipTextureVertically(Texture2D original)
+    {
+        Texture2D flipped = new Texture2D(original.width, original.height);
+
+        int xN = original.width;
+        int yN = original.height;
+
+        for (int i = 0; i < xN; i++)
+        {
+            for (int j = 0; j < yN; j++)
+            {
+                flipped.SetPixel(i, yN - j - 1, original.GetPixel(i, j));
+            }
+        }
+        flipped.Apply(); // Apply all SetPixel changes
+
+        return flipped;
+    }
+
+    public static string GetUserNickname(CSteamID userID)
+    {
+        if (!SteamManager.Initialized)
+        {
+            return null;
+        }
+        return SteamFriends.GetFriendPersonaName(userID);
+    }
 }
