@@ -13,11 +13,6 @@ public class UIManagerMenu : MonoBehaviour
 
     }
 
-    public void OnExitButton()
-    {
-        Application.Quit();
-    }
-
     public void OnPlayFriendButton()
     {
         InitialView.SetActive(false);
