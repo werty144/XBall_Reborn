@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using IngameDebugConsole;
@@ -51,6 +52,7 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("Exit", "Quits the game", Exit);
         
         DebugLogConsole.AddCommand<uint>("TestIsValidGrab", "Tests function ActionRules.IsValidGrab", TestIsValidGrab);
+        DebugLogConsole.AddCommand("TestDelayedAction", "Launches two delayed actions with same timeout", TestDelayedAction);
     }
 
     void PeerConnected()
@@ -259,5 +261,25 @@ public class DebugConsoleCommands : MonoBehaviour
     void SetTimeScale(float timeScale)
     {
         Time.timeScale = timeScale;
+    }
+
+    void TestDelayedAction()
+    {
+        StartCoroutine(DelayedAction(ActionRulesConfig.GrabDuration,
+            () =>
+            {
+                print(1);
+            }));
+        StartCoroutine(DelayedAction(ActionRulesConfig.GrabDuration - 1,
+            () =>
+            {
+                print(2);
+            }));
+    }
+    
+    IEnumerator DelayedAction(int millis, Action action)
+    {
+        yield return new WaitForSeconds(0.001f * millis);
+        action();
     }
 }

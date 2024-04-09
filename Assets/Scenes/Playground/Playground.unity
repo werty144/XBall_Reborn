@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 144675036}
   - component: {fileID: 144675038}
   - component: {fileID: 144675037}
+  - component: {fileID: 144675039}
   m_Layer: 0
   m_Name: Dummy
   m_TagString: Dummy
@@ -209,7 +210,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerPrefab: {fileID: 5395654648800661422, guid: 935265c851c72aaa28eb8dd03d2c0b52, type: 3}
   BallPrefab: {fileID: 7668133164203131654, guid: bbbd3e1119399ef6ba07505ebf8b1281, type: 3}
+  ActionScheduler: {fileID: 144675039}
   ServerBall: {fileID: 0}
+--- !u!114 &144675039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144675034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 605771910cc11920995b934fe18cd9be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &298412755
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -618,6 +632,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 546769086}
+  - component: {fileID: 546769088}
   - component: {fileID: 546769087}
   m_Layer: 0
   m_Name: Client
@@ -655,7 +670,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerPrefab: {fileID: 7563179792530239496, guid: 4d7da0b80967ff87a880b331f1032242, type: 3}
   BallPrefab: {fileID: 3015573755741814911, guid: 1da720c98dd6c5dbeb9923685d41ecdd, type: 3}
+  ActionScheduler: {fileID: 546769088}
   ServerBall: {fileID: 0}
+--- !u!114 &546769088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 546769085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 605771910cc11920995b934fe18cd9be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!64 &586138579
 MeshCollider:
   m_ObjectHideFlags: 0

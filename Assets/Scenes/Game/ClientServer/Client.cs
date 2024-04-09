@@ -24,6 +24,7 @@ public class Client : MonoBehaviour, StateHolder
     
     private uint NextActionId = 1;
     private Dictionary<uint, Stopwatch> ActionTimers = new();
+    public ActionScheduler ActionScheduler;
     
     public Dictionary<uint, PlayerController> ServerPlayers = new();
     public BallController ServerBall;
@@ -240,42 +241,25 @@ public class Client : MonoBehaviour, StateHolder
             {
                 return;
             }
-
-            Stopwatch timer;
-            long timePassed;
-            int timeLeft;
+            
             switch (relayedAction.ActionCase)
             {
                 case RelayedAction.ActionOneofCase.GrabAction:
                     ServerBall.SetOwner(ServerPlayers[relayedAction.GrabAction.PlayerId]);
-                    timer = ActionTimers[relayedAction.GrabAction.ActionId];
-                    ActionTimers.Remove(relayedAction.GrabAction.ActionId);
-                    timer.Stop();
-                    timePassed = timer.ElapsedMilliseconds;
-                    timeLeft = Mathf.Max(0, ActionRulesConfig.GrabDuration - (int)timePassed);
-                    StartCoroutine(DelayedAction(timeLeft,
-                        () =>
-                        {
-                            var newOwner = Players[relayedAction.GrabAction.PlayerId];
-                            if (ServerBall.Owned && ServerBall.Owner.ID == relayedAction.GrabAction.PlayerId)
-                            {
-                                Ball.SetOwner(newOwner);
-                            }
-                        }));
+                    var timeLeft = ManageTimer(relayedAction.GrabAction.ActionId);
+                    ActionScheduler.Schedule(() =>
+                    {
+                        Ball.SetOwner(Players[relayedAction.GrabAction.PlayerId]);
+                    }, timeLeft);
                     break;
                 case RelayedAction.ActionOneofCase.ThrowAction:
                     var ballTarget = ProtobufUtils.FromVector3Protobuf(relayedAction.ThrowAction.Destination);
                     ServerBall.ThrowTo(ballTarget);
-                    timer = ActionTimers[relayedAction.ThrowAction.ActionId];
-                    ActionTimers.Remove(relayedAction.ThrowAction.ActionId);
-                    timer.Stop();
-                    timePassed = timer.ElapsedMilliseconds;
-                    timeLeft = Mathf.Max(0, ActionRulesConfig.ThrowDuration - (int)timePassed);
-                    StartCoroutine(DelayedAction(timeLeft,
-                        () =>
-                        {
-                            Ball.ThrowTo(ballTarget);
-                        }));
+                    timeLeft = ManageTimer(relayedAction.ThrowAction.ActionId);
+                    ActionScheduler.Schedule(() =>
+                    {
+                        Ball.ThrowTo(ballTarget);
+                    }, timeLeft);
                     break;
             }
         }
@@ -290,11 +274,10 @@ public class Client : MonoBehaviour, StateHolder
                     if (relayedAction.Success)
                     {
                         ServerBall.SetOwner(ServerPlayers[relayedAction.GrabAction.PlayerId]);
-                        StartCoroutine(DelayedAction(ActionRulesConfig.GrabDuration,
-                            () =>
-                            {
-                                Ball.SetOwner(Players[relayedAction.GrabAction.PlayerId]);
-                            }));
+                        ActionScheduler.Schedule(() =>
+                        {
+                            Ball.SetOwner(Players[relayedAction.GrabAction.PlayerId]);
+                        }, ActionRulesConfig.GrabDuration);
                     }
                     break;
                 case RelayedAction.ActionOneofCase.ThrowAction:
@@ -304,22 +287,31 @@ public class Client : MonoBehaviour, StateHolder
                     {
                         var ballTarget = ProtobufUtils.FromVector3Protobuf(relayedAction.ThrowAction.Destination);
                         ServerBall.ThrowTo(ballTarget);
-                        StartCoroutine(DelayedAction(ActionRulesConfig.ThrowDuration,
-                            () =>
-                            {
-                                Ball.ThrowTo(ballTarget);
-                            }));
+                        ActionScheduler.Schedule(() =>
+                        {
+                            Ball.ThrowTo(ballTarget);
+                        }, ActionRulesConfig.GrabDuration);
                     }
                     break;
             }
         }
     }
-    
-    IEnumerator DelayedAction(int millis, Action action)
+
+    int ManageTimer(uint actionId)
     {
-        yield return new WaitForSeconds(0.001f * millis);
-        action();
+        var timer = ActionTimers[actionId];
+        ActionTimers.Remove(actionId);
+        timer.Stop();
+        var timePassed = timer.ElapsedMilliseconds;
+        var timeLeft = Mathf.Max(0, ActionRulesConfig.GrabDuration - (int)timePassed);
+        return timeLeft;
     }
+    
+    // IEnumerator DelayedAction(int millis, Action action)
+    // {
+    //     yield return new WaitForSeconds(0.001f * millis);
+    //     action();
+    // }
     
     public GameState GetGameState()
     {
