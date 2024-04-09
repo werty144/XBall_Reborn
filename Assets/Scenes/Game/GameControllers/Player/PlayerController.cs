@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
 {
     public bool IsMy;
     public uint ID;
+    public ulong UserID;
 
     public BallController Ball { set; private get; }
     

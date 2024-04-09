@@ -20,6 +20,8 @@ public class Server : MonoBehaviour, StateHolder
     protected BallController Ball;
     protected Dictionary<ulong, GoalController> Goal = new();
     private GameStateVersioning GameStateVersioning;
+    private ActionScheduler ActionScheduler;
+    private BallStateManager BallStateManager = new();
     
     private GameState PausedState;
     private bool OnPause;
@@ -29,6 +31,7 @@ public class Server : MonoBehaviour, StateHolder
         PlayerPrefab = Resources.Load<GameObject>("Player/ServerPlayerPrefab");
         BallPrefab = Resources.Load<GameObject>("Ball/ServerBallPrefab");
         GameStateVersioning = new GameStateVersioning(this);
+        ActionScheduler = GetComponent<ActionScheduler>();
     }
 
     private void Start()
@@ -71,6 +74,7 @@ public class Server : MonoBehaviour, StateHolder
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
+            controller.UserID = userIDs[i % 2].m_SteamID;
             controller.Ball = Ball;
             Players[spareID] = controller;
             spareID++;
@@ -124,6 +128,8 @@ public class Server : MonoBehaviour, StateHolder
     {
         if (OnPause) {return;}
         
+        var pingToActor = PingManager.GetPingToUser(actorID).Milliseconds;
+        bool success;
         switch (action)
         {
             case PlayerMovementAction:
@@ -135,15 +141,21 @@ public class Server : MonoBehaviour, StateHolder
                 MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
                 break;  
             case GrabAction grabAction:
-                if (grabAction.PreSuccess)
+                success = grabAction.PreSuccess && BallStateManager.Grab(Players[grabAction.PlayerId]);
+                if (success)
                 {
-                    GameStateVersioning.ApplyActionToCurrentState(grabAction);
+                    var delay = Math.Max(0, ActionRulesConfig.GrabDuration - pingToActor);
+                    ActionScheduler.Schedule(() =>
+                    {
+                        Ball.SetOwner(Players[grabAction.PlayerId]);
+                        BroadCastState();
+                    }, delay);
                 }
                 var relayedGrabAction = new RelayedAction
                 {
                     UserId = actorID.m_SteamID,
                     GrabAction = grabAction,
-                    Success = grabAction.PreSuccess
+                    Success = success
                 };
                 foreach (var userID in userIDs)
                 {
@@ -151,27 +163,23 @@ public class Server : MonoBehaviour, StateHolder
                 }
                 break;
             case ThrowAction throwAction:
+                success = BallStateManager.Throw(Players[throwAction.PlayerId]);
+                if (success)
+                {
+                    var delay = Math.Max(0, ActionRulesConfig.ThrowDuration - pingToActor);
+                    ActionScheduler.Schedule(() =>
+                    {
+                        Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
+                        BroadCastState();
+                    }, delay);
+                }
+
                 var relayedThrowAction = new RelayedAction
                 {
                     UserId = actorID.m_SteamID,
                     ThrowAction = throwAction,
+                    Success = success
                 };
-                if (Ball.Owned && Ball.Owner.ID == throwAction.PlayerId)
-                {
-                    relayedThrowAction.Success = true;
-                    var pingToActor = PingManager.GetPingToUser(actorID).Milliseconds;
-                    var delay = Math.Max(0, ActionRulesConfig.ThrowDuration - pingToActor);
-                    StartCoroutine(DelayedAction(delay, () =>
-                    {
-                        if (!Ball.Owned || Ball.Owner.ID != throwAction.PlayerId) return;
-                        Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
-                        BroadCastState();
-                    }));
-                }
-                else
-                {
-                    relayedThrowAction.Success = false;
-                }
                 foreach (var userID in userIDs)
                 {
                     MessageManager.RelayAction(userID, relayedThrowAction);

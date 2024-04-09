@@ -307,12 +307,6 @@ public class Client : MonoBehaviour, StateHolder
         return timeLeft;
     }
     
-    // IEnumerator DelayedAction(int millis, Action action)
-    // {
-    //     yield return new WaitForSeconds(0.001f * millis);
-    //     action();
-    // }
-    
     public GameState GetGameState()
     {
         GameState gameState = new GameState();

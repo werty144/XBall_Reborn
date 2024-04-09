@@ -118,7 +118,7 @@ public class BallController : MonoBehaviour
         Vector3 ballToTargetXZ = new Vector3(ballToTarget.x, 0, ballToTarget.z);
         float dot = Vector3.Dot(ballToTarget.normalized, Vector3.up);
         float angleRadians = Mathf.Acos(dot);
-        float launchAngleRadians = (Mathf.PI - angleRadians) * 0.5f;
+        float launchAngleRadians = Mathf.PI * 0.5f - angleRadians * 0.8f;
         float horizontalDistance = ballToTargetXZ.magnitude;
         float heightDifference = target.y - ballPosition.y;
 
@@ -132,7 +132,6 @@ public class BallController : MonoBehaviour
         float gravity = Physics.gravity.magnitude;
         float velocityMagnitude = Mathf.Sqrt((gravity * horizontalDistance * horizontalDistance) / 
                                              (2 * Mathf.Cos(launchAngleRadians) * Mathf.Cos(launchAngleRadians) * (horizontalDistance * Mathf.Tan(launchAngleRadians) - heightDifference)));
-
         Vector3 toTargetXZ = ballToTargetXZ.normalized;
         var launchVelocity = toTargetXZ * Mathf.Cos(launchAngleRadians) * velocityMagnitude + Vector3.up * Mathf.Sin(launchAngleRadians) * velocityMagnitude;
         GetComponent<Rigidbody>().velocity = launchVelocity;
