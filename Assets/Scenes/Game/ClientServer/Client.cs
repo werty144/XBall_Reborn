@@ -73,6 +73,8 @@ public class Client : MonoBehaviour, StateHolder
             else
             {
                 Goals[setupInfo.OpponentID.m_SteamID] = goal;
+                var probabilityController = goal.GetComponent<GoalProbabilityController>();
+                probabilityController.Client = this;
             }
         }
     }
@@ -97,7 +99,6 @@ public class Client : MonoBehaviour, StateHolder
         var ballObject = Instantiate(BallPrefab);
         ballObject.layer = collisionLayer;
         Ball = ballObject.GetComponent<BallController>();
-        
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
@@ -112,6 +113,7 @@ public class Client : MonoBehaviour, StateHolder
         foreach (var player in Players.Values)
         {
             player.IsMy = IAmMaster ^ (player.ID % 2 == 1);
+            player.UserID = player.IsMy ? MyID : OpponentID;
             player.Colorize(player.IsMy ? PlayerConfig.MyColor : PlayerConfig.OpponentColor);
         }
         
@@ -197,6 +199,8 @@ public class Client : MonoBehaviour, StateHolder
                 throwAction.ActionId = NextActionId;
                 ActionTimers[throwAction.ActionId] = Stopwatch.StartNew();
                 NextActionId++;
+                var goalSuccess = GoalRules.GoalAttemptSuccess(Players, Ball.Owner, Ball, Goals[OpponentID]);
+                throwAction.GoalSuccess = goalSuccess;
                 break;
             default:
                 Debug.LogWarning("Unknown input action");

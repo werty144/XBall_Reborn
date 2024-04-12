@@ -1314,6 +1314,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Goal
       objectReference: {fileID: 0}
+    - target: {fileID: 902525302589052621, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1892413264228793938, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -1334,6 +1338,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 2079638986}
+    - target: {fileID: 4395218990191329430, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5638946622577003998, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -1390,10 +1398,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6314524993900378550, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7475312377809571588, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 2079638986}
+    - target: {fileID: 7483063519831224301, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
 --- !u!64 &1803564397

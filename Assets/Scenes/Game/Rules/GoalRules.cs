@@ -1,21 +1,63 @@
+using System.Collections.Generic;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = System.Random;
 
 public static class GoalRules
 {
+    private const float distCoef = -0.0667f;
     private static Random random = new Random();
     
-    public static bool GoalAttemptSuccess(BallController ball, GoalController goal)
+    public static float GoalAttemptSuccessProbability(
+        Dictionary<uint, PlayerController> players, 
+        PlayerController thrower, 
+        BallController ball, 
+        GameObject goal)
     {
-        var ballGoalVector = goal.transform.position - ball.transform.position;
+        var goalPosition = goal.transform.position;
+        var ballGoal = goalPosition - ball.transform.position;
+        ballGoal.y = 0;
+        var distance = ballGoal.magnitude;
 
-        // var angle = Vector3.Angle(ball.GetComponent<Rigidbody>().velocity, ballGoalVector);
-        // // In case detected after the ball has bounced
-        // angle = Mathf.Min(angle, 180 - angle);
-        // angle = Mathf.Clamp(angle, 0f, 90f);
+        PlayerController nearestOpponent = null;
+        float minDist = Mathf.Infinity;
+        foreach (var player in players.Values)
+        {
+            if (player.UserID == thrower.UserID)
+            {
+                continue;
+            }
 
-        var speed = ball.GetComponent<Rigidbody>().velocity.magnitude;
-        var probability = 1 / (1 + Mathf.Exp(0.6f * (speed - 4)));
+            var dist = Vector2.Distance(player.GetPosition(), thrower.GetPosition());
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearestOpponent = player;
+            }
+        }
+
+        float opponentCoef;
+        if (minDist > 2)
+        {
+            opponentCoef = 1;
+        }
+        else
+        {
+            opponentCoef = thrower.CalculateViewAngle(nearestOpponent!.transform.position) > 90 ? 0.8f : 0.5f;
+        }
+
+        var probability = Mathf.Max(distCoef * distance + 1, 0.05f) * opponentCoef;
+        return probability;
+    }
+
+    public static bool GoalAttemptSuccess(
+        Dictionary<uint, PlayerController> players,
+        PlayerController thrower,
+        BallController ball,
+        GameObject goal)
+    {
+        var probability = GoalAttemptSuccessProbability(players, thrower, ball, goal);
         return random.NextDouble() < probability;
     }
 }

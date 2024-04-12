@@ -22,6 +22,8 @@ public class Server : MonoBehaviour, StateHolder
     private GameStateVersioning GameStateVersioning;
     private ActionScheduler ActionScheduler;
     private BallStateManager BallStateManager = new();
+
+    private bool LastThrowGoalSuccess;
     
     private GameState PausedState;
     private bool OnPause;
@@ -170,6 +172,7 @@ public class Server : MonoBehaviour, StateHolder
                     ActionScheduler.Schedule(() =>
                     {
                         Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
+                        LastThrowGoalSuccess = throwAction.GoalSuccess;
                         BroadCastState();
                     }, delay);
                 }
@@ -189,33 +192,6 @@ public class Server : MonoBehaviour, StateHolder
                 Debug.LogWarning("Unknown action");
                 break;
         }
-        
-        // var actorPing = PingManager.GetPingToUser(actorID);
-        // GameStateVersioning.ApplyActionInThePast(action, actorID, actorPing);
-        //
-        // var currentState = GetGameState();
-        // foreach (var userID in userIDs)
-        // {
-        //     var userPing = PingManager.GetPingToUser(userID);
-        //     GameStateVersioning.FastForward(userPing);
-        //     var stateForUser = GetGameState();
-        //     if (userID == actorID)
-        //     {
-        //         MessageManager.SendActionResponse(
-        //             actorID,
-        //             new ActionResponse
-        //             {
-        //                 ActionId = ParseUtils.GetActionId(action),
-        //                 GameState = stateForUser
-        //             });
-        //     }
-        //     else
-        //     {
-        //         MessageManager.SendGameState(userID, stateForUser);
-        //     }
-        //
-        //     ApplyGameState(currentState);
-        // }
     }
 
     private void BroadCastState()
@@ -337,11 +313,10 @@ public class Server : MonoBehaviour, StateHolder
 
     public void OnGoalAttempt(ulong goalOwner)
     {
-        var success = GoalRules.GoalAttemptSuccess(Ball, Goal[goalOwner]);
         var message = new GoalAttempt
         {
             GoalOwner = goalOwner,
-            Success = success
+            Success = LastThrowGoalSuccess
         };
         foreach (var userID in userIDs)
         {

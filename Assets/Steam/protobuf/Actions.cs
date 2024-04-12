@@ -27,19 +27,20 @@ public static partial class ActionsReflection {
           "ZBgCIAEoDRIJCgF4GAMgASgCEgkKAXkYBCABKAIiOAoQUGxheWVyU3RvcEFj",
           "dGlvbhIRCglhY3Rpb25faWQYASABKA0SEQoJcGxheWVyX2lkGAIgASgNIkcK",
           "CkdyYWJBY3Rpb24SEQoJYWN0aW9uX2lkGAEgASgNEhEKCXBsYXllcl9pZBgC",
-          "IAEoDRITCgtwcmVfc3VjY2VzcxgDIAEoCCJaCgtUaHJvd0FjdGlvbhIRCglh",
+          "IAEoDRITCgtwcmVfc3VjY2VzcxgDIAEoCCJwCgtUaHJvd0FjdGlvbhIRCglh",
           "Y3Rpb25faWQYASABKA0SEQoJcGxheWVyX2lkGAIgASgNEiUKC2Rlc3RpbmF0",
-          "aW9uGAMgASgLMhAuVmVjdG9yM1Byb3RvQnVmIoUBCg1SZWxheWVkQWN0aW9u",
-          "Eg8KB3VzZXJfaWQYASABKAQSIgoLZ3JhYl9hY3Rpb24YAiABKAsyCy5HcmFi",
-          "QWN0aW9uSAASJAoMdGhyb3dfYWN0aW9uGAMgASgLMgwuVGhyb3dBY3Rpb25I",
-          "ABIPCgdzdWNjZXNzGAQgASgIQggKBmFjdGlvbmIGcHJvdG8z"));
+          "aW9uGAMgASgLMhAuVmVjdG9yM1Byb3RvQnVmEhQKDGdvYWxfc3VjY2VzcxgE",
+          "IAEoCCKFAQoNUmVsYXllZEFjdGlvbhIPCgd1c2VyX2lkGAEgASgEEiIKC2dy",
+          "YWJfYWN0aW9uGAIgASgLMgsuR3JhYkFjdGlvbkgAEiQKDHRocm93X2FjdGlv",
+          "bhgDIAEoCzIMLlRocm93QWN0aW9uSAASDwoHc3VjY2VzcxgEIAEoCEIICgZh",
+          "Y3Rpb25iBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::PlayerStateReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerMovementAction), global::PlayerMovementAction.Parser, new[]{ "ActionId", "PlayerId", "X", "Y" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::PlayerStopAction), global::PlayerStopAction.Parser, new[]{ "ActionId", "PlayerId" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::GrabAction), global::GrabAction.Parser, new[]{ "ActionId", "PlayerId", "PreSuccess" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThrowAction), global::ThrowAction.Parser, new[]{ "ActionId", "PlayerId", "Destination" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThrowAction), global::ThrowAction.Parser, new[]{ "ActionId", "PlayerId", "Destination", "GoalSuccess" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::RelayedAction), global::RelayedAction.Parser, new[]{ "UserId", "GrabAction", "ThrowAction", "Success" }, new[]{ "Action" }, null, null, null)
         }));
   }
@@ -877,6 +878,7 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
     actionId_ = other.actionId_;
     playerId_ = other.playerId_;
     destination_ = other.destination_ != null ? other.destination_.Clone() : null;
+    goalSuccess_ = other.goalSuccess_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -922,6 +924,18 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
     }
   }
 
+  /// <summary>Field number for the "goal_success" field.</summary>
+  public const int GoalSuccessFieldNumber = 4;
+  private bool goalSuccess_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool GoalSuccess {
+    get { return goalSuccess_; }
+    set {
+      goalSuccess_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -940,6 +954,7 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
     if (ActionId != other.ActionId) return false;
     if (PlayerId != other.PlayerId) return false;
     if (!object.Equals(Destination, other.Destination)) return false;
+    if (GoalSuccess != other.GoalSuccess) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -950,6 +965,7 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
     if (ActionId != 0) hash ^= ActionId.GetHashCode();
     if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
     if (destination_ != null) hash ^= Destination.GetHashCode();
+    if (GoalSuccess != false) hash ^= GoalSuccess.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -980,6 +996,10 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
       output.WriteRawTag(26);
       output.WriteMessage(Destination);
     }
+    if (GoalSuccess != false) {
+      output.WriteRawTag(32);
+      output.WriteBool(GoalSuccess);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -1002,6 +1022,10 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
       output.WriteRawTag(26);
       output.WriteMessage(Destination);
     }
+    if (GoalSuccess != false) {
+      output.WriteRawTag(32);
+      output.WriteBool(GoalSuccess);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -1020,6 +1044,9 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
     }
     if (destination_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Destination);
+    }
+    if (GoalSuccess != false) {
+      size += 1 + 1;
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -1044,6 +1071,9 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
         Destination = new global::Vector3ProtoBuf();
       }
       Destination.MergeFrom(other.Destination);
+    }
+    if (other.GoalSuccess != false) {
+      GoalSuccess = other.GoalSuccess;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -1075,6 +1105,10 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
           input.ReadMessage(Destination);
           break;
         }
+        case 32: {
+          GoalSuccess = input.ReadBool();
+          break;
+        }
       }
     }
   #endif
@@ -1103,6 +1137,10 @@ public sealed partial class ThrowAction : pb::IMessage<ThrowAction>
             Destination = new global::Vector3ProtoBuf();
           }
           input.ReadMessage(Destination);
+          break;
+        }
+        case 32: {
+          GoalSuccess = input.ReadBool();
           break;
         }
       }
