@@ -119,14 +119,25 @@ public class Steam
         SteamMatchmaking.LeaveLobby(new CSteamID(lobbyID));
     }
 
-    public static Texture2D GetUserLargeAvatar(CSteamID userID)
+    private static Texture2D GetUserAvatar(CSteamID userID, string size)
     {
         if (!SteamManager.Initialized)
         {
             return null;
         }
-        
-        var avatarInt = SteamFriends.GetLargeFriendAvatar(userID);
+
+        int avatarInt;
+        switch (size)
+        {
+            case "large":
+                avatarInt = SteamFriends.GetLargeFriendAvatar(userID);
+                break;
+            case "medium":
+                avatarInt = SteamFriends.GetMediumFriendAvatar(userID);
+                break;
+            default:
+                return null;
+        }
         if (avatarInt == -1)
         {
             return null;
@@ -143,6 +154,16 @@ public class Steam
         texture.Apply();
         var flipped = FlipTextureVertically(texture);
         return flipped;
+    }
+
+    public static Texture2D GetUserLargeAvatar(CSteamID userID)
+    {
+        return GetUserAvatar(userID, "large");
+    }
+
+    public static Texture2D GetUserMediumAvatar(CSteamID userID)
+    {
+        return GetUserAvatar(userID, "medium");
     }
     
     static Texture2D FlipTextureVertically(Texture2D original)

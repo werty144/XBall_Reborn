@@ -25,32 +25,10 @@ public class FriendsListController : MonoBehaviour
         foreach (var friend in onlineFriends)
         {
             GameObject newItem = Instantiate(listItemPrefab, contentPanel);
-            var nicknamePlate = newItem.GetComponentInChildren<TextMeshProUGUI>();
-            if (nicknamePlate != null)
-            {
-                nicknamePlate.text = friend.Name;
-            }
-            else
-            {
-                Debug.LogWarning("Nickname plate not found");
-            }
-
-            var inviteButton = newItem.GetComponentInChildren<Button>();
-            if (inviteButton != null)
-            {
-                inviteButton.onClick.AddListener(() => {
-                    var lobbyManager = lobby.GetComponent<LobbyManager>();
-                    lobbyManager.InviteAndCreateOnNeed(friend.ID);
-                });
-                inviteButton.onClick.AddListener(() =>
-                {
-                    UIManagerMenu.GetComponent<UIManagerMenu>().OnInviteButton();
-                });
-            }
-            else
-            {
-                Debug.LogWarning("Invite button not found");
-            }
+            var controller = newItem.GetComponent<FriendItemController>();
+            controller.UserID = friend.ID;
+            controller.lobby = lobby;
+            controller.UIManagerMenu = UIManagerMenu;
         }
     }
 
@@ -60,5 +38,10 @@ public class FriendsListController : MonoBehaviour
         {
             Destroy(contentPanel.GetChild(i).gameObject);
         }
+    }
+
+    public void Close()
+    {
+        UIManagerMenu.GetComponent<UIManagerMenu>().OnCloseFriendsList();
     }
 }

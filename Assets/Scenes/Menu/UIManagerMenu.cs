@@ -31,4 +31,10 @@ public class UIManagerMenu : MonoBehaviour
         FriendsOnlineView.SetActive(false);
         LobbyView.SetActive(true);
     }
+
+    public void OnCloseFriendsList()
+    {
+        InitialView.SetActive(true);
+        FriendsOnlineView.SetActive(false);
+    }
 }
