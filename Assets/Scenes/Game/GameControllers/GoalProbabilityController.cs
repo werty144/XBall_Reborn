@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class GoalProbabilityController : MonoBehaviour
 {
     public Client Client;
+    public ulong MyUserID;
     public Canvas Canvas;
     public Image ProbabilityBar;
 
@@ -26,7 +27,7 @@ public class GoalProbabilityController : MonoBehaviour
     {
         Canvas.transform.LookAt(2 * Canvas.transform.position - Camera.transform.position);
         
-        if (!Client.GetBall().Owned)
+        if (!Client.GetBall().Owned || Client.GetBall().Owner.UserID != MyUserID)
         {
             Canvas.enabled = false;
             return;

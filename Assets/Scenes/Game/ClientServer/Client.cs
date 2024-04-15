@@ -75,6 +75,7 @@ public class Client : MonoBehaviour, StateHolder
                 Goals[setupInfo.OpponentID.m_SteamID] = goal;
                 var probabilityController = goal.GetComponent<GoalProbabilityController>();
                 probabilityController.Client = this;
+                probabilityController.MyUserID = MyID;
             }
         }
     }
