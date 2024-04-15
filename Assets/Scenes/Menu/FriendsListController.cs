@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Steamworks;
@@ -11,10 +12,17 @@ public class FriendsListController : MonoBehaviour
     public Transform contentPanel;
     public GameObject lobby;
     public GameObject UIManagerMenu;
+    
+    protected Callback<PersonaStateChange_t> m_PersonaStateChange;
     void Start()
     {
         UpdateFriendsList();
-        GameObject.FindGameObjectWithTag("Global").GetComponent<Callbacks>().SetFriendsList(this);
+        m_PersonaStateChange = Callback<PersonaStateChange_t>.Create(OnPersonaStateChange);
+    }
+
+    private void OnPersonaStateChange(PersonaStateChange_t pCallback)
+    {
+        UpdateFriendsList();
     }
 
     public void UpdateFriendsList()
@@ -43,5 +51,10 @@ public class FriendsListController : MonoBehaviour
     public void Close()
     {
         UIManagerMenu.GetComponent<UIManagerMenu>().OnCloseFriendsList();
+    }
+
+    private void OnDestroy()
+    {
+        m_PersonaStateChange.Dispose();
     }
 }

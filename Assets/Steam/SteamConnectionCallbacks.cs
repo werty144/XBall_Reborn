@@ -6,81 +6,18 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 
-public class Callbacks : MonoBehaviour
+public class SteamConnectionCallbacks : MonoBehaviour
 {
-    public GameObject lobby;
-    private FriendsListController friendsList;
-    public GameObject global;
-    public GameObject UIManagerMenu;
+    public GameStarter GameStarter;
     
-    protected Callback<LobbyCreated_t> m_LobbyCreated;
-    protected Callback<LobbyEnter_t> m_LobbyEnter;
-    protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
-    protected Callback<GameLobbyJoinRequested_t> m_GameLobbyJoinRequested;
-    protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
     protected Callback<SteamNetConnectionStatusChangedCallback_t> m_ConnectionChanged;
-    protected Callback<PersonaStateChange_t> m_PersonaStateChange;
 
     private void OnEnable()
     {
         if (SteamManager.Initialized)   
         {
-            m_LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
-            m_LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
-            m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
-            m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
-            m_GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequest);
             m_ConnectionChanged = Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnConnectionChanged);
-            m_PersonaStateChange = Callback<PersonaStateChange_t>.Create(OnPersonaStateChange);
         }
-    }
-
-    public void SetFriendsList(FriendsListController friendsListController)
-    {
-        friendsList = friendsListController;
-    }
-
-    private void OnLobbyCreated(LobbyCreated_t pCallback)
-    {
-        Debug.Log("Lobby with id " + pCallback.m_ulSteamIDLobby + " created");
-        
-        lobby.GetComponent<LobbyManager>().OnLobbyCreate(pCallback.m_ulSteamIDLobby);
-    }
-
-    private void OnLobbyEnter(LobbyEnter_t pCallback)
-    {
-        Debug.Log("Enter lobby " + pCallback.m_ulSteamIDLobby);
-
-        UIManagerMenu.GetComponent<UIManagerMenu>().OnLobbyEnter();
-        lobby.GetComponent<LobbyManager>().OnLobbyEnter(pCallback.m_ulSteamIDLobby);
-    }
-    
-    private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
-    {
-        // We receive member data update twice: as a member update and as a lobby update
-        // Hence, we can only handle lobby updates
-        if (pCallback.m_ulSteamIDMember != pCallback.m_ulSteamIDLobby) { return; }
-        Debug.Log("Lobby " + pCallback.m_ulSteamIDLobby + " data update.\n" + 
-                  "Success: " + pCallback.m_bSuccess + "\n" +
-                  "Updated ID: " + pCallback.m_ulSteamIDMember);
-        
-        if (lobby == null)
-        {
-            Assert.AreEqual("Game", SceneManager.GetActiveScene().name);
-            return;
-        }
-        lobby.GetComponent<LobbyManager>().OnDataUpdate();
-    }
-    
-    private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
-    {
-        // This one is handled as a part of LobbyDataUpdate
-    }
-    
-    private void OnGameLobbyJoinRequest(GameLobbyJoinRequested_t pCallback)
-    {
-        Debug.Log("Got invite into lobby " + pCallback.m_steamIDLobby + " from " + pCallback.m_steamIDFriend);
-        SteamMatchmaking.JoinLobby(pCallback.m_steamIDLobby);
     }
 
     private void OnConnectionChanged(SteamNetConnectionStatusChangedCallback_t pCallback)
@@ -89,7 +26,7 @@ public class Callbacks : MonoBehaviour
         switch (pCallback.m_info.m_eState)
         {
             case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
-                if (!GameObject.FindWithTag("Global").GetComponent<GameStarter>().Info.IAmMaster) {break;}
+                if (!GameStarter.Info.IAmMaster) {break;}
                 Debug.Log("On connecting");
                 StartCoroutine(RelayOnConnectingToConnectionManager(pCallback.m_hConn));
                 break;
@@ -166,14 +103,6 @@ public class Callbacks : MonoBehaviour
             }
 
             yield return new WaitForSeconds(0.1f);
-        }
-    }
-
-    private void OnPersonaStateChange(PersonaStateChange_t pCallback)
-    {
-        if (friendsList != null)
-        {
-            friendsList.UpdateFriendsList();
         }
     }
 }

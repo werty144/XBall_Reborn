@@ -28,7 +28,6 @@ public class LobbyManager : MonoBehaviour
     public Transform membersContainer;
     public Transform numberOfPlayersDropdown;
     public Transform speedDropdown;
-    public GameObject global;
 
     public void InviteAndCreateOnNeed(CSteamID invitedID)
     {
@@ -313,7 +312,7 @@ public class LobbyManager : MonoBehaviour
         Assert.AreNotEqual(CSteamID.Nil, opponentID, "Can't get opponent ID");
         var speed = GetSpeed();
         
-        global.GetComponent<GameStarter>().Initiate(
+        GameObject.FindWithTag("Global").GetComponent<GameStarter>().Initiate(
             new SetupInfo
             {
                 IAmMaster =  iAmOwner,
