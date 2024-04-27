@@ -27,6 +27,8 @@ public class Server : MonoBehaviour, StateHolder
     
     private GameState PausedState;
     private bool OnPause;
+
+    private Dictionary<ulong, int> Score = new();
     
     private void Awake()
     {
@@ -45,6 +47,9 @@ public class Server : MonoBehaviour, StateHolder
         var gameStarter = global.GetComponent<GameStarter>();
         userIDs[0] = gameStarter.Info.MyID;
         userIDs[1] = gameStarter.Info.OpponentID;
+
+        Score[userIDs[0].m_SteamID] = 0;
+        Score[userIDs[1].m_SteamID] = 0;
 
         CreateInitialState(gameStarter.Info.NumberOfPlayers);
         InitiateGoals();
@@ -313,10 +318,15 @@ public class Server : MonoBehaviour, StateHolder
 
     public void OnGoalAttempt(ulong goalOwner)
     {
+        if (LastThrowGoalSuccess)
+        {
+            Score[GetAnotherID(new CSteamID(goalOwner)).m_SteamID]++;
+        }
         var message = new GoalAttempt
         {
             GoalOwner = goalOwner,
-            Success = LastThrowGoalSuccess
+            Success = LastThrowGoalSuccess,
+            Score = { Score }
         };
         foreach (var userID in userIDs)
         {

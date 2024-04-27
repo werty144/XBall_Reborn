@@ -8,22 +8,14 @@ using UnityEngine.SceneManagement;
 public class UIManagerGame : MonoBehaviour
 {
     private PingManager PingManager;
-    private TextMeshProUGUI PingLabel;
-    private TextMeshProUGUI CurrentStateLabel;
-    private GameObject LoadingScreen;
-    private TextMeshProUGUI LoadingScreenText;
+    
+    public TextMeshProUGUI PingLabel;
+    public TextMeshProUGUI CurrentStateLabel;
+    public GameObject LoadingScreen;
+    public TextMeshProUGUI LoadingScreenText;
 
     private DateTime LastFPSUpdate;
     private uint FramesPerLasSecond;
-
-    private void Awake()
-    {
-        LastFPSUpdate = DateTime.Now;
-        PingLabel = GameObject.Find("Ping Label").GetComponent<TextMeshProUGUI>();
-        CurrentStateLabel = GameObject.Find("Current State Label").GetComponent<TextMeshProUGUI>();
-        LoadingScreen = GameObject.Find("Loading Screen");
-        LoadingScreenText = LoadingScreen.GetComponentInChildren<TextMeshProUGUI>();
-    }
 
     public void DisplayLoading()
     {
@@ -56,7 +48,9 @@ public class UIManagerGame : MonoBehaviour
 
     private void Start()
     {
+        LastFPSUpdate = DateTime.Now;
         PingManager = GameObject.FindWithTag("P2P").GetComponent<PingManager>();
+        LoadingScreen.SetActive(true);
     }
 
     private void Update()

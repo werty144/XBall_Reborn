@@ -15,6 +15,8 @@ public class Client : MonoBehaviour, StateHolder
     public GameObject PlayerPrefab;
     public GameObject BallPrefab;
 
+    public ScorePanelController ScorePanelController;
+
     protected MessageManager MessageManager;
     
     protected Dictionary<uint, PlayerController> Players = new();
@@ -356,6 +358,7 @@ public class Client : MonoBehaviour, StateHolder
 
     public virtual void ReceiveGoalAttempt(GoalAttempt goalAttempt)
     {
+        ScorePanelController.OnGoalAttempt(goalAttempt);
         Goals[goalAttempt.GoalOwner].transform.Find("Sphere").GetComponent<Animator>()
             .Play(goalAttempt.Success ? "TargetSuccessAnimation" : "TargetFailAnimation", -1, 0f);
     }

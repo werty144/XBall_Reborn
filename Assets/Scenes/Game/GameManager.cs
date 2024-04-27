@@ -13,6 +13,8 @@ enum GamePhase
 
 public class GameManager : MonoBehaviour
 {
+    public ScorePanelController ScorePanelController;
+    
     private MessageManager MessageManager;
     private UIManagerGame UIManager;
 
@@ -41,24 +43,28 @@ public class GameManager : MonoBehaviour
     {
         GamePhase = GamePhase.InGame;
         UIManager.RemoveScreen();
+        ScorePanelController.StartTimer();
     }
 
     public void OnConnectionRemoteProblem()
     {
         GamePhase = GamePhase.Pause;
         UIManager.DisplayPeerDropped();
+        ScorePanelController.PauseTimer();
     }
 
     public void OnConnectionLocalProblem()
     {
         GamePhase = GamePhase.Pause;
         UIManager.DisplayLocalProblem();
+        ScorePanelController.PauseTimer();
     }
 
     public void OnConnectionPeerDisconnected()
     {
         GamePhase = GamePhase.Pause;
         UIManager.DisplayPeerDropped();
+        ScorePanelController.PauseTimer();
     }
 
     public void ResumeGame()
@@ -66,6 +72,7 @@ public class GameManager : MonoBehaviour
         Assert.AreEqual(GamePhase.Pause, GamePhase);
         GamePhase = GamePhase.InGame;
         UIManager.RemoveScreen();
+        ScorePanelController.ResumeTimer();
     }
 
     public void OnConnectionUnknownProblem()
