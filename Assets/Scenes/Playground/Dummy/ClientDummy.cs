@@ -75,7 +75,7 @@ public class ClientDummy : Client
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
-            var player = Instantiate(PlayerPrefab);
+            var player = Instantiate(ClientPlayerPrefab);
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;

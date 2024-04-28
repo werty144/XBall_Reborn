@@ -1,33 +1,44 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class SelectionManager : MonoBehaviour
 {
-    private MeshRenderer Selection;
+    public TextMeshProUGUI Selection;
+    public int PlayerNumber;
 
     private Color SelectColor = new Color(82f/255, 186f/255, 221f/255, 1);
-    private Color SelectNextColor = new Color(111f/255, 111f/255, 111f/255, 0.5f);
-    void Awake()
+    private Color UnselectColor = new Color(111f/255, 111f/255, 111f/255, 0.5f);
+
+    private void Start()
     {
-        Selection = transform.Find("Selection").gameObject.GetComponent<MeshRenderer>();
-        Selection.enabled = false;
+        if (!GetComponent<PlayerController>().IsMy)
+        {
+            enabled = false;
+            Selection.gameObject.SetActive(false);
+            return;
+        }
+        
+        Selection.gameObject.SetActive(true);
+        Selection.color = UnselectColor;
+        Selection.text = PlayerNumber.ToString();
     }
 
     public void Select()
     {
-        Selection.enabled = true;
-        Selection.material.color = SelectColor;
+        Selection.color = SelectColor;
     }
 
     public void Unselect()
     {
-        Selection.enabled = false;
+        Selection.color = UnselectColor;
     }
 
-    public void SelectNext()
-    {
-        Selection.enabled = true;
-        Selection.material.color = SelectNextColor;
-    }
+    // public void SelectNext()
+    // {
+    //     Selection.enabled = true;
+    //     Selection.material.color = SelectNextColor;
+    // }
 }

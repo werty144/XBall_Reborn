@@ -208,7 +208,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7dfa9c3120ec7abeb5eb560c9156dc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerPrefab: {fileID: 5395654648800661422, guid: 935265c851c72aaa28eb8dd03d2c0b52, type: 3}
+  ClientPlayerPrefab: {fileID: 5395654648800661422, guid: 935265c851c72aaa28eb8dd03d2c0b52, type: 3}
+  BasePlayerPrefab: {fileID: 7563179792530239496, guid: 4d7da0b80967ff87a880b331f1032242, type: 3}
   BallPrefab: {fileID: 7668133164203131654, guid: bbbd3e1119399ef6ba07505ebf8b1281, type: 3}
   ScorePanelController: {fileID: 0}
   ActionScheduler: {fileID: 144675039}
@@ -669,7 +670,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3abb8ff86ae04db68f02a8242491b94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerPrefab: {fileID: 7563179792530239496, guid: 4d7da0b80967ff87a880b331f1032242, type: 3}
+  ClientPlayerPrefab: {fileID: 5589637218574686291, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+  BasePlayerPrefab: {fileID: 7563179792530239496, guid: 4d7da0b80967ff87a880b331f1032242, type: 3}
   BallPrefab: {fileID: 3015573755741814911, guid: 1da720c98dd6c5dbeb9923685d41ecdd, type: 3}
   ScorePanelController: {fileID: 750676417}
   ActionScheduler: {fileID: 546769088}
@@ -1542,6 +1544,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5960902729682632582, guid: 165681631db324759a098695a7e7b175, type: 3}
+      propertyPath: m_Color.a
+      value: 0.5176471
+      objectReference: {fileID: 0}
     - target: {fileID: 5960902730034723189, guid: 165681631db324759a098695a7e7b175, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1737,6 +1743,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6314524993900378550, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6746847367803259584, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
+      propertyPath: m_VertexColorAlwaysGammaSpace
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7475312377809571588, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}

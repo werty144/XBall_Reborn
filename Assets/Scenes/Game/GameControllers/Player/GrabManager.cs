@@ -1,51 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class GrabManager : MonoBehaviour
 {
-    private bool GrabIntention;
-
-    private MeshRenderer GrabIntentionIndicator;
+    private Stopwatch Cooldown;
 
     private Client Client;
+    public PlayerController ThisPlayer;
     void Start()
     {
-        GrabIntentionIndicator = transform.Find("GrabIntentionIndicator").GetComponent<MeshRenderer>();
-        GrabIntentionIndicator.enabled = false;
-
-        Client = GameObject.FindWithTag("Client").GetComponent<Client>();
-    }
-
-    public void SetGrabIntention()
-    {
-        if (ActionRules.IsValidGrab(transform, Client.GetBall().gameObject.transform))
+        if (!ThisPlayer.IsMy)
         {
-            var action = new GrabAction
-            {
-                PlayerId = gameObject.GetComponent<PlayerController>().ID
-            };
-            Client.InputAction(action);
+            enabled = false;
             return;
         }
-        
-        GrabIntention = true;
-        GrabIntentionIndicator.enabled = true;
+        Cooldown = Stopwatch.StartNew();
+
+        Client = GameObject.FindWithTag("Client").GetComponent<Client>();
     }
     
     void Update()
     {
-        if (!GrabIntention) return;
+        if (Cooldown.ElapsedMilliseconds < ActionRulesConfig.GrabCooldown) return;
 
         if (!ActionRules.IsValidGrab(transform, Client.GetBall().gameObject.transform)) return;
+
+        if (Client.GetBall().Owned && Client.GetBall().Owner.UserID == ThisPlayer.UserID) return;
         
         var action = new GrabAction
         {
-            PlayerId = gameObject.GetComponent<PlayerController>().ID
+            PlayerId = ThisPlayer.ID
         };
+        
         Client.InputAction(action);
         
-        GrabIntention = false;
-        GrabIntentionIndicator.enabled = false;
+        Cooldown.Restart();
+    }
+
+    public void RestartCooldown()
+    {
+        Cooldown.Restart();
     }
 }

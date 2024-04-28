@@ -7,12 +7,14 @@ using IngameDebugConsole;
 using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 using Update = UnityEngine.PlayerLoop.Update;
 
 public class Client : MonoBehaviour, StateHolder
 {
-    public GameObject PlayerPrefab;
+    public GameObject ClientPlayerPrefab;
+    public GameObject BasePlayerPrefab;
     public GameObject BallPrefab;
 
     public ScorePanelController ScorePanelController;
@@ -105,7 +107,7 @@ public class Client : MonoBehaviour, StateHolder
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
-            var player = Instantiate(PlayerPrefab);
+            var player = Instantiate(ClientPlayerPrefab);
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
@@ -113,11 +115,18 @@ public class Client : MonoBehaviour, StateHolder
             Players[spareID] = controller;
             spareID++;
         }
+
+        int sparePlayerNumber = 1;
         foreach (var player in Players.Values)
         {
             player.IsMy = IAmMaster ^ (player.ID % 2 == 1);
             player.UserID = player.IsMy ? MyID : OpponentID;
             player.Colorize(player.IsMy ? PlayerConfig.MyColor : PlayerConfig.OpponentColor);
+            if (player.IsMy)
+            {
+                player.GetComponent<SelectionManager>().PlayerNumber = sparePlayerNumber;
+                sparePlayerNumber++;
+            }
         }
         
         ApplyGameState(InitialState.GetInitialState(n));
@@ -132,7 +141,7 @@ public class Client : MonoBehaviour, StateHolder
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
-            var player = Instantiate(PlayerPrefab);
+            var player = Instantiate(BasePlayerPrefab);
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
@@ -179,9 +188,6 @@ public class Client : MonoBehaviour, StateHolder
             case GrabAction grabAction:
                 player = Players[grabAction.PlayerId];
                 if (!player.IsMy) { return; }
-                
-                if (Time.time < NextGrabTime[player.ID]) { return; }
-                NextGrabTime[player.ID] = Time.time + ActionRulesConfig.GrabCooldown;
                 
                 player.PlayGrabAnimation();
                 grabAction.PreSuccess = ActionRules.BallGrabSuccess(player, Ball);
@@ -265,6 +271,7 @@ public class Client : MonoBehaviour, StateHolder
                     timeLeft = ManageTimer(relayedAction.ThrowAction.ActionId);
                     ActionScheduler.Schedule(() =>
                     {
+                        Players[relayedAction.ThrowAction.PlayerId].GetComponent<GrabManager>().RestartCooldown();
                         Ball.ThrowTo(ballTarget);
                     }, timeLeft);
                     break;

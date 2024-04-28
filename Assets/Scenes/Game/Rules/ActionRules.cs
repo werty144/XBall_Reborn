@@ -12,7 +12,7 @@ public struct ActionRulesConfig
     public static int GrabDuration = 200; // millis
     public static int ThrowDuration = GrabDuration;
 
-    public static float GrabCooldown = 1f; // secs
+    public static float GrabCooldown = 1000f; // millis
 }
 
 public static class ActionRules

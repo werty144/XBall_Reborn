@@ -42,11 +42,6 @@ public class InputManager : MonoBehaviour
             ProcessStop();
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            ProcessGrab();
-        }
-
         if (Input.GetKeyDown(KeyCode.Q))
         {
             ProcessThroughIntention();
@@ -120,12 +115,5 @@ public class InputManager : MonoBehaviour
             PlayerId = selectedPlayer.GetComponent<PlayerController>().ID
         };
         Client.InputAction(action);
-    }
-
-    private void ProcessGrab()
-    {
-        var selectedPlayer = PlayerSelection.GetSelected();
-
-        selectedPlayer.GetComponent<GrabManager>().SetGrabIntention();
     }
 }
