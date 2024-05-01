@@ -1,11 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Google.Protobuf.WellKnownTypes;
 using UnityEngine;
+
+class Cooldown
+{
+    private Stopwatch watch = Stopwatch.StartNew();
+    private float cooldownMilllis = 0;
+
+    public void SetCooldown(float duration)
+    {
+        watch.Restart();
+        cooldownMilllis = duration;
+    }
+
+    public bool CooldwonElapsed()
+    {
+        return watch.ElapsedMilliseconds > cooldownMilllis;
+    }
+}
 
 public class GrabManager : MonoBehaviour
 {
-    private Stopwatch Cooldown;
+    private Cooldown Cooldown;
 
     private Client Client;
     public PlayerController ThisPlayer;
@@ -16,14 +34,15 @@ public class GrabManager : MonoBehaviour
             enabled = false;
             return;
         }
-        Cooldown = Stopwatch.StartNew();
+
+        Cooldown = new Cooldown();
 
         Client = GameObject.FindWithTag("Client").GetComponent<Client>();
     }
     
     void Update()
     {
-        if (Cooldown.ElapsedMilliseconds < ActionRulesConfig.GrabCooldown) return;
+        if (!Cooldown.CooldwonElapsed()) return;
 
         if (!ActionRules.IsValidGrab(transform, Client.GetBall().gameObject.transform)) return;
 
@@ -36,11 +55,11 @@ public class GrabManager : MonoBehaviour
         
         Client.InputAction(action);
         
-        Cooldown.Restart();
+        Cooldown.SetCooldown(ActionRulesConfig.GrabCooldown);
     }
 
-    public void RestartCooldown()
+    public void SetCooldownMillis(float cooldownMillis)
     {
-        Cooldown.Restart();
+        Cooldown.SetCooldown(cooldownMillis);
     }
 }

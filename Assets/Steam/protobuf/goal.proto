@@ -4,4 +4,5 @@ message GoalAttempt {
   uint64 goal_owner = 1;
   bool success = 2;
   map<uint64, int32> score = 3;
+  uint32 thrower_id = 4;
 }

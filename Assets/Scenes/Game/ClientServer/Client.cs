@@ -271,7 +271,7 @@ public class Client : MonoBehaviour, StateHolder
                     timeLeft = ManageTimer(relayedAction.ThrowAction.ActionId);
                     ActionScheduler.Schedule(() =>
                     {
-                        Players[relayedAction.ThrowAction.PlayerId].GetComponent<GrabManager>().RestartCooldown();
+                        Players[relayedAction.ThrowAction.PlayerId].GetComponent<GrabManager>().SetCooldownMillis(2000f);
                         Ball.ThrowTo(ballTarget);
                     }, timeLeft);
                     break;
@@ -368,6 +368,11 @@ public class Client : MonoBehaviour, StateHolder
         ScorePanelController.OnGoalAttempt(goalAttempt);
         Goals[goalAttempt.GoalOwner].transform.Find("Sphere").GetComponent<Animator>()
             .Play(goalAttempt.Success ? "TargetSuccessAnimation" : "TargetFailAnimation", -1, 0f);
+        
+        if (goalAttempt.Success)
+        {
+            Players[goalAttempt.ThrowerId].gameObject.GetComponent<Pig>().Piggiwise();
+        }
     }
 
     public void GaolShotInput(uint playerID)

@@ -6,6 +6,18 @@ using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
 
+struct LastThrowInfo
+{
+    public bool GoalSuccess;
+    public uint PlayerID;
+
+    public LastThrowInfo(bool goalSuccess, uint playerID)
+    {
+        GoalSuccess = goalSuccess;
+        PlayerID = playerID;
+    }
+}
+
 public class Server : MonoBehaviour, StateHolder
 {
     public GameObject PlayerPrefab;
@@ -23,7 +35,7 @@ public class Server : MonoBehaviour, StateHolder
     private ActionScheduler ActionScheduler;
     private BallStateManager BallStateManager = new();
 
-    private bool LastThrowGoalSuccess;
+    private LastThrowInfo LastThrow;
     
     private GameState PausedState;
     private bool OnPause;
@@ -177,7 +189,7 @@ public class Server : MonoBehaviour, StateHolder
                     ActionScheduler.Schedule(() =>
                     {
                         Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
-                        LastThrowGoalSuccess = throwAction.GoalSuccess;
+                        LastThrow = new LastThrowInfo(throwAction.GoalSuccess, throwAction.PlayerId);
                         BroadCastState();
                     }, delay);
                 }
@@ -318,15 +330,16 @@ public class Server : MonoBehaviour, StateHolder
 
     public void OnGoalAttempt(ulong goalOwner)
     {
-        if (LastThrowGoalSuccess)
+        if (LastThrow.GoalSuccess)
         {
             Score[GetAnotherID(new CSteamID(goalOwner)).m_SteamID]++;
         }
         var message = new GoalAttempt
         {
             GoalOwner = goalOwner,
-            Success = LastThrowGoalSuccess,
-            Score = { Score }
+            Success = LastThrow.GoalSuccess,
+            Score = { Score },
+            ThrowerId = LastThrow.PlayerID
         };
         foreach (var userID in userIDs)
         {
