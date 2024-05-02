@@ -123,6 +123,8 @@ public class Steam
     {
         if (!SteamManager.Initialized)
         {
+            if (userID.m_SteamID == 0) return Resources.Load<Texture2D>("Avatars/default_steam_avatar");
+            if (userID.m_SteamID == 1) return Resources.Load<Texture2D>("Avatars/default_steam_avatar");;
             return null;
         }
 
@@ -189,6 +191,8 @@ public class Steam
     {
         if (!SteamManager.Initialized)
         {
+            if (userID.m_SteamID == 0) return "Тони Марсвраке";
+            if (userID.m_SteamID == 1) return "Mister Bot";
             return null;
         }
         return SteamFriends.GetFriendPersonaName(userID);

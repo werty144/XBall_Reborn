@@ -24,7 +24,7 @@ public class GameStarter : MonoBehaviour
     {
         Debug.Log("Initiate switching scenes" );
         Info = info;
-        SceneManager.LoadScene("Game");
+        GameObject.FindWithTag("SceneTransition").GetComponent<SceneTransition>().LoadScene("Game");
         switch (Info.Speed)
         {
             case LobbyManager.SpeedSlow:

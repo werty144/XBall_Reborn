@@ -134,6 +134,22 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
             ConnectionManager.SendMessage(bytes);
         }
     }
+
+    public virtual void SendGameEnd(CSteamID userID, GameEnd message)
+    {
+        if (userID == Steam.MySteamID())
+        {
+            Client.GameEnd(message);
+        }
+        else
+        {
+            using MemoryStream stream = new MemoryStream();
+            stream.WriteByte((byte)MessageType.GameEnd);
+            message.WriteTo(stream);
+            byte[] bytes = stream.ToArray();
+            ConnectionManager.SendMessage(bytes);
+        }
+    }
     
     // ----------------------------- PROCESS MESSAGES --------------------------------
     public void ProcessMessage(byte[] message)

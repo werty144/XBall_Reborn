@@ -2,11 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Google.Protobuf;
 using IngameDebugConsole;
 using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 using Update = UnityEngine.PlayerLoop.Update;
@@ -16,6 +18,7 @@ public class Client : MonoBehaviour, StateHolder
     public GameObject ClientPlayerPrefab;
     public GameObject BasePlayerPrefab;
     public GameObject BallPrefab;
+    public InputManager InputManager;
 
     public ScorePanelController ScorePanelController;
 
@@ -383,5 +386,23 @@ public class Client : MonoBehaviour, StateHolder
             Destination = ProtobufUtils.ToVector3ProtoBuf(Goals[OpponentID].transform.position)
         };
         InputAction(throwAction);
+    }
+
+    public void GameEnd(GameEnd gameEnd)
+    {
+        InputManager.enabled = false;
+        
+        var gameEnder = GameObject.FindWithTag("Global").GetComponent<GameEnder>();
+        gameEnder.MyId = new CSteamID(MyID);
+        gameEnder.OpponentID = new CSteamID(OpponentID);
+        gameEnder.Score = gameEnd.Score.ToDictionary(x => x.Key, x => x.Value);
+        gameEnder.Winner = new CSteamID(gameEnd.Winner);
+        
+        Invoke(nameof(SwitchToGameEnd), 3f);
+    }
+
+    void SwitchToGameEnd()
+    {
+        GameObject.FindWithTag("SceneTransition").GetComponent<SceneTransition>().LoadScene("GameEnd");
     }
 }

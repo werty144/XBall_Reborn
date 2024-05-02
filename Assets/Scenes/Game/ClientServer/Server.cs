@@ -345,5 +345,27 @@ public class Server : MonoBehaviour, StateHolder
         {
             MessageManager.SendGoalAttempt(userID, message);
         }
+        
+        CheckForWin();
+    }
+
+    void CheckForWin()
+    {
+        var gameEndMessage = new GameEnd
+        {
+            Score = { Score }
+        };
+        if (Score[userIDs[0].m_SteamID] >= Score[userIDs[1].m_SteamID] + 1)
+        {
+            gameEndMessage.Winner = userIDs[0].m_SteamID;
+            MessageManager.SendGameEnd(userIDs[0], gameEndMessage);
+            MessageManager.SendGameEnd(userIDs[1], gameEndMessage);
+        }
+        if (Score[userIDs[1].m_SteamID] >= Score[userIDs[0].m_SteamID] + 1)
+        {
+            gameEndMessage.Winner = userIDs[1].m_SteamID;
+            MessageManager.SendGameEnd(userIDs[0], gameEndMessage);
+            MessageManager.SendGameEnd(userIDs[1], gameEndMessage);
+        }
     }
 }

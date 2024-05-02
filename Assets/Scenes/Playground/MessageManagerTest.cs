@@ -51,6 +51,19 @@ public class MessageManagerTest : MessageManagerMaster
             );
         }
     }
+    
+    public override void SendGameEnd(CSteamID userID, GameEnd message)
+    {
+        if (userID == MyID)
+        {
+            StartCoroutine(
+                DelayedAction(
+                    MyPing,
+                    () => Client.GameEnd(message)
+                )
+            );
+        }
+    }
 
     public override void SendGameState(CSteamID userID, GameState gameState)
     {

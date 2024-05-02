@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message GameEnd {
+  uint64 winner = 1;
+  map<uint64, int32> score = 2;
+}

@@ -101,6 +101,10 @@ public class MessageManagerFollower : MonoBehaviour, MessageManager
                 var goalAttempt = ParseUtils.Unmarshal<GoalAttempt>(message);
                 Client.ReceiveGoalAttempt(goalAttempt);
                 break;
+            case (byte)MessageType.GameEnd:
+                var gameEnd = ParseUtils.Unmarshal<GameEnd>(message);
+                Client.GameEnd(gameEnd);
+                break;
         }
     }
 }
