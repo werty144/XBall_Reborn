@@ -10,8 +10,8 @@ public class FriendsListController : MonoBehaviour
 {
     public GameObject listItemPrefab;
     public Transform contentPanel;
-    public GameObject lobby;
-    public GameObject UIManagerMenu;
+    public LobbyManager lobbyManager;
+    public UIManagerMenu UIManagerMenu;
     
     protected Callback<PersonaStateChange_t> m_PersonaStateChange;
     void Start()
@@ -35,7 +35,7 @@ public class FriendsListController : MonoBehaviour
             GameObject newItem = Instantiate(listItemPrefab, contentPanel);
             var controller = newItem.GetComponent<FriendItemController>();
             controller.UserID = friend.ID;
-            controller.lobby = lobby;
+            controller.lobbyManager = lobbyManager;
             controller.UIManagerMenu = UIManagerMenu;
         }
     }

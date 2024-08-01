@@ -8,6 +8,8 @@ using UnityEngine;
 
 public class DebugConsoleCommands : MonoBehaviour
 {
+    public GameObject lobby;
+    public GameObject InitialView;
     private GameState SnapshotState;
     void Start()
     {
@@ -53,6 +55,8 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand<uint>("TestIsValidGrab", "Tests function ActionRules.IsValidGrab", TestIsValidGrab);
         DebugLogConsole.AddCommand("TestDelayedAction", "Launches two delayed actions with same timeout", TestDelayedAction);
+        
+        DebugLogConsole.AddCommand("EnterLobby", "Creates and enters lobby with invitee ID = 0", EnterLobby);
     }
 
     void PeerConnected()
@@ -281,5 +285,12 @@ public class DebugConsoleCommands : MonoBehaviour
     {
         yield return new WaitForSeconds(0.001f * millis);
         action();
+    }
+
+    void EnterLobby()
+    {
+        InitialView.SetActive(false);
+        lobby.SetActive(true);
+        lobby.GetComponent<LobbyManager>().InviteAndCreateOnNeed(new CSteamID(0));
     }
 }

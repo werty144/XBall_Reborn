@@ -32,6 +32,12 @@ public class UIManagerMenu : MonoBehaviour
         LobbyView.SetActive(true);
     }
 
+    public void OnLobbyLeave()
+    {
+        LobbyView.SetActive(false);
+        InitialView.SetActive(true);
+    }
+
     public void OnCloseFriendsList()
     {
         InitialView.SetActive(true);

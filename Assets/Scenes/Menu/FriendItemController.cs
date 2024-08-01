@@ -10,8 +10,8 @@ public class FriendItemController : MonoBehaviour
 {
     public CSteamID UserID;
     
-    public GameObject lobby;
-    public GameObject UIManagerMenu;
+    public LobbyManager lobbyManager;
+    public UIManagerMenu UIManagerMenu;
 
     public RawImage Avatar;
     public GameObject Nickname;
@@ -26,12 +26,11 @@ public class FriendItemController : MonoBehaviour
         StartCoroutine(FetchNicknameUntilSuccess());
         
         InviteButton.onClick.AddListener(() => {
-            var lobbyManager = lobby.GetComponent<LobbyManager>();
             lobbyManager.InviteAndCreateOnNeed(UserID);
         });
         InviteButton.onClick.AddListener(() =>
         {
-            UIManagerMenu.GetComponent<UIManagerMenu>().OnInviteButton();
+            UIManagerMenu.OnInviteButton();
         });
     }
     
