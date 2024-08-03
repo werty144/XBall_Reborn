@@ -60,6 +60,7 @@ public class GrabManager : MonoBehaviour
 
     public void SetCooldownMillis(float cooldownMillis)
     {
+        if (!enabled) return;
         Cooldown.SetCooldown(cooldownMillis);
     }
 }

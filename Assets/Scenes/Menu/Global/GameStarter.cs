@@ -13,6 +13,7 @@ public struct SetupInfo
     public CSteamID OpponentID;
     public CSteamID MyID;
     public bool IAmMaster;
+    public CSteamID LobbyID;
 }
 
 public class GameStarter : MonoBehaviour

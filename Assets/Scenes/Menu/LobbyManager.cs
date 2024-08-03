@@ -276,9 +276,9 @@ public class LobbyManager : MonoBehaviour
                 NumberOfPlayers = numberOfPlayers,
                 Speed = speed,
                 OpponentID = opponentID,
-                MyID = Steam.MySteamID()
+                MyID = Steam.MySteamID(),
+                LobbyID = new CSteamID(currentLobbyID)
             });
-        Steam.LeaveLobby(currentLobbyID);
     }
 
     private void OwnerOrNot()
