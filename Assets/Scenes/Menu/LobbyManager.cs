@@ -30,12 +30,12 @@ public class LobbyManager : MonoBehaviour
     public TMP_Dropdown speedDropdown;
 
     public TextMeshProUGUI myNick;
-    public TextMeshProUGUI opponentNick;
     public RawImage myAvatar;
-    public RawImage opponentAvatar;
     public Button myReadyButton;
-    public TextMeshProUGUI opponentReadyText;
+    public Image opponentReadyBackground;
     public GameObject opponentPlateContent;
+
+    public OpponentPlateManager opponentPlateManager;
 
     public void InviteAndCreateOnNeed(CSteamID invitedID)
     {
@@ -120,6 +120,7 @@ public class LobbyManager : MonoBehaviour
         opponentPlateContent.SetActive(false);
         
         var lobbyMembers = Steam.GetLobbyMembers(currentLobbyID);
+        print("Members in lobby: " + lobbyMembers.Count);
         foreach (var member in lobbyMembers)
         {
             if (member.ID == Steam.MySteamID())
@@ -137,9 +138,8 @@ public class LobbyManager : MonoBehaviour
             }
             else
             {
+                opponentPlateManager.opponentID = member.ID;
                 opponentPlateContent.SetActive(true);
-                opponentNick.text = member.Name;
-                opponentAvatar.texture = Steam.GetUserLargeAvatar(member.ID);
                 var readyStatusString = Steam.GetLobbyMemberData(currentLobbyID, member.ID, ReadyStatusKey);
                 var success = bool.TryParse(readyStatusString, out var readyStatus);
                 if (!success)
@@ -147,7 +147,7 @@ public class LobbyManager : MonoBehaviour
                     Debug.LogWarning("Invalid ready status");
                 }
 
-                opponentReadyText.color = readyStatus ? Color.green : Color.red;
+                opponentReadyBackground.color = readyStatus ? Color.green : Color.red;
             }
         }
     }

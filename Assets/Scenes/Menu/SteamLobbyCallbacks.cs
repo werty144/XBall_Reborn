@@ -53,7 +53,13 @@ public class SteamLobbyCallbacks : MonoBehaviour
     
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
     {
-        // This one is handled as a part of LobbyDataUpdate
+        // Other cases are handled as a part of LobbyDataUpdate
+        if (pCallback.m_rgfChatMemberStateChange is 
+            (uint) EChatMemberStateChange.k_EChatMemberStateChangeLeft or 
+            (uint) EChatMemberStateChange.k_EChatMemberStateChangeDisconnected)
+        {
+            lobby.OnDataUpdate();
+        }
     }
     
     private void OnGameLobbyJoinRequest(GameLobbyJoinRequested_t pCallback)
