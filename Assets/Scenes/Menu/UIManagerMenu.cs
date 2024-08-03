@@ -8,14 +8,13 @@ public class UIManagerMenu : MonoBehaviour
     public GameObject FriendsOnlineView;
     public GameObject LobbyView;
     public GameObject InitialView;
-    private void Start()
-    {
 
-    }
+    public ParticleSystem smoke;
 
     public void OnPlayFriendButton()
     {
         InitialView.SetActive(false);
+        smoke.Stop();
         FriendsOnlineView.SetActive(true);
     }
 
@@ -28,6 +27,7 @@ public class UIManagerMenu : MonoBehaviour
     public void OnLobbyEnter()
     {
         InitialView.SetActive(false);
+        smoke.Stop();
         FriendsOnlineView.SetActive(false);
         LobbyView.SetActive(true);
     }
@@ -36,11 +36,13 @@ public class UIManagerMenu : MonoBehaviour
     {
         LobbyView.SetActive(false);
         InitialView.SetActive(true);
+        smoke.Play();
     }
 
     public void OnCloseFriendsList()
     {
         InitialView.SetActive(true);
+        smoke.Play();
         FriendsOnlineView.SetActive(false);
     }
 }
