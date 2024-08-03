@@ -17,6 +17,7 @@ public class FriendItemController : MonoBehaviour
     public GameObject Nickname;
     public Button InviteButton;
     public Image Tint;
+    public Image Underline;
     private Color UnHoverColor = new Color(0, 0, 0, 0);
     private Color HoverColor = new Color(0, 0, 0, 0.4f);
 
@@ -66,11 +67,13 @@ public class FriendItemController : MonoBehaviour
     {
         InviteButton.gameObject.SetActive(true);
         Tint.color = HoverColor;
+        Underline.gameObject.SetActive(false);
     }
 
     public void OnUnhover()
     {
         InviteButton.gameObject.SetActive(false);
         Tint.color = UnHoverColor;
+        Underline.gameObject.SetActive(true);
     }
 }

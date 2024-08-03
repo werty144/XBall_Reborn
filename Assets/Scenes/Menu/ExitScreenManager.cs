@@ -5,14 +5,8 @@ using Application = UnityEngine.Device.Application;
 
 public class ExitScreenManager : MonoBehaviour
 {
-
-    public GameObject ExitScreen;
+    public UIManagerMenu UIManagerMenu;
     
-    public void OnExitButtonMenu()
-    {
-        ExitScreen.SetActive(true);
-    }
-
     public void OnExitButtonExitScreen()
     {
         Application.Quit();
@@ -20,6 +14,6 @@ public class ExitScreenManager : MonoBehaviour
 
     public void OnReturnButton()
     {
-        ExitScreen.SetActive(false);
+        UIManagerMenu.OnReturnFromExitScreen();
     }
 }

@@ -8,6 +8,7 @@ public class UIManagerMenu : MonoBehaviour
     public GameObject FriendsOnlineView;
     public GameObject LobbyView;
     public GameObject InitialView;
+    public GameObject ExitView;
 
     public ParticleSystem smoke;
 
@@ -44,5 +45,19 @@ public class UIManagerMenu : MonoBehaviour
         InitialView.SetActive(true);
         smoke.Play();
         FriendsOnlineView.SetActive(false);
+    }
+
+    public void OnToExitButton()
+    {
+        InitialView.SetActive(false);
+        smoke.Stop();
+        ExitView.SetActive(true);
+    }
+
+    public void OnReturnFromExitScreen()
+    {
+        ExitView.SetActive(false);
+        InitialView.SetActive(true);
+        smoke.Play();
     }
 }
