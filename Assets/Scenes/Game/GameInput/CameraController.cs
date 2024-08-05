@@ -5,7 +5,9 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     private float fieldLength;
-    private float movementSpeed = 10f;
+    private float movementSpeed = 15f;
+    private float backBound = -20;
+    private float forwardBound = 12;
 
     void Start()
     {
@@ -17,6 +19,8 @@ public class CameraController : MonoBehaviour
         if (!GameObject.FindWithTag("Global").GetComponent<GameStarter>().Info.IAmMaster)
         {
             movementSpeed *= -1;
+            backBound = -12;
+            forwardBound = 20;
             
             var curCamPos = transform.position;
             var newCameraPosition = new Vector3(
@@ -48,7 +52,7 @@ public class CameraController : MonoBehaviour
             translation = -movementSpeed * Time.unscaledDeltaTime;
         }
 
-        float newZ = Mathf.Clamp(transform.position.z + translation, -fieldLength, fieldLength);
+        float newZ = Mathf.Clamp(transform.position.z + translation, backBound, forwardBound);
 
         transform.position = new Vector3(transform.position.x, transform.position.y, newZ);
     }

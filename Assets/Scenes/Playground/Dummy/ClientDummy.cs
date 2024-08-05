@@ -75,7 +75,7 @@ public class ClientDummy : Client
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
-            var player = Instantiate(ClientPlayerPrefab);
+            var player = Instantiate(i % 2 == 0 ? ClientPlayerPrefabBlue : ClientPlayerPrefabRed);
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
@@ -104,8 +104,7 @@ public class ClientDummy : Client
                 {
                     if (material.HasProperty("_Color"))
                     {
-                        Color color;
-                        color = playerController.ID % 2 == 0 ? PlayerConfig.MyColor : PlayerConfig.OpponentColor;
+                        Color color = material.color;
                         color.a = 0.5f;
                         material.color = color;
                     }

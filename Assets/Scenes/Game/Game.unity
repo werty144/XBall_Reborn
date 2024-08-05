@@ -173,7 +173,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5759980349170041419, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5759980349170041419, guid: c9cecd0b651f09bbeb8aa1228789d748, type: 3}
       propertyPath: m_LocalPosition.x
@@ -266,7 +266,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7081731353302546226, guid: d115340530f112f3c808554c9148c24e, type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7081731353302546226, guid: d115340530f112f3c808554c9148c24e, type: 3}
       propertyPath: m_AnchorMax.x
@@ -654,7 +654,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &867326772 stripped
 MonoBehaviour:
@@ -1069,7 +1069,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3abb8ff86ae04db68f02a8242491b94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ClientPlayerPrefab: {fileID: 5589637218574686291, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+  ClientPlayerPrefabBlue: {fileID: 2060779753837267573, guid: 0c3226b989cb139a7a4c5fb808f13bcb, type: 3}
+  ClientPlayerPrefabRed: {fileID: 6793425358898238020, guid: 9eef8cd051234654dba8873498d325ee, type: 3}
   BasePlayerPrefab: {fileID: 7563179792530239496, guid: 4d7da0b80967ff87a880b331f1032242, type: 3}
   BallPrefab: {fileID: 3015573755741814911, guid: 1da720c98dd6c5dbeb9923685d41ecdd, type: 3}
   InputManager: {fileID: 1151241156}
@@ -1386,7 +1387,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &1712127260
 GameObject:

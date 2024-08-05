@@ -15,7 +15,8 @@ using Update = UnityEngine.PlayerLoop.Update;
 
 public class Client : MonoBehaviour, StateHolder
 {
-    public GameObject ClientPlayerPrefab;
+    public GameObject ClientPlayerPrefabBlue;
+    public GameObject ClientPlayerPrefabRed;
     public GameObject BasePlayerPrefab;
     public GameObject BallPrefab;
     public InputManager InputManager;
@@ -110,7 +111,8 @@ public class Client : MonoBehaviour, StateHolder
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
-            var player = Instantiate(ClientPlayerPrefab);
+            var isMy = IAmMaster ^ (i % 2 == 1);
+            var player = Instantiate(isMy ? ClientPlayerPrefabBlue : ClientPlayerPrefabRed);
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
@@ -124,7 +126,6 @@ public class Client : MonoBehaviour, StateHolder
         {
             player.IsMy = IAmMaster ^ (player.ID % 2 == 1);
             player.UserID = player.IsMy ? MyID : OpponentID;
-            player.Colorize(player.IsMy ? PlayerConfig.MyColor : PlayerConfig.OpponentColor);
             if (player.IsMy)
             {
                 player.GetComponent<SelectionManager>().PlayerNumber = sparePlayerNumber;
