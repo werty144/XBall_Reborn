@@ -370,8 +370,8 @@ public class Client : MonoBehaviour, StateHolder
     public virtual void ReceiveGoalAttempt(GoalAttempt goalAttempt)
     {
         ScorePanelController.OnGoalAttempt(goalAttempt);
-        Goals[goalAttempt.GoalOwner].transform.Find("Sphere").GetComponent<Animator>()
-            .Play(goalAttempt.Success ? "TargetSuccessAnimation" : "TargetFailAnimation", -1, 0f);
+        Goals[goalAttempt.GoalOwner].GetComponentInChildren<Animator>()
+            .Play(goalAttempt.Success ? "success" : "failure", -1, 0f);
         
         if (goalAttempt.Success)
         {
