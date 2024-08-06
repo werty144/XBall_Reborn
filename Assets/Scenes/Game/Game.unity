@@ -847,6 +847,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ScorePanelController: {fileID: 1644426183}
+  InputManager: {fileID: 1151241156}
 --- !u!1 &1213337827
 GameObject:
   m_ObjectHideFlags: 0

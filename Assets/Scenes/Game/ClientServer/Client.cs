@@ -389,21 +389,5 @@ public class Client : MonoBehaviour, StateHolder
         InputAction(throwAction);
     }
 
-    public void GameEnd(GameEnd gameEnd)
-    {
-        InputManager.enabled = false;
-        
-        var gameEnder = GameObject.FindWithTag("Global").GetComponent<GameEnder>();
-        gameEnder.MyId = new CSteamID(MyID);
-        gameEnder.OpponentID = new CSteamID(OpponentID);
-        gameEnder.Score = gameEnd.Score.ToDictionary(x => x.Key, x => x.Value);
-        gameEnder.Winner = new CSteamID(gameEnd.Winner);
-        
-        Invoke(nameof(SwitchToGameEnd), 3f);
-    }
-
-    void SwitchToGameEnd()
-    {
-        GameObject.FindWithTag("SceneTransition").GetComponent<SceneTransition>().LoadScene("GameEnd");
-    }
+    
 }

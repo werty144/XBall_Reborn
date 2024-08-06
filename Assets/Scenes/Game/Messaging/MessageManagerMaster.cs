@@ -139,7 +139,7 @@ public class MessageManagerMaster : MonoBehaviour, MessageManager
     {
         if (userID == Steam.MySteamID())
         {
-            Client.GameEnd(message);
+            GameManager.GameEnd(message);
         }
         else
         {

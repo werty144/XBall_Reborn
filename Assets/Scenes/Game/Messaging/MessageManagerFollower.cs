@@ -103,7 +103,7 @@ public class MessageManagerFollower : MonoBehaviour, MessageManager
                 break;
             case (byte)MessageType.GameEnd:
                 var gameEnd = ParseUtils.Unmarshal<GameEnd>(message);
-                Client.GameEnd(gameEnd);
+                GameManager.GameEnd(gameEnd);
                 break;
         }
     }

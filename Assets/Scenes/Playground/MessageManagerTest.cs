@@ -59,7 +59,7 @@ public class MessageManagerTest : MessageManagerMaster
             StartCoroutine(
                 DelayedAction(
                     MyPing,
-                    () => Client.GameEnd(message)
+                    () => GameManager.GameEnd(message)
                 )
             );
         }

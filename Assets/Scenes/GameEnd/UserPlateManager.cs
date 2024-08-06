@@ -15,15 +15,17 @@ public class UserPlateManager : MonoBehaviour
     public Image OpponentOutline;
 
     private GameEnder GameEnder;
+    private GameStarter GameStarter;
     
     void Start()
     {
         GameEnder = GameObject.FindWithTag("Global").GetComponent<GameEnder>();
+        GameStarter = GameObject.FindWithTag("Global").GetComponent<GameStarter>();
         
         StartCoroutine(FetchAvatarUntilSuccess());
         StartCoroutine(FetchNicknameUntilSuccess());
 
-        if (GameEnder.Winner == GameEnder.MyId)
+        if (GameEnder.Winner == GameStarter.Info.MyID)
         {
             OpponentOutline.color = Color.gray;
         }
@@ -37,8 +39,8 @@ public class UserPlateManager : MonoBehaviour
     {
         while (true)
         {
-            var myAvatarTexture = Steam.GetUserLargeAvatar(GameEnder.MyId);
-            var opponentAvatarTexture = Steam.GetUserLargeAvatar(GameEnder.OpponentID);
+            var myAvatarTexture = Steam.GetUserLargeAvatar(GameStarter.Info.MyID);
+            var opponentAvatarTexture = Steam.GetUserLargeAvatar(GameStarter.Info.OpponentID);
             if (myAvatarTexture != null && opponentAvatarTexture != null)
             {
                 MyAvatar.texture = myAvatarTexture;
@@ -53,8 +55,8 @@ public class UserPlateManager : MonoBehaviour
     {
         while (true)
         {
-            var myNickname = Steam.GetUserNickname(GameEnder.MyId);
-            var opponentNickname = Steam.GetUserNickname(GameEnder.OpponentID);
+            var myNickname = Steam.GetUserNickname(GameStarter.Info.MyID);
+            var opponentNickname = Steam.GetUserNickname(GameStarter.Info.OpponentID);
             if (myNickname != null && opponentNickname != null)
             {
                 MyNickname.text = myNickname;

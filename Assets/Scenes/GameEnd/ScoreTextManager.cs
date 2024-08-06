@@ -11,7 +11,8 @@ public class ScoreTextManager : MonoBehaviour
     void Start()
     {
         var gameEnder = GameObject.FindWithTag("Global").GetComponent<GameEnder>();
-        MyScore.text = gameEnder.Score[gameEnder.MyId.m_SteamID].ToString();
-        OpponentScore.text = gameEnder.Score[gameEnder.OpponentID.m_SteamID].ToString();
+        var gameStarter = GameObject.FindWithTag("Global").GetComponent<GameStarter>();
+        MyScore.text = gameEnder.Score[gameStarter.Info.MyID.m_SteamID].ToString();
+        OpponentScore.text = gameEnder.Score[gameStarter.Info.OpponentID.m_SteamID].ToString();
     }
 }
