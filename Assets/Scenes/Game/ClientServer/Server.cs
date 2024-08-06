@@ -355,13 +355,13 @@ public class Server : MonoBehaviour, StateHolder
         {
             Score = { Score }
         };
-        if (Score[userIDs[0].m_SteamID] >= Score[userIDs[1].m_SteamID] + 1)
+        if (Score[userIDs[0].m_SteamID] >= Score[userIDs[1].m_SteamID] + 3)
         {
             gameEndMessage.Winner = userIDs[0].m_SteamID;
             MessageManager.SendGameEnd(userIDs[0], gameEndMessage);
             MessageManager.SendGameEnd(userIDs[1], gameEndMessage);
         }
-        if (Score[userIDs[1].m_SteamID] >= Score[userIDs[0].m_SteamID] + 1)
+        if (Score[userIDs[1].m_SteamID] >= Score[userIDs[0].m_SteamID] + 3)
         {
             gameEndMessage.Winner = userIDs[1].m_SteamID;
             MessageManager.SendGameEnd(userIDs[0], gameEndMessage);
