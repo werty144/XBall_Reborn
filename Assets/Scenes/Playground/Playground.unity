@@ -197,7 +197,7 @@ MonoBehaviour:
   ClientPlayerPrefabBlue: {fileID: 2060779753837267573, guid: 0c3226b989cb139a7a4c5fb808f13bcb, type: 3}
   ClientPlayerPrefabRed: {fileID: 6793425358898238020, guid: 9eef8cd051234654dba8873498d325ee, type: 3}
   BasePlayerPrefab: {fileID: 7563179792530239496, guid: 4d7da0b80967ff87a880b331f1032242, type: 3}
-  BallPrefab: {fileID: 7668133164203131654, guid: bbbd3e1119399ef6ba07505ebf8b1281, type: 3}
+  BallPrefab: {fileID: 3015573755741814911, guid: 1da720c98dd6c5dbeb9923685d41ecdd, type: 3}
   InputManager: {fileID: 0}
   ScorePanelController: {fileID: 0}
   ActionScheduler: {fileID: 144675039}

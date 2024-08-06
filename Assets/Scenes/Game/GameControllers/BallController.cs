@@ -11,13 +11,12 @@ public class BallController : MonoBehaviour
     public PlayerController Owner { get; private set; }
     public bool Owned { get; private set; }
 
-    private Outline Outline;
+    public Outline Outline;
     private float OutlineWidth = 3f;
     private Client Client;
 
     private void Start()
     {
-        Outline = transform.Find("Sphere").GetComponent<Outline>();
         Client = GameObject.FindWithTag("Client").GetComponent<Client>();
     }
 
@@ -88,6 +87,7 @@ public class BallController : MonoBehaviour
             var targetPosition = new Vector3(ownerPosition.x, PlayerConfig.Height * 2 + GameConfig.BallRadius,
                 ownerPosition.y);
             transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 20f);
+            GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         }
     }
 
