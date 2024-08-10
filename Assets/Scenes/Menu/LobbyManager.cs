@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.VFX;
 
 
 public class LobbyManager : MonoBehaviour
@@ -31,8 +32,8 @@ public class LobbyManager : MonoBehaviour
 
     public TextMeshProUGUI myNick;
     public RawImage myAvatar;
-    public Button myReadyButton;
-    public Image opponentReadyBackground;
+    public UnityEngine.UI.Outline myReadyButtonOutline;
+    public UnityEngine.UI.Outline opponentReadyOutline;
     public GameObject opponentPlateContent;
 
     public OpponentPlateManager opponentPlateManager;
@@ -134,7 +135,8 @@ public class LobbyManager : MonoBehaviour
                     Debug.LogWarning("Invalid ready status");
                 }
 
-                myReadyButton.image.color = readyStatus ? Color.green : Color.red;
+                myReadyButtonOutline.effectColor =
+                    readyStatus ? new Color(0.07450981f, 0.4666667f, 0.3176471f, 1) : Color.white;
             }
             else
             {
@@ -147,7 +149,8 @@ public class LobbyManager : MonoBehaviour
                     Debug.LogWarning("Invalid ready status");
                 }
 
-                opponentReadyBackground.color = readyStatus ? Color.green : Color.red;
+                opponentReadyOutline.effectColor =
+                    readyStatus ? new Color(0.07450981f, 0.4666667f, 0.3176471f, 1) : Color.white;
             }
         }
     }
