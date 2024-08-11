@@ -12,7 +12,6 @@ public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
     protected HSteamNetConnection Connection;
     private MessageManager MessageManager;
     private PingManager PingManager;
-    private GameStarter GameStarter;
 
     private Callback<SteamNetConnectionStatusChangedCallback_t> m_StateConnectionStatusChangeCallback;
     
@@ -22,7 +21,6 @@ public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
         MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
         PingManager = GameObject.FindWithTag("P2P").GetComponent<PingManager>();
         GameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
-        GameStarter = GameObject.FindWithTag("Global").GetComponent<GameStarter>();
         
         m_StateConnectionStatusChangeCallback = Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnConnectionChanged);
     }
@@ -87,7 +85,6 @@ public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
     public virtual void OnConnected(HSteamNetConnection connection)
     {
         Connection = connection;
-        Steam.LeaveLobby(GameStarter.Info.LobbyID.m_SteamID);
         PingManager.OnConnected();
     }
 
@@ -158,7 +155,7 @@ public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
 
     public void CloseConnection()
     {
-        SteamNetworkingSockets.CloseConnection(Connection, 0, "", false);
+        SteamNetworkingSockets.CloseConnection(Connection, 0, "", true);
     }
 
     public void OnDestroy()

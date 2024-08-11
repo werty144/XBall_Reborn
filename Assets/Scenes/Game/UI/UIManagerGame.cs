@@ -4,17 +4,13 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UIManagerGame : MonoBehaviour
 {
-    private PingManager PingManager;
-    
-    public TextMeshProUGUI PingLabel;
-    public TextMeshProUGUI CurrentStateLabel;
     public GameObject LoadingScreen;
     public TextMeshProUGUI LoadingScreenText;
 
-    private DateTime LastFPSUpdate;
     private uint FramesPerLasSecond;
 
     public void DisplayLoading()
@@ -48,35 +44,6 @@ public class UIManagerGame : MonoBehaviour
 
     private void Start()
     {
-        LastFPSUpdate = DateTime.Now;
-        PingManager = GameObject.FindWithTag("P2P").GetComponent<PingManager>();
         LoadingScreen.SetActive(true);
-    }
-
-    private void Update()
-    {
-        UpdateFPS();
-        UpdatePing();
-    }
-
-    public void OnMenuButton()
-    {
-        SceneManager.LoadScene("Menu");
-    }
-
-    public void UpdatePing()
-    {
-        PingLabel.text = "Ping: " + PingManager.GetPing().Milliseconds + "ms";
-    }
-
-    private void UpdateFPS()
-    {
-        FramesPerLasSecond++;
-        if (DateTime.Now - LastFPSUpdate >= TimeSpan.FromSeconds(1))
-        {
-            CurrentStateLabel.text = "FPS: " + FramesPerLasSecond;
-            FramesPerLasSecond = 0;
-            LastFPSUpdate = DateTime.Now;
-        }
     }
 }

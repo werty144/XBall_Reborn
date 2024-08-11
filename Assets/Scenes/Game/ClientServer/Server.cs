@@ -167,7 +167,7 @@ public class Server : MonoBehaviour, StateHolder
                     ActionScheduler.Schedule(() =>
                     {
                         Ball.SetOwner(Players[grabAction.PlayerId]);
-                        BroadCastState();
+                        BroadcastState();
                     }, delay);
                 }
                 var relayedGrabAction = new RelayedAction
@@ -190,7 +190,7 @@ public class Server : MonoBehaviour, StateHolder
                     {
                         Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
                         LastThrow = new LastThrowInfo(throwAction.GoalSuccess, throwAction.PlayerId);
-                        BroadCastState();
+                        BroadcastState();
                     }, delay);
                 }
 
@@ -211,7 +211,7 @@ public class Server : MonoBehaviour, StateHolder
         }
     }
 
-    private void BroadCastState()
+    private void BroadcastState()
     {
         var curGameState = GetGameState();
         foreach (var userID in userIDs)
@@ -325,7 +325,7 @@ public class Server : MonoBehaviour, StateHolder
     public void CollisionExit()
     {
         // TODO: Consider cooldown and periodic sending
-        BroadCastState();
+        BroadcastState();
     }
 
     public void OnGoalAttempt(ulong goalOwner)
@@ -351,17 +351,18 @@ public class Server : MonoBehaviour, StateHolder
 
     void CheckForWin()
     {
+        var scoreDiffToWin = 3;
         var gameEndMessage = new GameEnd
         {
             Score = { Score }
         };
-        if (Score[userIDs[0].m_SteamID] >= Score[userIDs[1].m_SteamID] + 3)
+        if (Score[userIDs[0].m_SteamID] >= Score[userIDs[1].m_SteamID] + scoreDiffToWin)
         {
             gameEndMessage.Winner = userIDs[0].m_SteamID;
             MessageManager.SendGameEnd(userIDs[0], gameEndMessage);
             MessageManager.SendGameEnd(userIDs[1], gameEndMessage);
         }
-        if (Score[userIDs[1].m_SteamID] >= Score[userIDs[0].m_SteamID] + 3)
+        if (Score[userIDs[1].m_SteamID] >= Score[userIDs[0].m_SteamID] + scoreDiffToWin)
         {
             gameEndMessage.Winner = userIDs[1].m_SteamID;
             MessageManager.SendGameEnd(userIDs[0], gameEndMessage);
