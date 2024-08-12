@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="300"
+   height="300"
+   viewBox="0 0 79.374998 79.375"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="ground.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="0.78363065"
+     inkscape:cx="196.52115"
+     inkscape:cy="183.76004"
+     inkscape:window-width="1280"
+     inkscape:window-height="503"
+     inkscape:window-x="160"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     units="px" />
+  <defs
+     id="defs2">
+    <filter
+       inkscape:label="Cross Noise Poster"
+       style="color-interpolation-filters:sRGB"
+       inkscape:menu-tooltip="Overlay with a small scale screen like noise"
+       inkscape:menu="Image Paint and Draw"
+       id="filter8150"
+       x="-0.045354329"
+       y="-0.045354334"
+       width="1.0907087"
+       height="1.0907087">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="4"
+         result="result3"
+         id="feGaussianBlur8126" />
+      <feGaussianBlur
+         result="result4"
+         in="SourceGraphic"
+         stdDeviation="1"
+         id="feGaussianBlur8128" />
+      <feBlend
+         mode="darken"
+         in2="result3"
+         id="feBlend8130" />
+      <feComponentTransfer
+         result="result1"
+         id="feComponentTransfer8138">
+        <feFuncR
+           type="discrete"
+           tableValues="0 0.2 0.4 0.6 0.8 1 1"
+           id="feFuncR8132" />
+        <feFuncG
+           type="discrete"
+           tableValues="0 0.2 0.4 0.6 0.8 1 1"
+           id="feFuncG8134" />
+        <feFuncB
+           type="discrete"
+           tableValues="0 0.2 0.4 0.6 0.8 1 1"
+           id="feFuncB8136" />
+      </feComponentTransfer>
+      <feTurbulence
+         result="result0"
+         seed="0"
+         baseFrequency="1"
+         numOctaves="7"
+         type="fractalNoise"
+         id="feTurbulence8140" />
+      <feConvolveMatrix
+         result="result5"
+         order="3 3"
+         kernelMatrix="-2 0 -2 0 -10 0 -2 0 -2 "
+         id="feConvolveMatrix8142" />
+      <feColorMatrix
+         in="result5"
+         type="saturate"
+         values="0"
+         result="result4"
+         id="feColorMatrix8144" />
+      <feComposite
+         result="result2"
+         k3="0.5"
+         k2="0.5"
+         k1="1.5"
+         operator="arithmetic"
+         in="result1"
+         in2="result4"
+         id="feComposite8146"
+         k4="0" />
+      <feComposite
+         in2="SourceGraphic"
+         operator="in"
+         id="feComposite8148" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#4c4c4c;fill-opacity:1;stroke:none;stroke-width:0;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.431373;filter:url(#filter8150)"
+       id="rect51"
+       width="264.58334"
+       height="264.58331"
+       x="12.568539"
+       y="13.800069"
+       inkscape:export-filename="/home/anton/programming/XBall_Reborn/Assets/Resources/Field/Terrain/ground.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"
+       transform="matrix(0.23539831,0,0,0.23400039,5.4587282,4.8271958)" />
+  </g>
+</svg>
