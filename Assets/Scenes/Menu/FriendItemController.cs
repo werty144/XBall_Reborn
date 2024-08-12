@@ -45,7 +45,7 @@ public class FriendItemController : MonoBehaviour
                 Avatar.texture = avatarTexture;
                 break;
             }
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
     }
 
@@ -59,7 +59,7 @@ public class FriendItemController : MonoBehaviour
                 Nickname.GetComponent<TextMeshProUGUI>().text = nickname;
                 break;
             }
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
     }
     

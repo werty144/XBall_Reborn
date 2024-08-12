@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
         gameEnder.Score = gameEnd.Score.ToDictionary(x => x.Key, x => x.Value);
         gameEnder.Winner = new CSteamID(gameEnd.Winner);
         
-        Invoke(nameof(SwitchToGameEnd), 3f);
+        Invoke(nameof(SwitchToGameEnd), 3f * Time.timeScale);
     }
 
     void SwitchToGameEnd()

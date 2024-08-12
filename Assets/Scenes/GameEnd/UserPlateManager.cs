@@ -47,7 +47,7 @@ public class UserPlateManager : MonoBehaviour
                 OpponentAvatar.texture = opponentAvatarTexture;
                 break;
             }
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
     }
 
@@ -63,7 +63,7 @@ public class UserPlateManager : MonoBehaviour
                 OpponentNickname.text = opponentNickname;
                 break;
             }
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
     }
 }

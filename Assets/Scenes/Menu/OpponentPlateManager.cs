@@ -27,7 +27,7 @@ public class OpponentPlateManager : MonoBehaviour
                 opponentAvatar.texture = opponentAvatarTexture;
                 break;
             }
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
     }
 
@@ -41,7 +41,7 @@ public class OpponentPlateManager : MonoBehaviour
                 opponentNick.text = opponentNickname;
                 break;
             }
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
     }
 }

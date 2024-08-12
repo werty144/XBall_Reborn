@@ -85,6 +85,8 @@ public class Client : MonoBehaviour, StateHolder
                 probabilityController.Client = this;
                 probabilityController.MyUserID = MyID;
             }
+
+            goal.GetComponentInChildren<Animator>().updateMode = AnimatorUpdateMode.UnscaledTime;
         }
     }
 
@@ -275,7 +277,7 @@ public class Client : MonoBehaviour, StateHolder
                     timeLeft = ManageTimer(relayedAction.ThrowAction.ActionId);
                     ActionScheduler.Schedule(() =>
                     {
-                        Players[relayedAction.ThrowAction.PlayerId].GetComponent<GrabManager>().SetCooldownMillis(2000f);
+                        Players[relayedAction.ThrowAction.PlayerId].GetComponent<GrabManager>().SetCooldownMillis(2000f / Time.timeScale);
                         Ball.ThrowTo(ballTarget);
                     }, timeLeft);
                     break;

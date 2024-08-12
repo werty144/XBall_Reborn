@@ -8,7 +8,7 @@ public class Pig : MonoBehaviour
     public GameObject Skin;
     public void Piggiwise()
     {
-        gameObject.GetComponent<GrabManager>().SetCooldownMillis(PigRules.PigDurationMillis);
+        gameObject.GetComponent<GrabManager>().SetCooldownMillis(PigRules.PigDurationMillis / Time.timeScale);
         PigModel.SetActive(true);
         Skin.SetActive(false);
         

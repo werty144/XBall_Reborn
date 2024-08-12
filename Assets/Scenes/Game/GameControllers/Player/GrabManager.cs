@@ -55,7 +55,7 @@ public class GrabManager : MonoBehaviour
         
         Client.InputAction(action);
         
-        Cooldown.SetCooldown(ActionRulesConfig.GrabCooldown);
+        Cooldown.SetCooldown(ActionRulesConfig.GrabCooldown / Time.timeScale);
     }
 
     public void SetCooldownMillis(float cooldownMillis)

@@ -157,7 +157,7 @@ public class MessageManagerTest : MessageManagerMaster
 
     IEnumerator DelayedAction(TimeSpan delay, Action action)
     {
-        yield return new WaitForSeconds((float)delay.TotalSeconds);
+        yield return new WaitForSecondsRealtime((float)delay.TotalSeconds);
         action();
     }
 }

@@ -11,7 +11,7 @@ public class LoadingScreenController : MonoBehaviour
     private void OnEnable()
     {
         ToMenuButton.SetActive(false);
-        Invoke(nameof(ShowToMenuButton), 7f);
+        Invoke(nameof(ShowToMenuButton), 7f * Time.timeScale);
     }
 
     private void ShowToMenuButton()

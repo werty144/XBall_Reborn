@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,11 @@ public class SceneTransition : MonoBehaviour
 {
     public Animator Animator;
 
+    private void Start()
+    {
+        Animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+    }
+
     public void LoadScene(string SceneName)
     {
         StartCoroutine(Go(SceneName));
@@ -15,7 +21,7 @@ public class SceneTransition : MonoBehaviour
     IEnumerator Go(string SceneName)
     {
         Animator.SetTrigger("Start");
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSecondsRealtime(1f);
         SceneManager.LoadScene(SceneName);
     }
 }
