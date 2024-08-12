@@ -9,8 +9,8 @@ public class SelectionManager : MonoBehaviour
     public TextMeshProUGUI Selection;
     public int PlayerNumber;
 
-    private Color SelectColor = new Color(82f/255, 186f/255, 221f/255, 1);
-    private Color UnselectColor = new Color(111f/255, 111f/255, 111f/255, 0.5f);
+    public Material SelectedPlayerNumber;
+    public Material UnselectedPlayerNumber;
 
     private void Start()
     {
@@ -22,18 +22,18 @@ public class SelectionManager : MonoBehaviour
         }
         
         Selection.gameObject.SetActive(true);
-        Selection.color = UnselectColor;
+        Selection.fontMaterial = UnselectedPlayerNumber;
         Selection.text = PlayerNumber.ToString();
     }
 
     public void Select()
     {
-        Selection.color = SelectColor;
+        Selection.fontMaterial = SelectedPlayerNumber;
     }
 
     public void Unselect()
     {
-        Selection.color = UnselectColor;
+        Selection.fontMaterial = UnselectedPlayerNumber;
     }
 
     // public void SelectNext()

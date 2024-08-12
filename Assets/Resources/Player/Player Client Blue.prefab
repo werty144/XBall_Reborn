@@ -120,6 +120,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Client Blue
       objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontSize
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 47b9eeda2d13873558c7fd373e167262, type: 2}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontStyle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: e5d77ddd01387cefdbfa5a2db8761397, type: 2}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131692831381197458, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7552239132345444596, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -132,6 +184,14 @@ PrefabInstance:
       propertyPath: m_RootOrder
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 8947873559677798725, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: SelectedPlayerNumber
+      value: 
+      objectReference: {fileID: 2100000, guid: f4ed0e59eaf2b12828ab0a90b4193043, type: 2}
+    - target: {fileID: 8947873559677798725, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
+      propertyPath: UnselectedPlayerNumber
+      value: 
+      objectReference: {fileID: 2100000, guid: e5d77ddd01387cefdbfa5a2db8761397, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4678a6fcacbc4641ea1fa54fb8730304, type: 3}
 --- !u!4 &4504059756848771919 stripped

@@ -6,13 +6,15 @@ using UnityEngine;
 
 public class GameStarterTest : GameStarter
 {
+
+    public bool iAmMaster;
     private void Awake()
     {
         IsTest = true;
 
         Info = new SetupInfo
         {
-            IAmMaster = true,
+            IAmMaster = iAmMaster,
             NumberOfPlayers = 3,
             OpponentID = new CSteamID(1),
             MyID = new CSteamID(0)
