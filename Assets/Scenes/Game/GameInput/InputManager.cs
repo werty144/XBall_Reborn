@@ -7,13 +7,22 @@ public class InputManager : MonoBehaviour
 {
     private Client Client;
     
-    private GameObject selectedPlayer;
+    private PlayerSelection PlayerSelection;
+
+    private int layerMask;
 
     private bool ThrowIntention = false;
 
     private void Start()
     {
         Client = GameObject.FindWithTag("Client").GetComponent<Client>();
+        PlayerSelection = gameObject.GetComponent<PlayerSelection>();
+        
+        layerMask = (1 << LayerMask.NameToLayer("Server")) +
+                        (1 << LayerMask.NameToLayer("Dummy")) + 
+                        (1 << LayerMask.NameToLayer("ClientServer")) + 
+                        (1 << LayerMask.NameToLayer("DummyServer"));
+        layerMask = ~layerMask;
     }
 
     void Update()
@@ -33,16 +42,6 @@ public class InputManager : MonoBehaviour
             ProcessStop();
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            ProcessGrab();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            SelectNextPlayer();
-        }
-
         if (Input.GetKeyDown(KeyCode.Q))
         {
             ProcessThroughIntention();
@@ -53,7 +52,7 @@ public class InputManager : MonoBehaviour
     {
         if (ThrowIntention)
         {
-            if (selectedPlayer == null) return;
+            var selectedPlayer = PlayerSelection.GetSelected();
             Client.GaolShotInput(selectedPlayer.GetComponent<PlayerController>().ID);
             ThrowIntention = false;
         }
@@ -63,60 +62,11 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    void DeselectPlayer()
-    {
-        if (selectedPlayer == null) { return; }
-
-        selectedPlayer.GetComponent<PlayerController>().DeOutline();
-        selectedPlayer = null;
-    }
-
-    void SelectPlayer(GameObject selected)
-    {
-        selectedPlayer = selected;
-        selectedPlayer.GetComponent<PlayerController>().Outline();
-    }
-
-    void SelectNextPlayer()
-    {
-        if (selectedPlayer == null)
-        {
-            return;
-            
-        }
-        if (!selectedPlayer.GetComponent<PlayerController>().IsMy) { return; }
-
-        List<uint> myIDs = new List<uint>();
-        List<GameObject> myPlayers = new List<GameObject>();
-        var client = GameObject.FindWithTag("Client").GetComponent<Client>();
-        foreach (var player in client.GetPlayers().Values)
-        {
-            var controller = player.GetComponent<PlayerController>();
-            if (controller.IsMy)
-            {
-                myIDs.Add(controller.ID);
-                myPlayers.Add(player.gameObject);
-            }
-        }
-
-        
-        var curID = selectedPlayer.GetComponent<PlayerController>().ID;
-        var curInd = myIDs.FindIndex((uint x) => x == curID);
-        var nextInd = (curInd + 1) % myIDs.Count;
-        
-        DeselectPlayer();
-        SelectPlayer(myPlayers[nextInd]);
-    }
-
     private void ProcessLeftClick()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        int layerMask = (1 << LayerMask.NameToLayer("Server")) +
-                        (1 << LayerMask.NameToLayer("Dummy")) + 
-                        (1 << LayerMask.NameToLayer("ClientServer")) + 
-                        (1 << LayerMask.NameToLayer("DummyServer"));
-        layerMask = ~layerMask;
+        
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
@@ -133,30 +83,17 @@ public class InputManager : MonoBehaviour
             }
             if (hit.collider.gameObject.CompareTag("Player"))
             {
-                DeselectPlayer();
-                SelectPlayer(hit.collider.gameObject);
-            }
-            if (hit.collider.gameObject.CompareTag("Floor"))
-            {
-                DeselectPlayer();
+                PlayerSelection.SelectPlayer(hit.collider.gameObject);
             }
         }
     }
 
     private void ProcessRightClick()
     {
-        if (selectedPlayer == null)
-        {
-            return;
-        }
+        var selectedPlayer = PlayerSelection.GetSelected();
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        int layerMask = (1 << LayerMask.NameToLayer("Server")) +
-                        (1 << LayerMask.NameToLayer("Dummy")) + 
-                        (1 << LayerMask.NameToLayer("ClientServer")) + 
-                        (1 << LayerMask.NameToLayer("DummyServer"));
-        layerMask = ~layerMask;
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
@@ -172,26 +109,8 @@ public class InputManager : MonoBehaviour
 
     private void ProcessStop()
     {
-        if (selectedPlayer == null)
-        {
-            return;
-            
-        }
+        var selectedPlayer = PlayerSelection.GetSelected();
         var action = new PlayerStopAction
-        {
-            PlayerId = selectedPlayer.GetComponent<PlayerController>().ID
-        };
-        Client.InputAction(action);
-    }
-
-    private void ProcessGrab()
-    {
-        if (selectedPlayer == null)
-        {
-            return;
-        }
-
-        var action = new GrabAction
         {
             PlayerId = selectedPlayer.GetComponent<PlayerController>().ID
         };

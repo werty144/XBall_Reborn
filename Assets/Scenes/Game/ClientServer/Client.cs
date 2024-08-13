@@ -2,18 +2,26 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Google.Protobuf;
 using IngameDebugConsole;
 using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 using Update = UnityEngine.PlayerLoop.Update;
 
 public class Client : MonoBehaviour, StateHolder
 {
-    public GameObject PlayerPrefab;
+    public GameObject ClientPlayerPrefabBlue;
+    public GameObject ClientPlayerPrefabRed;
+    public GameObject BasePlayerPrefab;
     public GameObject BallPrefab;
+    public InputManager InputManager;
+
+    public ScorePanelController ScorePanelController;
 
     protected MessageManager MessageManager;
     
@@ -24,6 +32,7 @@ public class Client : MonoBehaviour, StateHolder
     
     private uint NextActionId = 1;
     private Dictionary<uint, Stopwatch> ActionTimers = new();
+    public ActionScheduler ActionScheduler;
     
     public Dictionary<uint, PlayerController> ServerPlayers = new();
     public BallController ServerBall;
@@ -72,7 +81,12 @@ public class Client : MonoBehaviour, StateHolder
             else
             {
                 Goals[setupInfo.OpponentID.m_SteamID] = goal;
+                var probabilityController = goal.GetComponent<GoalProbabilityController>();
+                probabilityController.Client = this;
+                probabilityController.MyUserID = MyID;
             }
+
+            goal.GetComponentInChildren<Animator>().updateMode = AnimatorUpdateMode.UnscaledTime;
         }
     }
 
@@ -96,11 +110,11 @@ public class Client : MonoBehaviour, StateHolder
         var ballObject = Instantiate(BallPrefab);
         ballObject.layer = collisionLayer;
         Ball = ballObject.GetComponent<BallController>();
-        
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
-            var player = Instantiate(PlayerPrefab);
+            var isMy = IAmMaster ^ (i % 2 == 1);
+            var player = Instantiate(isMy ? ClientPlayerPrefabBlue : ClientPlayerPrefabRed);
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
@@ -108,10 +122,17 @@ public class Client : MonoBehaviour, StateHolder
             Players[spareID] = controller;
             spareID++;
         }
+
+        int sparePlayerNumber = 1;
         foreach (var player in Players.Values)
         {
             player.IsMy = IAmMaster ^ (player.ID % 2 == 1);
-            player.Colorize(player.IsMy ? PlayerConfig.MyColor : PlayerConfig.OpponentColor);
+            player.UserID = player.IsMy ? MyID : OpponentID;
+            if (player.IsMy)
+            {
+                player.GetComponent<SelectionManager>().PlayerNumber = sparePlayerNumber;
+                sparePlayerNumber++;
+            }
         }
         
         ApplyGameState(InitialState.GetInitialState(n));
@@ -126,7 +147,7 @@ public class Client : MonoBehaviour, StateHolder
         uint spareID = 0;
         for (int i = 0; i < 2 * n; i++)
         {
-            var player = Instantiate(PlayerPrefab);
+            var player = Instantiate(BasePlayerPrefab);
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
@@ -154,7 +175,7 @@ public class Client : MonoBehaviour, StateHolder
         {
             case PlayerMovementAction playerMovementAction:
                 player = Players[playerMovementAction.PlayerId];
-                if (!player.IsMy) { return; }
+                // if (!player.IsMy) { return; }
                 
                 var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
                 player.SetMovementTarget(target);
@@ -173,9 +194,6 @@ public class Client : MonoBehaviour, StateHolder
             case GrabAction grabAction:
                 player = Players[grabAction.PlayerId];
                 if (!player.IsMy) { return; }
-                
-                if (Time.time < NextGrabTime[player.ID]) { return; }
-                NextGrabTime[player.ID] = Time.time + ActionRulesConfig.GrabCooldown;
                 
                 player.PlayGrabAnimation();
                 grabAction.PreSuccess = ActionRules.BallGrabSuccess(player, Ball);
@@ -196,6 +214,8 @@ public class Client : MonoBehaviour, StateHolder
                 throwAction.ActionId = NextActionId;
                 ActionTimers[throwAction.ActionId] = Stopwatch.StartNew();
                 NextActionId++;
+                var goalSuccess = GoalRules.GoalAttemptSuccess(Players, Ball.Owner, Ball, Goals[OpponentID]);
+                throwAction.GoalSuccess = goalSuccess;
                 break;
             default:
                 Debug.LogWarning("Unknown input action");
@@ -240,42 +260,26 @@ public class Client : MonoBehaviour, StateHolder
             {
                 return;
             }
-
-            Stopwatch timer;
-            long timePassed;
-            int timeLeft;
+            
             switch (relayedAction.ActionCase)
             {
                 case RelayedAction.ActionOneofCase.GrabAction:
                     ServerBall.SetOwner(ServerPlayers[relayedAction.GrabAction.PlayerId]);
-                    timer = ActionTimers[relayedAction.GrabAction.ActionId];
-                    ActionTimers.Remove(relayedAction.GrabAction.ActionId);
-                    timer.Stop();
-                    timePassed = timer.ElapsedMilliseconds;
-                    timeLeft = Mathf.Max(0, ActionRulesConfig.GrabDuration - (int)timePassed);
-                    StartCoroutine(DelayedAction(timeLeft,
-                        () =>
-                        {
-                            var newOwner = Players[relayedAction.GrabAction.PlayerId];
-                            if (ServerBall.Owned && ServerBall.Owner.ID == relayedAction.GrabAction.PlayerId)
-                            {
-                                Ball.SetOwner(newOwner);
-                            }
-                        }));
+                    var timeLeft = ManageTimer(relayedAction.GrabAction.ActionId);
+                    ActionScheduler.Schedule(() =>
+                    {
+                        Ball.SetOwner(Players[relayedAction.GrabAction.PlayerId]);
+                    }, timeLeft);
                     break;
                 case RelayedAction.ActionOneofCase.ThrowAction:
                     var ballTarget = ProtobufUtils.FromVector3Protobuf(relayedAction.ThrowAction.Destination);
                     ServerBall.ThrowTo(ballTarget);
-                    timer = ActionTimers[relayedAction.ThrowAction.ActionId];
-                    ActionTimers.Remove(relayedAction.ThrowAction.ActionId);
-                    timer.Stop();
-                    timePassed = timer.ElapsedMilliseconds;
-                    timeLeft = Mathf.Max(0, ActionRulesConfig.ThrowDuration - (int)timePassed);
-                    StartCoroutine(DelayedAction(timeLeft,
-                        () =>
-                        {
-                            Ball.ThrowTo(ballTarget);
-                        }));
+                    timeLeft = ManageTimer(relayedAction.ThrowAction.ActionId);
+                    ActionScheduler.Schedule(() =>
+                    {
+                        Players[relayedAction.ThrowAction.PlayerId].GetComponent<GrabManager>().SetCooldownMillis(2000f / Time.timeScale);
+                        Ball.ThrowTo(ballTarget);
+                    }, timeLeft);
                     break;
             }
         }
@@ -290,11 +294,10 @@ public class Client : MonoBehaviour, StateHolder
                     if (relayedAction.Success)
                     {
                         ServerBall.SetOwner(ServerPlayers[relayedAction.GrabAction.PlayerId]);
-                        StartCoroutine(DelayedAction(ActionRulesConfig.GrabDuration,
-                            () =>
-                            {
-                                Ball.SetOwner(Players[relayedAction.GrabAction.PlayerId]);
-                            }));
+                        ActionScheduler.Schedule(() =>
+                        {
+                            Ball.SetOwner(Players[relayedAction.GrabAction.PlayerId]);
+                        }, ActionRulesConfig.GrabDuration);
                     }
                     break;
                 case RelayedAction.ActionOneofCase.ThrowAction:
@@ -304,21 +307,24 @@ public class Client : MonoBehaviour, StateHolder
                     {
                         var ballTarget = ProtobufUtils.FromVector3Protobuf(relayedAction.ThrowAction.Destination);
                         ServerBall.ThrowTo(ballTarget);
-                        StartCoroutine(DelayedAction(ActionRulesConfig.ThrowDuration,
-                            () =>
-                            {
-                                Ball.ThrowTo(ballTarget);
-                            }));
+                        ActionScheduler.Schedule(() =>
+                        {
+                            Ball.ThrowTo(ballTarget);
+                        }, ActionRulesConfig.GrabDuration);
                     }
                     break;
             }
         }
     }
-    
-    IEnumerator DelayedAction(int millis, Action action)
+
+    int ManageTimer(uint actionId)
     {
-        yield return new WaitForSeconds(0.001f * millis);
-        action();
+        var timer = ActionTimers[actionId];
+        ActionTimers.Remove(actionId);
+        timer.Stop();
+        var timePassed = timer.ElapsedMilliseconds;
+        var timeLeft = Mathf.Max(0, ActionRulesConfig.GrabDuration - (int)timePassed);
+        return timeLeft;
     }
     
     public GameState GetGameState()
@@ -365,8 +371,14 @@ public class Client : MonoBehaviour, StateHolder
 
     public virtual void ReceiveGoalAttempt(GoalAttempt goalAttempt)
     {
-        Goals[goalAttempt.GoalOwner].transform.Find("Sphere").GetComponent<Animator>()
-            .Play(goalAttempt.Success ? "TargetSuccessAnimation" : "TargetFailAnimation", -1, 0f);
+        ScorePanelController.OnGoalAttempt(goalAttempt);
+        Goals[goalAttempt.GoalOwner].GetComponentInChildren<Animator>()
+            .Play(goalAttempt.Success ? "success" : "failure", -1, 0f);
+        
+        if (goalAttempt.Success)
+        {
+            Players[goalAttempt.ThrowerId].gameObject.GetComponent<Pig>().Piggiwise();
+        }
     }
 
     public void GaolShotInput(uint playerID)
@@ -378,4 +390,6 @@ public class Client : MonoBehaviour, StateHolder
         };
         InputAction(throwAction);
     }
+
+    
 }

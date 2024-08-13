@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Steamworks;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -13,6 +15,9 @@ enum GamePhase
 
 public class GameManager : MonoBehaviour
 {
+    public ScorePanelController ScorePanelController;
+    public InputManager InputManager;
+    
     private MessageManager MessageManager;
     private UIManagerGame UIManager;
 
@@ -25,6 +30,7 @@ public class GameManager : MonoBehaviour
         GamePhase = GamePhase.BeforeGame;
         
         UIManager.DisplayLoading();
+        InputManager.enabled = false;
     }
 
     public void OnConnectedToServer()
@@ -40,25 +46,30 @@ public class GameManager : MonoBehaviour
     public void OnGameStart()
     {
         GamePhase = GamePhase.InGame;
+        InputManager.enabled = true;
         UIManager.RemoveScreen();
+        ScorePanelController.StartTimer();
     }
 
     public void OnConnectionRemoteProblem()
     {
         GamePhase = GamePhase.Pause;
         UIManager.DisplayPeerDropped();
+        ScorePanelController.PauseTimer();
     }
 
     public void OnConnectionLocalProblem()
     {
         GamePhase = GamePhase.Pause;
         UIManager.DisplayLocalProblem();
+        ScorePanelController.PauseTimer();
     }
 
     public void OnConnectionPeerDisconnected()
     {
         GamePhase = GamePhase.Pause;
         UIManager.DisplayPeerDropped();
+        ScorePanelController.PauseTimer();
     }
 
     public void ResumeGame()
@@ -66,6 +77,23 @@ public class GameManager : MonoBehaviour
         Assert.AreEqual(GamePhase.Pause, GamePhase);
         GamePhase = GamePhase.InGame;
         UIManager.RemoveScreen();
+        ScorePanelController.ResumeTimer();
+    }
+    
+    public void GameEnd(GameEnd gameEnd)
+    {
+        InputManager.enabled = false;
+        
+        var gameEnder = GameObject.FindWithTag("Global").GetComponent<GameEnder>();
+        gameEnder.Score = gameEnd.Score.ToDictionary(x => x.Key, x => x.Value);
+        gameEnder.Winner = new CSteamID(gameEnd.Winner);
+        
+        Invoke(nameof(SwitchToGameEnd), 3f * Time.timeScale);
+    }
+
+    void SwitchToGameEnd()
+    {
+        GameObject.FindWithTag("SceneTransition").GetComponent<SceneTransition>().LoadScene("GameEnd");
     }
 
     public void OnConnectionUnknownProblem()

@@ -12,6 +12,8 @@ public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
     protected HSteamNetConnection Connection;
     private MessageManager MessageManager;
     private PingManager PingManager;
+
+    private Callback<SteamNetConnectionStatusChangedCallback_t> m_StateConnectionStatusChangeCallback;
     
     
     protected virtual void Start()
@@ -19,8 +21,67 @@ public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
         MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
         PingManager = GameObject.FindWithTag("P2P").GetComponent<PingManager>();
         GameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
+        
+        m_StateConnectionStatusChangeCallback = Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnConnectionChanged);
     }
-    
+
+    private void OnConnectionChanged(SteamNetConnectionStatusChangedCallback_t pCallback)
+    {
+        switch (pCallback.m_info.m_eState)
+        {
+            case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
+                SteamNetworkingSockets.AcceptConnection(pCallback.m_hConn);
+                break;
+            case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
+                Debug.Log(
+                    "Connection with " + pCallback.m_info.m_identityRemote.GetSteamID().m_SteamID + " established");
+                OnConnected(pCallback.m_hConn);
+                break;
+            case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
+                Debug.LogWarning("Problem detected locally: " + pCallback.m_info.m_eEndReason + ". " +
+                                 pCallback.m_info.m_szEndDebug);
+                switch (pCallback.m_info.m_eEndReason)
+                {
+                    case (int)ESteamNetConnectionEnd.k_ESteamNetConnectionEnd_Remote_Timeout:
+                        OnRemoteProblem();
+                        break;
+                    case (int)ESteamNetConnectionEnd.k_ESteamNetConnectionEnd_Misc_Timeout:
+                        if (pCallback.m_eOldState ==
+                            ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting)
+                        {
+                            ((ConnectionManagerFollower)this).ReconnectTimeOut();
+                        }
+                        else
+                        {
+                            OnLocalProblem();
+                        }
+
+                        break;
+                    default:
+                        OnUnknownProblem();
+                        Debug.LogWarning("Unknown problem detected locally");
+                        break;
+                }
+                break;
+            case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer:
+                Debug.Log("Closed by peer");
+                switch (pCallback.m_eOldState)
+                {
+                    case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
+                        OnClosedByPeerWhileConnecting();
+                        break;
+                    case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
+                        OnClosedByPeerWhenActive();
+                        break;
+                    default:
+                        Debug.LogWarning("Unsupported connection close");
+                        break;
+                }
+
+                break;
+        }
+    }
+
     public virtual void OnConnected(HSteamNetConnection connection)
     {
         Connection = connection;
@@ -94,11 +155,12 @@ public abstract class ConnectionManagerBase : MonoBehaviour, ConnectionManager
 
     public void CloseConnection()
     {
-        SteamNetworkingSockets.CloseConnection(Connection, 0, "", false);
+        SteamNetworkingSockets.CloseConnection(Connection, 0, "", true);
     }
 
     public void OnDestroy()
     {
         CloseConnection();
+        m_StateConnectionStatusChangeCallback.Dispose();
     }
 }

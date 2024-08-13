@@ -6,23 +6,17 @@ using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
-public struct BallConfig
-{
-    public static Color CanGrabColor = new Color(102f/255f, 204f/255f, 153f/255f);
-}
-
 public class BallController : MonoBehaviour
 {
     public PlayerController Owner { get; private set; }
     public bool Owned { get; private set; }
 
-    private Outline Outline;
+    public Outline Outline;
     private float OutlineWidth = 3f;
     private Client Client;
 
     private void Start()
     {
-        Outline = transform.Find("Sphere").GetComponent<Outline>();
         Client = GameObject.FindWithTag("Client").GetComponent<Client>();
     }
 
@@ -93,35 +87,21 @@ public class BallController : MonoBehaviour
             var targetPosition = new Vector3(ownerPosition.x, PlayerConfig.Height * 2 + GameConfig.BallRadius,
                 ownerPosition.y);
             transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 20f);
+            GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         }
     }
 
     private void ManageOutline()
     {
-        var existsMyNotOwnerWhoCanGrab = false;
-        foreach (var player in from player in Client.GetPlayers().Values where player.IsMy where !Owned || Owner.ID != player.ID where ActionRules.IsValidGrab(player.transform, transform) select player)
+        if (Owned)
         {
-            existsMyNotOwnerWhoCanGrab = true;
-        }
-        
-        if (existsMyNotOwnerWhoCanGrab)
-        {
-            Outline.OutlineWidth = OutlineWidth;
-            Outline.OutlineMode = Outline.Mode.OutlineAll;
-            Outline.OutlineColor = BallConfig.CanGrabColor;
+            Outline.OutlineWidth = 0;
         }
         else
         {
-            if (Owned)
-            {
-                Outline.OutlineWidth = 0;
-            }
-            else
-            {
-                Outline.OutlineWidth = OutlineWidth;
-                Outline.OutlineMode = Outline.Mode.OutlineHidden;
-                Outline.OutlineColor = Color.white;
-            }
+            Outline.OutlineWidth = OutlineWidth;
+            Outline.OutlineMode = Outline.Mode.OutlineHidden;
+            Outline.OutlineColor = Color.white;
         }
     }
 
@@ -138,7 +118,7 @@ public class BallController : MonoBehaviour
         Vector3 ballToTargetXZ = new Vector3(ballToTarget.x, 0, ballToTarget.z);
         float dot = Vector3.Dot(ballToTarget.normalized, Vector3.up);
         float angleRadians = Mathf.Acos(dot);
-        float launchAngleRadians = (Mathf.PI - angleRadians) * 0.5f;
+        float launchAngleRadians = Mathf.PI * 0.5f - angleRadians * 0.8f;
         float horizontalDistance = ballToTargetXZ.magnitude;
         float heightDifference = target.y - ballPosition.y;
 
@@ -152,7 +132,6 @@ public class BallController : MonoBehaviour
         float gravity = Physics.gravity.magnitude;
         float velocityMagnitude = Mathf.Sqrt((gravity * horizontalDistance * horizontalDistance) / 
                                              (2 * Mathf.Cos(launchAngleRadians) * Mathf.Cos(launchAngleRadians) * (horizontalDistance * Mathf.Tan(launchAngleRadians) - heightDifference)));
-
         Vector3 toTargetXZ = ballToTargetXZ.normalized;
         var launchVelocity = toTargetXZ * Mathf.Cos(launchAngleRadians) * velocityMagnitude + Vector3.up * Mathf.Sin(launchAngleRadians) * velocityMagnitude;
         GetComponent<Rigidbody>().velocity = launchVelocity;

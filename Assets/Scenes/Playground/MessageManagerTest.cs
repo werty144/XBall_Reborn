@@ -51,6 +51,19 @@ public class MessageManagerTest : MessageManagerMaster
             );
         }
     }
+    
+    public override void SendGameEnd(CSteamID userID, GameEnd message)
+    {
+        if (userID == MyID)
+        {
+            StartCoroutine(
+                DelayedAction(
+                    MyPing,
+                    () => GameManager.GameEnd(message)
+                )
+            );
+        }
+    }
 
     public override void SendGameState(CSteamID userID, GameState gameState)
     {
@@ -144,7 +157,7 @@ public class MessageManagerTest : MessageManagerMaster
 
     IEnumerator DelayedAction(TimeSpan delay, Action action)
     {
-        yield return new WaitForSeconds((float)delay.TotalSeconds);
+        yield return new WaitForSecondsRealtime((float)delay.TotalSeconds);
         action();
     }
 }

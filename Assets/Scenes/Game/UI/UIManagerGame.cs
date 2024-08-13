@@ -4,26 +4,14 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UIManagerGame : MonoBehaviour
 {
-    private PingManager PingManager;
-    private TextMeshProUGUI PingLabel;
-    private TextMeshProUGUI CurrentStateLabel;
-    private GameObject LoadingScreen;
-    private TextMeshProUGUI LoadingScreenText;
+    public GameObject LoadingScreen;
+    public TextMeshProUGUI LoadingScreenText;
 
-    private DateTime LastFPSUpdate;
     private uint FramesPerLasSecond;
-
-    private void Awake()
-    {
-        LastFPSUpdate = DateTime.Now;
-        PingLabel = GameObject.Find("Ping Label").GetComponent<TextMeshProUGUI>();
-        CurrentStateLabel = GameObject.Find("Current State Label").GetComponent<TextMeshProUGUI>();
-        LoadingScreen = GameObject.Find("Loading Screen");
-        LoadingScreenText = LoadingScreen.GetComponentInChildren<TextMeshProUGUI>();
-    }
 
     public void DisplayLoading()
     {
@@ -56,33 +44,6 @@ public class UIManagerGame : MonoBehaviour
 
     private void Start()
     {
-        PingManager = GameObject.FindWithTag("P2P").GetComponent<PingManager>();
-    }
-
-    private void Update()
-    {
-        UpdateFPS();
-        UpdatePing();
-    }
-
-    public void OnMenuButton()
-    {
-        SceneManager.LoadScene("Menu");
-    }
-
-    public void UpdatePing()
-    {
-        PingLabel.text = "Ping: " + PingManager.GetPing().Milliseconds + "ms";
-    }
-
-    private void UpdateFPS()
-    {
-        FramesPerLasSecond++;
-        if (DateTime.Now - LastFPSUpdate >= TimeSpan.FromSeconds(1))
-        {
-            CurrentStateLabel.text = "FPS: " + FramesPerLasSecond;
-            FramesPerLasSecond = 0;
-            LastFPSUpdate = DateTime.Now;
-        }
+        LoadingScreen.SetActive(true);
     }
 }

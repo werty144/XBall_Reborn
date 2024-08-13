@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Steamworks;
@@ -9,11 +10,19 @@ public class FriendsListController : MonoBehaviour
 {
     public GameObject listItemPrefab;
     public Transform contentPanel;
-    public GameObject lobby;
+    public LobbyManager lobbyManager;
+    public UIManagerMenu UIManagerMenu;
+    
+    protected Callback<PersonaStateChange_t> m_PersonaStateChange;
     void Start()
     {
         UpdateFriendsList();
-        GameObject.FindGameObjectWithTag("Global").GetComponent<Callbacks>().SetFriendsList(this);
+        m_PersonaStateChange = Callback<PersonaStateChange_t>.Create(OnPersonaStateChange);
+    }
+
+    private void OnPersonaStateChange(PersonaStateChange_t pCallback)
+    {
+        UpdateFriendsList();
     }
 
     public void UpdateFriendsList()
@@ -24,28 +33,10 @@ public class FriendsListController : MonoBehaviour
         foreach (var friend in onlineFriends)
         {
             GameObject newItem = Instantiate(listItemPrefab, contentPanel);
-            var nicknamePlate = newItem.GetComponentInChildren<TextMeshProUGUI>();
-            if (nicknamePlate != null)
-            {
-                nicknamePlate.text = friend.Name;
-            }
-            else
-            {
-                Debug.LogWarning("Nickname plate not found");
-            }
-
-            var inviteButton = newItem.GetComponentInChildren<Button>();
-            if (inviteButton != null)
-            {
-                inviteButton.onClick.AddListener(() => {
-                    var lobbyManager = lobby.GetComponent<LobbyManager>();
-                    lobbyManager.InviteAndCreateOnNeed(friend.ID);
-                });
-            }
-            else
-            {
-                Debug.LogWarning("Invite button not found");
-            }
+            var controller = newItem.GetComponent<FriendItemController>();
+            controller.UserID = friend.ID;
+            controller.lobbyManager = lobbyManager;
+            controller.UIManagerMenu = UIManagerMenu;
         }
     }
 
@@ -55,5 +46,15 @@ public class FriendsListController : MonoBehaviour
         {
             Destroy(contentPanel.GetChild(i).gameObject);
         }
+    }
+
+    public void Close()
+    {
+        UIManagerMenu.GetComponent<UIManagerMenu>().OnCloseFriendsList();
+    }
+
+    private void OnDestroy()
+    {
+        m_PersonaStateChange.Dispose();
     }
 }

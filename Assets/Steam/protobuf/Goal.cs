@@ -22,12 +22,14 @@ public static partial class GoalReflection {
   static GoalReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cgpnb2FsLnByb3RvIjIKC0dvYWxBdHRlbXB0EhIKCmdvYWxfb3duZXIYASAB",
-          "KAQSDwoHc3VjY2VzcxgCIAEoCGIGcHJvdG8z"));
+          "Cgpnb2FsLnByb3RvIpwBCgtHb2FsQXR0ZW1wdBISCgpnb2FsX293bmVyGAEg",
+          "ASgEEg8KB3N1Y2Nlc3MYAiABKAgSJgoFc2NvcmUYAyADKAsyFy5Hb2FsQXR0",
+          "ZW1wdC5TY29yZUVudHJ5EhIKCnRocm93ZXJfaWQYBCABKA0aLAoKU2NvcmVF",
+          "bnRyeRILCgNrZXkYASABKAQSDQoFdmFsdWUYAiABKAU6AjgBYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::GoalAttempt), global::GoalAttempt.Parser, new[]{ "GoalOwner", "Success" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::GoalAttempt), global::GoalAttempt.Parser, new[]{ "GoalOwner", "Success", "Score", "ThrowerId" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
         }));
   }
   #endregion
@@ -71,6 +73,8 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
   public GoalAttempt(GoalAttempt other) : this() {
     goalOwner_ = other.goalOwner_;
     success_ = other.success_;
+    score_ = other.score_.Clone();
+    throwerId_ = other.throwerId_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -104,6 +108,29 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
     }
   }
 
+  /// <summary>Field number for the "score" field.</summary>
+  public const int ScoreFieldNumber = 3;
+  private static readonly pbc::MapField<ulong, int>.Codec _map_score_codec
+      = new pbc::MapField<ulong, int>.Codec(pb::FieldCodec.ForUInt64(8, 0UL), pb::FieldCodec.ForInt32(16, 0), 26);
+  private readonly pbc::MapField<ulong, int> score_ = new pbc::MapField<ulong, int>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::MapField<ulong, int> Score {
+    get { return score_; }
+  }
+
+  /// <summary>Field number for the "thrower_id" field.</summary>
+  public const int ThrowerIdFieldNumber = 4;
+  private uint throwerId_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public uint ThrowerId {
+    get { return throwerId_; }
+    set {
+      throwerId_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -121,6 +148,8 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
     }
     if (GoalOwner != other.GoalOwner) return false;
     if (Success != other.Success) return false;
+    if (!Score.Equals(other.Score)) return false;
+    if (ThrowerId != other.ThrowerId) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -130,6 +159,8 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
     int hash = 1;
     if (GoalOwner != 0UL) hash ^= GoalOwner.GetHashCode();
     if (Success != false) hash ^= Success.GetHashCode();
+    hash ^= Score.GetHashCode();
+    if (ThrowerId != 0) hash ^= ThrowerId.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -156,6 +187,11 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
       output.WriteRawTag(16);
       output.WriteBool(Success);
     }
+    score_.WriteTo(output, _map_score_codec);
+    if (ThrowerId != 0) {
+      output.WriteRawTag(32);
+      output.WriteUInt32(ThrowerId);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -174,6 +210,11 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
       output.WriteRawTag(16);
       output.WriteBool(Success);
     }
+    score_.WriteTo(ref output, _map_score_codec);
+    if (ThrowerId != 0) {
+      output.WriteRawTag(32);
+      output.WriteUInt32(ThrowerId);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -189,6 +230,10 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
     }
     if (Success != false) {
       size += 1 + 1;
+    }
+    size += score_.CalculateSize(_map_score_codec);
+    if (ThrowerId != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ThrowerId);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -207,6 +252,10 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
     }
     if (other.Success != false) {
       Success = other.Success;
+    }
+    score_.MergeFrom(other.score_);
+    if (other.ThrowerId != 0) {
+      ThrowerId = other.ThrowerId;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -231,6 +280,14 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
           Success = input.ReadBool();
           break;
         }
+        case 26: {
+          score_.AddEntriesFrom(input, _map_score_codec);
+          break;
+        }
+        case 32: {
+          ThrowerId = input.ReadUInt32();
+          break;
+        }
       }
     }
   #endif
@@ -252,6 +309,14 @@ public sealed partial class GoalAttempt : pb::IMessage<GoalAttempt>
         }
         case 16: {
           Success = input.ReadBool();
+          break;
+        }
+        case 26: {
+          score_.AddEntriesFrom(ref input, _map_score_codec);
+          break;
+        }
+        case 32: {
+          ThrowerId = input.ReadUInt32();
           break;
         }
       }

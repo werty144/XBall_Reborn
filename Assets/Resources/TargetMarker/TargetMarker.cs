@@ -7,7 +7,7 @@ public class TargetMarker : MonoBehaviour
 {
     private void Start()
     {
-        Invoke(nameof(SelfDestroy), 3f);
+        Invoke(nameof(SelfDestroy), 0.3f * Time.timeScale);
     }
 
     void SelfDestroy()

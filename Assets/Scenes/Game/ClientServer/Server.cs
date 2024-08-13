@@ -6,6 +6,18 @@ using Steamworks;
 using Unity.VisualScripting;
 using UnityEngine;
 
+struct LastThrowInfo
+{
+    public bool GoalSuccess;
+    public uint PlayerID;
+
+    public LastThrowInfo(bool goalSuccess, uint playerID)
+    {
+        GoalSuccess = goalSuccess;
+        PlayerID = playerID;
+    }
+}
+
 public class Server : MonoBehaviour, StateHolder
 {
     public GameObject PlayerPrefab;
@@ -20,15 +32,22 @@ public class Server : MonoBehaviour, StateHolder
     protected BallController Ball;
     protected Dictionary<ulong, GoalController> Goal = new();
     private GameStateVersioning GameStateVersioning;
+    private ActionScheduler ActionScheduler;
+    private BallStateManager BallStateManager = new();
+
+    private LastThrowInfo LastThrow;
     
     private GameState PausedState;
     private bool OnPause;
+
+    private Dictionary<ulong, int> Score = new();
     
     private void Awake()
     {
         PlayerPrefab = Resources.Load<GameObject>("Player/ServerPlayerPrefab");
         BallPrefab = Resources.Load<GameObject>("Ball/ServerBallPrefab");
         GameStateVersioning = new GameStateVersioning(this);
+        ActionScheduler = GetComponent<ActionScheduler>();
     }
 
     private void Start()
@@ -40,6 +59,9 @@ public class Server : MonoBehaviour, StateHolder
         var gameStarter = global.GetComponent<GameStarter>();
         userIDs[0] = gameStarter.Info.MyID;
         userIDs[1] = gameStarter.Info.OpponentID;
+
+        Score[userIDs[0].m_SteamID] = 0;
+        Score[userIDs[1].m_SteamID] = 0;
 
         CreateInitialState(gameStarter.Info.NumberOfPlayers);
         InitiateGoals();
@@ -71,6 +93,7 @@ public class Server : MonoBehaviour, StateHolder
             player.layer = collisionLayer;
             var controller = player.GetComponent<PlayerController>();
             controller.ID = spareID;
+            controller.UserID = userIDs[i % 2].m_SteamID;
             controller.Ball = Ball;
             Players[spareID] = controller;
             spareID++;
@@ -124,6 +147,8 @@ public class Server : MonoBehaviour, StateHolder
     {
         if (OnPause) {return;}
         
+        var pingToActor = PingManager.GetPingToUser(actorID).Milliseconds;
+        bool success;
         switch (action)
         {
             case PlayerMovementAction:
@@ -135,15 +160,21 @@ public class Server : MonoBehaviour, StateHolder
                 MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
                 break;  
             case GrabAction grabAction:
-                if (grabAction.PreSuccess)
+                success = grabAction.PreSuccess && BallStateManager.Grab(Players[grabAction.PlayerId]);
+                if (success)
                 {
-                    GameStateVersioning.ApplyActionToCurrentState(grabAction);
+                    var delay = Math.Max(0, ActionRulesConfig.GrabDuration - pingToActor);
+                    ActionScheduler.Schedule(() =>
+                    {
+                        Ball.SetOwner(Players[grabAction.PlayerId]);
+                        BroadcastState();
+                    }, delay);
                 }
                 var relayedGrabAction = new RelayedAction
                 {
                     UserId = actorID.m_SteamID,
                     GrabAction = grabAction,
-                    Success = grabAction.PreSuccess
+                    Success = success
                 };
                 foreach (var userID in userIDs)
                 {
@@ -151,27 +182,24 @@ public class Server : MonoBehaviour, StateHolder
                 }
                 break;
             case ThrowAction throwAction:
+                success = BallStateManager.Throw(Players[throwAction.PlayerId]);
+                if (success)
+                {
+                    var delay = Math.Max(0, ActionRulesConfig.ThrowDuration - pingToActor);
+                    ActionScheduler.Schedule(() =>
+                    {
+                        Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
+                        LastThrow = new LastThrowInfo(throwAction.GoalSuccess, throwAction.PlayerId);
+                        BroadcastState();
+                    }, delay);
+                }
+
                 var relayedThrowAction = new RelayedAction
                 {
                     UserId = actorID.m_SteamID,
                     ThrowAction = throwAction,
+                    Success = success
                 };
-                if (Ball.Owned && Ball.Owner.ID == throwAction.PlayerId)
-                {
-                    relayedThrowAction.Success = true;
-                    var pingToActor = PingManager.GetPingToUser(actorID).Milliseconds;
-                    var delay = Math.Max(0, ActionRulesConfig.ThrowDuration - pingToActor);
-                    StartCoroutine(DelayedAction(delay, () =>
-                    {
-                        if (!Ball.Owned || Ball.Owner.ID != throwAction.PlayerId) return;
-                        Ball.ThrowTo(ProtobufUtils.FromVector3Protobuf(throwAction.Destination));
-                        BroadCastState();
-                    }));
-                }
-                else
-                {
-                    relayedThrowAction.Success = false;
-                }
                 foreach (var userID in userIDs)
                 {
                     MessageManager.RelayAction(userID, relayedThrowAction);
@@ -181,36 +209,9 @@ public class Server : MonoBehaviour, StateHolder
                 Debug.LogWarning("Unknown action");
                 break;
         }
-        
-        // var actorPing = PingManager.GetPingToUser(actorID);
-        // GameStateVersioning.ApplyActionInThePast(action, actorID, actorPing);
-        //
-        // var currentState = GetGameState();
-        // foreach (var userID in userIDs)
-        // {
-        //     var userPing = PingManager.GetPingToUser(userID);
-        //     GameStateVersioning.FastForward(userPing);
-        //     var stateForUser = GetGameState();
-        //     if (userID == actorID)
-        //     {
-        //         MessageManager.SendActionResponse(
-        //             actorID,
-        //             new ActionResponse
-        //             {
-        //                 ActionId = ParseUtils.GetActionId(action),
-        //                 GameState = stateForUser
-        //             });
-        //     }
-        //     else
-        //     {
-        //         MessageManager.SendGameState(userID, stateForUser);
-        //     }
-        //
-        //     ApplyGameState(currentState);
-        // }
     }
 
-    private void BroadCastState()
+    private void BroadcastState()
     {
         var curGameState = GetGameState();
         foreach (var userID in userIDs)
@@ -324,20 +325,48 @@ public class Server : MonoBehaviour, StateHolder
     public void CollisionExit()
     {
         // TODO: Consider cooldown and periodic sending
-        BroadCastState();
+        BroadcastState();
     }
 
     public void OnGoalAttempt(ulong goalOwner)
     {
-        var success = GoalRules.GoalAttemptSuccess(Ball, Goal[goalOwner]);
+        if (LastThrow.GoalSuccess)
+        {
+            Score[GetAnotherID(new CSteamID(goalOwner)).m_SteamID]++;
+        }
         var message = new GoalAttempt
         {
             GoalOwner = goalOwner,
-            Success = success
+            Success = LastThrow.GoalSuccess,
+            Score = { Score },
+            ThrowerId = LastThrow.PlayerID
         };
         foreach (var userID in userIDs)
         {
             MessageManager.SendGoalAttempt(userID, message);
+        }
+        
+        CheckForWin();
+    }
+
+    void CheckForWin()
+    {
+        var scoreDiffToWin = 3;
+        var gameEndMessage = new GameEnd
+        {
+            Score = { Score }
+        };
+        if (Score[userIDs[0].m_SteamID] >= Score[userIDs[1].m_SteamID] + scoreDiffToWin)
+        {
+            gameEndMessage.Winner = userIDs[0].m_SteamID;
+            MessageManager.SendGameEnd(userIDs[0], gameEndMessage);
+            MessageManager.SendGameEnd(userIDs[1], gameEndMessage);
+        }
+        if (Score[userIDs[1].m_SteamID] >= Score[userIDs[0].m_SteamID] + scoreDiffToWin)
+        {
+            gameEndMessage.Winner = userIDs[1].m_SteamID;
+            MessageManager.SendGameEnd(userIDs[0], gameEndMessage);
+            MessageManager.SendGameEnd(userIDs[1], gameEndMessage);
         }
     }
 }

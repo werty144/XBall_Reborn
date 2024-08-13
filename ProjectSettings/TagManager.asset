@@ -18,6 +18,7 @@ TagManager:
   - Ball
   - Wall
   - Goal
+  - SceneTransition
   layers:
   - Default
   - TransparentFX
