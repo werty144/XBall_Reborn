@@ -57,6 +57,20 @@ public class DebugConsoleCommands : MonoBehaviour
         DebugLogConsole.AddCommand("TestDelayedAction", "Launches two delayed actions with same timeout", TestDelayedAction);
         
         DebugLogConsole.AddCommand("EnterLobby", "Creates and enters lobby with invitee ID = 0", EnterLobby);
+        
+        DebugLogConsole.AddCommand<int, int>("Persist", "Persists number of wins and games", Persist);
+        DebugLogConsole.AddCommand("ReadPersisted", "prints persisted data", ReadPersisted);
+    }
+
+    void Persist(int wins, int games)
+    {
+        GameObject.FindWithTag("Global").GetComponent<Storage>().SaveData(new UserData(wins, games));
+    }
+
+    void ReadPersisted()
+    {
+        var data = GameObject.FindWithTag("Global").GetComponent<Storage>().GetUserData();
+        print(data.wins + " " + data.gamesPlayed);
     }
 
     void PeerConnected()

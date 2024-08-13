@@ -87,6 +87,15 @@ public class GameManager : MonoBehaviour
         var gameEnder = GameObject.FindWithTag("Global").GetComponent<GameEnder>();
         gameEnder.Score = gameEnd.Score.ToDictionary(x => x.Key, x => x.Value);
         gameEnder.Winner = new CSteamID(gameEnd.Winner);
+
+        var storage = GameObject.FindWithTag("Global").GetComponent<Storage>();
+        var currentStats = storage.GetUserData();
+        currentStats.gamesPlayed++;
+        if (gameEnder.Winner == Steam.MySteamID())
+        {
+            currentStats.wins++;
+        }
+        storage.SaveData(currentStats);
         
         Invoke(nameof(SwitchToGameEnd), 3f * Time.timeScale);
     }

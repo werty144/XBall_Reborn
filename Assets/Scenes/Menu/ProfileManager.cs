@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -9,12 +10,12 @@ public class ProfileManager : MonoBehaviour
 {
     public RawImage Avatar;
     public GameObject Nickname;
-    public GameObject Rating;
-    void Start()
+    public TextMeshProUGUI Winrate;
+    void OnEnable()
     {
         StartCoroutine(FetchAvatarUntilSuccess());
         StartCoroutine(FetchNicknameUntilSuccess());
-        FetchRating();
+        FetchWinrate();
     }
 
     IEnumerator FetchAvatarUntilSuccess()
@@ -45,8 +46,22 @@ public class ProfileManager : MonoBehaviour
         }
     }
 
-    void FetchRating()
+    void FetchWinrate()
     {
-        Rating.GetComponent<TextMeshProUGUI>().text = "228";
+        var storage = GameObject.FindWithTag("Global").GetComponent<Storage>();
+        var userData = storage.GetUserData();
+        Winrate.text = CalculatePercentage(userData.wins, userData.gamesPlayed);
+    }
+    
+    string CalculatePercentage(int a, int b)
+    {
+        if (b == 0)
+        {
+            return "?";
+        }
+
+        double percentage = ((double)a / b) * 100;
+
+        return percentage.ToString("0") + "%";
     }
 }
