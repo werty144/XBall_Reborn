@@ -35,6 +35,7 @@ public class LobbyManager : MonoBehaviour
     public UnityEngine.UI.Outline myReadyButtonOutline;
     public UnityEngine.UI.Outline opponentReadyOutline;
     public GameObject opponentPlateContent;
+    public GameObject opponentPlaceholder;
 
     public OpponentPlateManager opponentPlateManager;
 
@@ -118,6 +119,7 @@ public class LobbyManager : MonoBehaviour
 
     private void UpdateMembers()
     {
+        opponentPlaceholder.SetActive(true);
         opponentPlateContent.SetActive(false);
         
         var lobbyMembers = Steam.GetLobbyMembers(currentLobbyID);
@@ -136,11 +138,13 @@ public class LobbyManager : MonoBehaviour
                 }
 
                 myReadyButtonOutline.effectColor =
-                    readyStatus ? new Color(0.07450981f, 0.4666667f, 0.3176471f, 1) : Color.white;
+                    readyStatus ? new Color(0.07450981f, 0.4666667f, 0.3176471f, 1) : 
+                        new Color(34/255f, 34/255f, 34/255f, 128/255f);
             }
             else
             {
                 opponentPlateManager.opponentID = member.ID;
+                opponentPlaceholder.SetActive(false);
                 opponentPlateContent.SetActive(true);
                 var readyStatusString = Steam.GetLobbyMemberData(currentLobbyID, member.ID, ReadyStatusKey);
                 var success = bool.TryParse(readyStatusString, out var readyStatus);
@@ -150,7 +154,8 @@ public class LobbyManager : MonoBehaviour
                 }
 
                 opponentReadyOutline.effectColor =
-                    readyStatus ? new Color(0.07450981f, 0.4666667f, 0.3176471f, 1) : Color.white;
+                    readyStatus ? new Color(0.07450981f, 0.4666667f, 0.3176471f, 1) : 
+                        new Color(34/255f, 34/255f, 34/255f, 128/255f);;
             }
         }
     }
