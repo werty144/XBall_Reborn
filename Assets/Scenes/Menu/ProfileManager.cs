@@ -11,7 +11,7 @@ public class ProfileManager : MonoBehaviour
     public RawImage Avatar;
     public GameObject Nickname;
     public TextMeshProUGUI Winrate;
-    void OnEnable()
+    public void Initialize()
     {
         StartCoroutine(FetchAvatarUntilSuccess());
         StartCoroutine(FetchNicknameUntilSuccess());

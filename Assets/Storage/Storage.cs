@@ -3,11 +3,15 @@ using UnityEngine;
 
 public class Storage : MonoBehaviour
 {
+    private string userDir;
     private string saveFilePath;
 
-    void Awake()
+    public void Initialize()
     {
-        saveFilePath = Path.Combine(Application.persistentDataPath, "savefile.json");
+        userDir = Path.Combine(Application.persistentDataPath, Steam.MySteamID().m_SteamID.ToString());
+        Directory.CreateDirectory(userDir);
+        
+        saveFilePath = Path.Combine(userDir, "savefile.json");
     }
 
     public void SaveData(UserData data)
