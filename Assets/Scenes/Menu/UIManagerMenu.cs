@@ -60,4 +60,9 @@ public class UIManagerMenu : MonoBehaviour
         InitialView.SetActive(true);
         smoke.Play();
     }
+
+    public void OnTutorial()
+    {
+        GameObject.FindWithTag("SceneTransition").GetComponent<SceneTransition>().LoadScene("Tutorial");
+    }
 }
