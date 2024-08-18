@@ -63,3 +63,5 @@ crashlytics-build.properties
 executables/
 
 account_steam_ids.txt
+
+Steam/sdk/
