@@ -16,7 +16,6 @@ public class ClientDummy : Client
         var setupInfo = global.GetComponent<GameStarter>().Info;
         CreateServerState(setupInfo.NumberOfPlayers, LayerMask.NameToLayer("DummyServer"));
         CreateInitialState(setupInfo.NumberOfPlayers);
-        InitiateCooldowns();
         Hide();
     }
 

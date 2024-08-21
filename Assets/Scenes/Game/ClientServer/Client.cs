@@ -36,9 +36,7 @@ public class Client : MonoBehaviour, StateHolder
     
     public Dictionary<uint, PlayerController> ServerPlayers = new();
     public BallController ServerBall;
-
-    private Dictionary<uint, float> NextGrabTime = new();
-
+    
     protected ulong MyID;
     protected ulong OpponentID;
 
@@ -51,7 +49,6 @@ public class Client : MonoBehaviour, StateHolder
         OpponentID = setupInfo.OpponentID.m_SteamID;
         
         CreateInitialState(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
-        InitiateCooldowns();
         InitiateGoals();
         CreateServerState(setupInfo.NumberOfPlayers, LayerMask.NameToLayer("ClientServer"));
         
@@ -87,19 +84,6 @@ public class Client : MonoBehaviour, StateHolder
             }
 
             goal.GetComponentInChildren<Animator>().updateMode = AnimatorUpdateMode.UnscaledTime;
-        }
-    }
-
-    protected void InitiateCooldowns()
-    {
-        foreach (var player in Players.Values)
-        {
-            if (!player.IsMy)
-            {
-                continue;
-            }
-
-            NextGrabTime[player.ID] = 0;
         }
     }
 

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class GoalProbabilityController : MonoBehaviour
 {
-    public Client Client;
+    public StateHolder Client;
     public ulong MyUserID;
     public Canvas Canvas;
     public Image ProbabilityBar;

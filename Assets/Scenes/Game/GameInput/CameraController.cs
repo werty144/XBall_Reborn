@@ -4,18 +4,12 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    private float fieldLength;
     private float movementSpeed = 15f;
     private float backBound = -20;
     private float forwardBound = 12;
 
     void Start()
     {
-        var defaultPlaneLength = 10;
-        var floor = GameObject.FindWithTag("Floor");
-        var scale = floor.GetComponent<Transform>().localScale;
-        fieldLength = scale.z * defaultPlaneLength;
-        
         if (!GameObject.FindWithTag("Global").GetComponent<GameStarter>().Info.IAmMaster)
         {
             movementSpeed *= -1;
