@@ -60,6 +60,22 @@ public class DebugConsoleCommands : MonoBehaviour
         
         DebugLogConsole.AddCommand<int, int>("Persist", "Persists number of wins and games", Persist);
         DebugLogConsole.AddCommand("ReadPersisted", "prints persisted data", ReadPersisted);
+        
+        DebugLogConsole.AddCommand("TutorialAddMyPlayer", "adds my player to tutorial", TutorialAddMyPlayer);
+    }
+
+    void TutorialAddMyPlayer()
+    {
+        var client = GameObject.FindWithTag("Client").GetComponent<ClientTutorial>();
+        var playerState = new PlayerState
+        {
+            Id = 1,
+            X = -5,
+            Y = -10,
+            IsMoving = false,
+            RotationAngle = Mathf.PI
+        };
+        client.AddMyPlayer(1, 1, playerState);
     }
 
     void Persist(int wins, int games)

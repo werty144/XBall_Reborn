@@ -19,7 +19,6 @@ public class Client : MonoBehaviour, StateHolder
     public GameObject ClientPlayerPrefabRed;
     public GameObject BasePlayerPrefab;
     public GameObject BallPrefab;
-    public InputManager InputManager;
 
     public ScorePanelController ScorePanelController;
 
@@ -28,7 +27,6 @@ public class Client : MonoBehaviour, StateHolder
     protected Dictionary<uint, PlayerController> Players = new();
     protected BallController Ball;
     protected Dictionary<ulong, GameObject> Goals = new();
-    protected GameStateVersioning GameStateVersioning;
     
     private uint NextActionId = 1;
     private Dictionary<uint, Stopwatch> ActionTimers = new();
@@ -49,10 +47,8 @@ public class Client : MonoBehaviour, StateHolder
         OpponentID = setupInfo.OpponentID.m_SteamID;
         
         CreateInitialState(setupInfo.NumberOfPlayers, setupInfo.IAmMaster);
-        InitiateGoals();
+        InitiateGoals(setupInfo);
         CreateServerState(setupInfo.NumberOfPlayers, LayerMask.NameToLayer("ClientServer"));
-        
-        GameStateVersioning = new GameStateVersioning(this);
     }
 
     protected virtual void Start()
@@ -60,15 +56,13 @@ public class Client : MonoBehaviour, StateHolder
         MessageManager = GameObject.FindWithTag("P2P").GetComponent<MessageManager>();
     }
 
-    private void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         InterpolateToServerState();
     }
 
-    protected void InitiateGoals()
+    protected void InitiateGoals(SetupInfo setupInfo)
     {
-        var global = GameObject.FindWithTag("Global");
-        var setupInfo = global.GetComponent<GameStarter>().Info;
         foreach (var goal in GameObject.FindGameObjectsWithTag("Goal"))
         {
             if (goal.transform.position.z < 0 && setupInfo.IAmMaster || goal.transform.position.z > 0 && !setupInfo.IAmMaster)
@@ -152,7 +146,7 @@ public class Client : MonoBehaviour, StateHolder
         ApplyServerState(InitialState.GetInitialState(n));
     }
 
-    public void InputAction(IBufferMessage action)
+    public virtual void InputAction(IBufferMessage action)
     {
         PlayerController player;
         switch (action)

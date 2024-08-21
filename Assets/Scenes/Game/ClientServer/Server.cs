@@ -31,7 +31,6 @@ public class Server : MonoBehaviour, StateHolder
     protected Dictionary<uint, PlayerController> Players = new ();
     protected BallController Ball;
     protected Dictionary<ulong, GoalController> Goal = new();
-    private GameStateVersioning GameStateVersioning;
     private ActionScheduler ActionScheduler;
     private BallStateManager BallStateManager = new();
 
@@ -46,7 +45,6 @@ public class Server : MonoBehaviour, StateHolder
     {
         PlayerPrefab = Resources.Load<GameObject>("Player/ServerPlayerPrefab");
         BallPrefab = Resources.Load<GameObject>("Ball/ServerBallPrefab");
-        GameStateVersioning = new GameStateVersioning(this);
         ActionScheduler = GetComponent<ActionScheduler>();
     }
 
@@ -136,13 +134,7 @@ public class Server : MonoBehaviour, StateHolder
             }
         }
     }
-
-    private void Update()
-    {
-        if (OnPause) {return;}
-        GameStateVersioning.AddCurrentState();
-    }
-
+    
     public void ProcessAction(CSteamID actorID, IBufferMessage action)
     {
         if (OnPause) {return;}
@@ -152,11 +144,9 @@ public class Server : MonoBehaviour, StateHolder
         switch (action)
         {
             case PlayerMovementAction:
-                GameStateVersioning.ApplyActionToCurrentState(action);
                 MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
                 break;
             case PlayerStopAction:
-                GameStateVersioning.ApplyActionToCurrentState(action);
                 MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
                 break;  
             case GrabAction grabAction:
