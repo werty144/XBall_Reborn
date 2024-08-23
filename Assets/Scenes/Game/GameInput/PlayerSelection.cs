@@ -15,8 +15,6 @@ public class PlayerSelection : MonoBehaviour
             var selectionManager = player.gameObject.GetComponent<SelectionManager>();
             MyPlayers[selectionManager.PlayerNumber] = selectionManager;
         }
-        MyPlayers[1].Select();
-        CurrentSelected = MyPlayers[1];
     }
 
     // Update is called once per frame
@@ -51,7 +49,7 @@ public class PlayerSelection : MonoBehaviour
         if (number == 0) return;
         if (!MyPlayers.Keys.Contains(number)) return;
         
-        CurrentSelected.Unselect();
+        if (CurrentSelected != null) CurrentSelected.Unselect();
         CurrentSelected = MyPlayers[number];
         CurrentSelected.Select();
     }
@@ -60,13 +58,13 @@ public class PlayerSelection : MonoBehaviour
     {
         if (!player.GetComponent<PlayerController>().IsMy) {return;}
         
-        CurrentSelected.Unselect();
+        if (CurrentSelected != null) CurrentSelected.Unselect();
         CurrentSelected = player.GetComponent<SelectionManager>();
         CurrentSelected.Select();
     }
 
     public GameObject GetSelected()
     {
-        return CurrentSelected.gameObject;
+        return CurrentSelected == null ? null : CurrentSelected.gameObject;
     }
 }

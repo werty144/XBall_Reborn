@@ -7,6 +7,7 @@ public class TaskManager : MonoBehaviour
 {
     public GameObject WelcomeTask;
     public GameObject SelectPlayerTask;
+    public GameObject MovePlayerTask;
 
     private List<GameObject> Tasks;
     private int currentTask;
@@ -16,7 +17,8 @@ public class TaskManager : MonoBehaviour
         Tasks = new List<GameObject>
         {
             WelcomeTask, 
-            SelectPlayerTask
+            SelectPlayerTask,
+            MovePlayerTask
         };
     }
 

@@ -53,6 +53,7 @@ public class InputManager : MonoBehaviour
         if (ThrowIntention)
         {
             var selectedPlayer = PlayerSelection.GetSelected();
+            if (selectedPlayer == null) return;
             Client.GaolShotInput(selectedPlayer.GetComponent<PlayerController>().ID);
             ThrowIntention = false;
         }
@@ -91,6 +92,7 @@ public class InputManager : MonoBehaviour
     private void ProcessRightClick()
     {
         var selectedPlayer = PlayerSelection.GetSelected();
+        if (selectedPlayer == null) return;
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -110,6 +112,7 @@ public class InputManager : MonoBehaviour
     private void ProcessStop()
     {
         var selectedPlayer = PlayerSelection.GetSelected();
+        if (selectedPlayer == null) return;
         var action = new PlayerStopAction
         {
             PlayerId = selectedPlayer.GetComponent<PlayerController>().ID

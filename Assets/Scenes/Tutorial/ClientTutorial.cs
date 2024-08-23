@@ -27,9 +27,6 @@ public class ClientTutorial : Client
         ballObject.layer = collisionLayer;
         Ball = ballObject.GetComponent<BallController>();
         ballObject.SetActive(false);
-
-        var initPlayer = AddMyPlayer(0, 0, new PlayerState());
-        initPlayer.SetActive(false);
     }
 
     protected override void Start()
@@ -42,19 +39,12 @@ public class ClientTutorial : Client
         
     }
 
-    public GameObject AddMyPlayer(uint playerID, int playerNumber, PlayerState playerState)
+    public void AddMyPlayer(GameObject player)
     {
-        var player = Instantiate(ClientPlayerPrefabBlue);
-        player.layer = LayerMask.NameToLayer("Client");;
         var controller = player.GetComponent<PlayerController>();
-        controller.ID = playerID;
-        controller.IsMy = true;
         controller.Ball = Ball;
         controller.UserID = Steam.MySteamID().m_SteamID;
-        Players[playerID] = controller;
-        player.GetComponent<SelectionManager>().PlayerNumber = playerNumber;
-        controller.ApplyState(playerState);
-        return player;
+        Players[controller.ID] = controller;
     }
     
     public override void InputAction(IBufferMessage action)
