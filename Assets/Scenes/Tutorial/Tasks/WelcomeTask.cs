@@ -13,11 +13,6 @@ public class WelcomeTask : MonoBehaviour
     private void OnEnable()
     {
         mainText.text = "Welcome to XBall tutorial!";
-        Invoke(nameof(ActivateAnyKey),2f);
-    }
-
-    void ActivateAnyKey()
-    {
         anyKeyText.SetActive(true);
     }
 

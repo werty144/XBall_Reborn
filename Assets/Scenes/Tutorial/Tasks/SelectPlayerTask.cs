@@ -7,7 +7,6 @@ using UnityEngine.Serialization;
 
 public class SelectPlayerTask : MonoBehaviour
 {
-    public ClientTutorial client;
     public InputManager inputManager;
     public PlayerSelection playerSelection;
 
@@ -20,7 +19,6 @@ public class SelectPlayerTask : MonoBehaviour
     {
         mainText.text = "Here is your player.\nSelect it by left clicking or pressing 1 (its number).";
         MyPlayer.SetActive(true);
-        client.AddMyPlayer(MyPlayer);
         inputManager.enabled = true;
         playerSelection.enabled = true;
     }

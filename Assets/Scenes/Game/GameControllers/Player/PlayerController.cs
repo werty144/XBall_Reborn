@@ -21,9 +21,10 @@ public class PlayerController : MonoBehaviour
     public ulong UserID;
 
     public BallController Ball { set; private get; }
+    public bool isMoving { private set; get; }
     
     private Vector3 targetPosition;
-    private bool isMoving;
+    
     private float targetRotationAngle;
     private bool needsRotation;
     

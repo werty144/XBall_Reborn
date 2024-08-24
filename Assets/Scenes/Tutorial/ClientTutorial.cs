@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,25 +9,35 @@ using Debug = UnityEngine.Debug;
 
 public class ClientTutorial : Client
 {
+    public GameObject BallInstance;
+    public GameObject MyPlayer1;
+    public GameObject MyPlayer2;
+    public GameObject OpponentPlayer;
+
+    public bool scored;
+
+    private Pig lastThrower;
+    private bool lastThrowSuccess;
+    private int stealAttempts;
     protected override void Awake()
     {
+        OpponentID = 1;
+        MyID = Steam.MySteamID().m_SteamID;
         var setupInfo = new SetupInfo
         {
             IAmMaster =  true,
             NumberOfPlayers = 0,
             Speed = LobbyManager.SpeedNormal,
-            OpponentID = new CSteamID(1),
-            MyID = Steam.MySteamID(),
-            LobbyID = new CSteamID(2)
+            OpponentID = new CSteamID(OpponentID),
+            MyID = new CSteamID(MyID),
+            LobbyID = new CSteamID(228)
         };
         InitiateGoals(setupInfo);
         
-        int collisionLayer = LayerMask.NameToLayer("Client");
-        
-        var ballObject = Instantiate(BallPrefab);
-        ballObject.layer = collisionLayer;
-        Ball = ballObject.GetComponent<BallController>();
-        ballObject.SetActive(false);
+        Ball = BallInstance.GetComponent<BallController>();
+        AddPlayer(MyPlayer1);
+        AddPlayer(MyPlayer2);
+        AddPlayer(OpponentPlayer);
     }
 
     protected override void Start()
@@ -39,11 +50,11 @@ public class ClientTutorial : Client
         
     }
 
-    public void AddMyPlayer(GameObject player)
+    void AddPlayer(GameObject player)
     {
         var controller = player.GetComponent<PlayerController>();
         controller.Ball = Ball;
-        controller.UserID = Steam.MySteamID().m_SteamID;
+        controller.UserID = controller.IsMy ? Steam.MySteamID().m_SteamID : 1;
         Players[controller.ID] = controller;
     }
     
@@ -64,7 +75,18 @@ public class ClientTutorial : Client
             case GrabAction grabAction:
                 player = Players[grabAction.PlayerId];
                 player.PlayGrabAnimation();
-                grabAction.PreSuccess = ActionRules.BallGrabSuccess(player, Ball);
+                if (player.IsMy && Ball.Owned && !Ball.Owner.IsMy)
+                {
+                    stealAttempts++;
+                    if (stealAttempts == 1)
+                    {
+                        break;
+                    }
+                }
+                StartCoroutine(DelayedAction(() =>
+                {
+                    Ball.SetOwner(player);
+                }, ActionRulesConfig.GrabDuration));
                 break;
             case ThrowAction throwAction:
                 if (!Ball.Owned || !Ball.Owner.IsMy)
@@ -74,14 +96,39 @@ public class ClientTutorial : Client
                 var initialTarget = ProtobufUtils.FromVector3Protobuf(throwAction.Destination);
                 var resultingTarget = ActionRules.CalculateThrowTarget(Ball.Owner, initialTarget);
                 throwAction.Destination = ProtobufUtils.ToVector3ProtoBuf(resultingTarget);
-                throwAction.PlayerId = Ball.Owner.ID;
+                lastThrowSuccess = GoalRules.GoalAttemptSuccess(Players, Ball.Owner, Ball, Goals[OpponentID]);
+                lastThrower = Ball.Owner.gameObject.GetComponent<Pig>();
                 Ball.Owner.PlayThroughAnimation();
-                var goalSuccess = GoalRules.GoalAttemptSuccess(Players, Ball.Owner, Ball, Goals[OpponentID]);
-                throwAction.GoalSuccess = goalSuccess;
+                StartCoroutine(DelayedAction(() =>
+                {
+                    Ball.Owner.GetComponent<GrabManager>().SetCooldownMillis(2000f / Time.timeScale);
+                    Ball.ThrowTo(resultingTarget);
+                }, ActionRulesConfig.ThrowDuration));
                 break;
             default:
                 Debug.LogWarning("Unknown input action");
                 break;
+        }
+    }
+    
+    IEnumerator DelayedAction(Action action, int delayMillis)
+    {
+        yield return new WaitForSeconds(0.001f * delayMillis);
+        action();
+    }
+
+    public override void ReceiveGoalAttempt(GoalAttempt goalAttempt)
+    {
+        Goals[1].GetComponentInChildren<Animator>().Play(lastThrowSuccess ? "success" : "failure", -1, 0f);
+        if (lastThrowSuccess)
+        {
+            scored = true;
+            lastThrower.Piggiwise();
+            Goals[1].GetComponentInChildren<Animator>().Play("success", -1, 0f);
+        }
+        else
+        {
+            Goals[1].GetComponentInChildren<Animator>().Play("failure", -1, 0f);
         }
     }
 }

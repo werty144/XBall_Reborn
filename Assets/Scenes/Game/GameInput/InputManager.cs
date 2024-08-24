@@ -54,7 +54,7 @@ public class InputManager : MonoBehaviour
         {
             var selectedPlayer = PlayerSelection.GetSelected();
             if (selectedPlayer == null) return;
-            Client.GaolShotInput(selectedPlayer.GetComponent<PlayerController>().ID);
+            Client.GoalShotInput(selectedPlayer.GetComponent<PlayerController>().ID);
             ThrowIntention = false;
         }
         else

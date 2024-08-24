@@ -359,7 +359,7 @@ public class Client : MonoBehaviour, StateHolder
         }
     }
 
-    public void GaolShotInput(uint playerID)
+    public void GoalShotInput(uint playerID)
     {
         var throwAction = new ThrowAction
         {
