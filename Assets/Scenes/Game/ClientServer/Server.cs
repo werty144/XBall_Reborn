@@ -143,10 +143,15 @@ public class Server : MonoBehaviour, StateHolder
         bool success;
         switch (action)
         {
-            case PlayerMovementAction:
+            case PlayerMovementAction playerMovementAction:
+                var target = new Vector2(playerMovementAction.X, playerMovementAction.Y);
+                var player = Players[playerMovementAction.PlayerId];
+                player.SetMovementTarget(target);
                 MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
                 break;
-            case PlayerStopAction:
+            case PlayerStopAction playerStopAction:
+                player = Players[playerStopAction.PlayerId];
+                player.Stop();
                 MessageManager.SendGameState(GetAnotherID(actorID), GetGameState());
                 break;  
             case GrabAction grabAction:

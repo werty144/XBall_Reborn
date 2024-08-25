@@ -3033,6 +3033,7 @@ MonoBehaviour:
   MyPlayer1: {fileID: 1155608909}
   MyPlayer2: {fileID: 257057627}
   OpponentPlayer: {fileID: 538832337}
+  scored: 0
 --- !u!1 &1508155796
 GameObject:
   m_ObjectHideFlags: 0
@@ -3365,7 +3366,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed1896c18945975ae9bddd67863e0160, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GoalTask: {fileID: 957869832}
+  Client: {fileID: 1384067360}
 --- !u!1 &1678388475
 GameObject:
   m_ObjectHideFlags: 0

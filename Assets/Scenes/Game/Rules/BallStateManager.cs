@@ -38,7 +38,7 @@ public class BallStateManager
 
     public bool Throw(PlayerController player)
     {
-        if (Owner.ID != player.ID)
+        if (Owner == null || Owner.ID != player.ID)
         {
             return false;
         }

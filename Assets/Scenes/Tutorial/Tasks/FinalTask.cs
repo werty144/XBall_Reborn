@@ -14,7 +14,7 @@ public class FinalTask : MonoBehaviour
 
     private void OnEnable()
     {
-        mainText.text = "That's it. Enjoy XBall!";
+        mainText.text = "Game ends at a 3-point difference.\nEnjoy XBall!";
         Invoke(nameof(Ready), 2f);
     }
 
