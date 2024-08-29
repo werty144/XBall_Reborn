@@ -9,6 +9,7 @@ public class UIManagerMenu : MonoBehaviour
     public GameObject LobbyView;
     public GameObject InitialView;
     public GameObject ExitView;
+    public GameObject EasterEggView;
 
     public ParticleSystem smoke;
 
@@ -64,5 +65,26 @@ public class UIManagerMenu : MonoBehaviour
     public void OnTutorial()
     {
         GameObject.FindWithTag("SceneTransition").GetComponent<SceneTransition>().LoadScene("Tutorial");
+    }
+
+    public void OnEasterEggEnter()
+    {
+        if (!InitialView.activeInHierarchy)
+        {
+            return;
+        }
+        InitialView.SetActive(false);
+        EasterEggView.SetActive(true);
+    }
+
+    public void OnEasterEggLeave()
+    {
+        EasterEggView.SetActive(false);
+        InitialView.SetActive(true);
+    }
+
+    public bool IsInitialView()
+    {
+        return InitialView.activeInHierarchy;
     }
 }
