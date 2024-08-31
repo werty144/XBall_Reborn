@@ -43,12 +43,14 @@ public class ConnectionManagerMaster : ConnectionManagerBase
     public override void OnUnknownProblem()
     {
         CloseConnection();
+        Server.PeerDropped();
         GameManager.OnConnectionUnknownProblem();
     }
 
     public override void OnClosedByPeerWhenActive()
     {
         CloseConnection();
+        Server.PeerDropped();
         GameManager.OnConnectionPeerDisconnected();
     }
 

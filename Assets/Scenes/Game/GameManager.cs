@@ -107,6 +107,8 @@ public class GameManager : MonoBehaviour
 
     public void OnConnectionUnknownProblem()
     {
-        
+        GamePhase = GamePhase.Pause;
+        UIManager.DisplayUnknownProblem();
+        ScorePanelController.PauseTimer();
     }
 }
